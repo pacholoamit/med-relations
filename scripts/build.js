@@ -284,6 +284,32 @@ function getCSS() {
   --t:        150ms ease;
 }
 
+html[data-theme="dark"] {
+  --bg:       #0f172a;
+  --surface:  #1e293b;
+  --surface-2:#1e293b;
+  --border:   #334155;
+  --border-2: #475569;
+  --text:     #f1f5f9;
+  --text-2:   #94a3b8;
+  --text-3:   #64748b;
+  --accent:   #6366f1;
+  --accent-bg:#1e1b4b;
+  --accent-bd:#3730a3;
+  --green:    #22c55e;
+  --green-bg: #052e16;
+  --green-bd: #166534;
+  --orange:   #f97316;
+  --orange-bg:#431407;
+  --orange-bd:#9a3412;
+}
+
+html.theme-ready *,
+html.theme-ready *::before,
+html.theme-ready *::after {
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease !important;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 body {
@@ -322,6 +348,18 @@ body {
 .hdr-org { font-size: 0.8125rem; color: var(--text-2); font-weight: 500; }
 .hdr-space { flex: 1; }
 .hdr-date { font-size: 0.75rem; color: var(--text-3); }
+.theme-toggle {
+  width: 32px; height: 32px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 6px; cursor: pointer; color: var(--text-2);
+  padding: 0;
+}
+.theme-toggle:hover { background: var(--border); color: var(--text); }
+.theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.theme-icon { display: block; pointer-events: none; }
+html[data-theme="dark"] .theme-icon--moon { display: none; }
+html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 
 /* ── Layout ─────────────────────────────────────────────────────────────── */
 .layout {
@@ -629,6 +667,32 @@ body {
 function getJS() {
   return `
 (function () {
+  // Theme toggle
+  var btn = document.getElementById('theme-toggle');
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    if (btn) {
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+  }
+  // Enable transitions after initial paint to avoid flash
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      document.documentElement.classList.add('theme-ready');
+    });
+  });
+  if (btn) {
+    btn.addEventListener('click', function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
+    // Set initial aria-label
+    var initial = document.documentElement.getAttribute('data-theme') || 'dark';
+    btn.setAttribute('aria-label', initial === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+
+  // Active nav highlight
   var sections = document.querySelectorAll('.section');
   var links = document.querySelectorAll('.nav-link');
   function setActive(id) {
@@ -673,6 +737,7 @@ function generateHTML(data) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>${getCSS()}</style>
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
 </head>
 <body>
 
@@ -685,6 +750,10 @@ function generateHTML(data) {
   <span class="hdr-org">Engineering Team</span>
   <div class="hdr-space"></div>
   <time class="hdr-date" datetime="${new Date().toISOString()}">${buildDate}</time>
+  <button class="theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Toggle light/dark mode">
+    <svg class="theme-icon theme-icon--sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <svg class="theme-icon theme-icon--moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
 </header>
 
 <div class="layout">
