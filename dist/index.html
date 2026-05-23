@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MediaJel Relations</title>
+  <meta name="description" content="Weekly performance dashboard, achievements wall, and release notes for the MediaJel engineering team.">
+  <meta name="color-scheme" content="dark">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* === TOKENS === */
+:root {
+  --bg: #070b10;
+  --surf: #101720;
+  --surf2: #141d28;
+  --surf3: #1a2436;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.04);
+  --border-hover: rgba(255,255,255,0.12);
+  --text: #e8eef6;
+  --text2: #9baabb;
+  --text3: #667788;
+  --blue: #58a6ff;
+  --green: #3fb950;
+  --orange: #f78166;
+  --hdr-h: 58px;
+  --sidebar-w: 260px;
+  --radius: 10px;
+  --transition: 180ms cubic-bezier(0.4,0,0.2,1);
+}
+
+/* === RESET === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+/* === BASE === */
+body {
+  font-family: 'Outfit', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(88,166,255,0.06) 0%, transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+}
+
+/* === HEADER === */
+.hdr {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  height: var(--hdr-h);
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  background: rgba(7,11,16,0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.hdr-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: var(--text);
+  outline-offset: 4px;
+}
+.hdr-logo:focus-visible { outline: 2px solid var(--blue); border-radius: 4px; }
+
+.hdr-gem {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--blue) 0%, var(--green) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  box-shadow: 0 0 16px rgba(88,166,255,0.3);
+}
+
+.hdr-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.hdr-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+}
+
+.hdr-org {
+  font-size: 0.72rem;
+  color: var(--text3);
+  background: var(--surf2);
+  border: 1px solid var(--border);
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.hdr-space { flex: 1; }
+
+.live-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--green);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse-dot 2.4s ease infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(63,185,80,0.5); }
+  60% { box-shadow: 0 0 0 5px rgba(63,185,80,0); }
+}
+
+.hdr-time {
+  font-size: 0.68rem;
+  color: var(--text3);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* === LAYOUT === */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: calc(100vh - var(--hdr-h));
+}
+
+/* === SIDEBAR === */
+.sidebar {
+  border-right: 1px solid var(--border);
+  padding: 1.5rem 0;
+  position: sticky;
+  top: var(--hdr-h);
+  height: calc(100vh - var(--hdr-h));
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.sidebar-lbl {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding: 0 1.25rem 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1.25rem;
+  text-decoration: none;
+  color: var(--text2);
+  border-left: 2px solid transparent;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  outline-offset: -2px;
+  position: relative;
+}
+.nav-link:focus-visible { outline: 2px solid var(--blue); }
+.nav-link:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+.nav-link.active { color: var(--blue); background: rgba(88,166,255,0.06); border-left-color: var(--blue); }
+
+.nav-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--surf2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background var(--transition), border-color var(--transition);
+}
+.nav-link.active .nav-icon {
+  background: rgba(88,166,255,0.1);
+  border-color: rgba(88,166,255,0.25);
+  color: var(--blue);
+}
+
+.nav-txt { flex: 1; min-width: 0; }
+.nav-label { display: block; font-size: 0.85rem; font-weight: 500; line-height: 1.3; }
+.nav-sub { display: block; font-size: 0.69rem; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+
+.nav-count {
+  font-size: 0.67rem;
+  color: var(--text3);
+  background: var(--surf3);
+  border: 1px solid var(--border);
+  padding: 1px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+}
+.nav-link.active .nav-count { color: var(--blue); border-color: rgba(88,166,255,0.25); background: rgba(88,166,255,0.08); }
+
+/* === MAIN CONTENT === */
+.main { padding: 2.5rem 2.5rem 2rem; max-width: 900px; }
+
+/* === SECTION === */
+.section { margin-bottom: 4.5rem; scroll-margin-top: calc(var(--hdr-h) + 16px); }
+
+.section-hd {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(var(--si-r), var(--si-g), var(--si-b), 0.25);
+  background: rgba(var(--si-r), var(--si-g), var(--si-b), 0.1);
+  color: rgb(var(--si-r), var(--si-g), var(--si-b));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.section-desc { font-size: 0.77rem; color: var(--text3); margin-top: 3px; }
+
+/* === FEATURED CARD === */
+.featured-card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-top: 2px solid rgb(var(--fc-r), var(--fc-g), var(--fc-b));
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow: hidden;
+  margin-bottom: 0.875rem;
+  animation: card-in 0.35s ease both;
+}
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.featured-header { padding: 1.25rem 1.5rem 0.875rem; }
+.featured-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text2);
+  margin-top: 0.4rem;
+}
+
+/* === STAT GRID === */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-left: none;
+  border-right: none;
+  margin-bottom: 1.25rem;
+}
+
+.stat-card {
+  background: var(--surf2);
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  transition: background var(--transition);
+}
+.stat-card:hover { background: var(--surf3); }
+
+.stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  letter-spacing: -0.03em;
+}
+.stat-card--green .stat-val { color: var(--green); }
+.stat-card--orange .stat-val { color: var(--orange); }
+
+.stat-key {
+  font-size: 0.64rem;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+/* === LEADERBOARD === */
+.leaderboard { padding: 0 1.5rem 1.25rem; }
+
+.dev-list { display: flex; flex-direction: column; gap: 0.35rem; }
+
+.dev-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.875rem;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  background: var(--surf2);
+  transition: background var(--transition), border-color var(--transition);
+  animation: slide-in 0.4s ease both;
+}
+.dev-card:hover { background: var(--surf3); border-color: var(--border); }
+.dev-card--first {
+  border-color: rgba(var(--card-accent-r), var(--card-accent-g), var(--card-accent-b), 0.3);
+  background: rgba(var(--card-accent-r), var(--card-accent-g), var(--card-accent-b), 0.06);
+  box-shadow: 0 0 20px rgba(var(--card-accent-r), var(--card-accent-g), var(--card-accent-b), 0.08);
+}
+.dev-card--first:hover {
+  background: rgba(var(--card-accent-r), var(--card-accent-g), var(--card-accent-b), 0.09);
+  border-color: rgba(var(--card-accent-r), var(--card-accent-g), var(--card-accent-b), 0.45);
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.dev-rank { width: 28px; text-align: center; flex-shrink: 0; }
+.rank-medal { font-size: 1.1rem; line-height: 1; }
+.rank-num { font-size: 0.75rem; color: var(--text3); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+.dev-body { flex: 1; min-width: 0; }
+.dev-name {
+  font-size: 0.83rem;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.dev-bar-track {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.dev-bar {
+  height: 100%;
+  border-radius: 2px;
+  width: var(--bar-pct);
+  background: linear-gradient(90deg,
+    rgba(var(--bar-r), var(--bar-g), var(--bar-b), 0.9),
+    rgba(var(--bar-r), var(--bar-g), var(--bar-b), 0.45)
+  );
+  box-shadow: 0 0 6px rgba(var(--bar-r), var(--bar-g), var(--bar-b), 0.4);
+  animation: bar-grow 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transform-origin: left;
+}
+
+@keyframes bar-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.dev-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.dev-total {
+  font-size: 0.83rem;
+  font-weight: 700;
+  min-width: 22px;
+  text-align: right;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* === PILLS / BADGES === */
+.pill {
+  font-size: 0.65rem;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace;
+}
+.pill--green { background: rgba(63,185,80,0.1); color: var(--green); border: 1px solid rgba(63,185,80,0.2); }
+.pill--orange { background: rgba(247,129,102,0.1); color: var(--orange); border: 1px solid rgba(247,129,102,0.2); }
+
+.badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 20px;
+  border: 1px solid rgba(var(--badge-r), var(--badge-g), var(--badge-b), 0.3);
+  color: rgb(var(--badge-r), var(--badge-g), var(--badge-b));
+  background: rgba(var(--badge-r), var(--badge-g), var(--badge-b), 0.1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.chip-row { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.375rem; }
+
+.slug-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.73rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: rgb(var(--chip-r), var(--chip-g), var(--chip-b));
+  background: rgba(var(--chip-r), var(--chip-g), var(--chip-b), 0.1);
+  border: 1px solid rgba(var(--chip-r), var(--chip-g), var(--chip-b), 0.2);
+}
+
+/* === EXPAND TOGGLE === */
+.expand-details { border-top: 1px solid var(--border); }
+
+.expand-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.77rem;
+  color: var(--text3);
+  user-select: none;
+  transition: color var(--transition);
+  font-family: 'JetBrains Mono', monospace;
+}
+.expand-summary::-webkit-details-marker { display: none; }
+.expand-summary:hover { color: var(--text2); }
+
+.expand-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.expand-icon::before, .expand-icon::after {
+  content: '';
+  position: absolute;
+  background: currentColor;
+  border-radius: 1px;
+}
+.expand-icon::before { width: 6px; height: 1px; }
+.expand-icon::after { width: 1px; height: 6px; transition: transform 0.2s; }
+.expand-details[open] .expand-icon::after { transform: scaleY(0); }
+
+/* === ACCORDION CARD === */
+.accordion-card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  transition: border-color var(--transition);
+}
+.accordion-card:hover { border-color: var(--border-hover); }
+
+.accordion-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.875rem 1.25rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: background var(--transition);
+}
+.accordion-summary::-webkit-details-marker { display: none; }
+.accordion-summary:hover { background: rgba(255,255,255,0.02); }
+
+.accordion-chevron {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: var(--surf2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text3);
+  transition: transform 0.18s, background var(--transition);
+}
+.accordion-card[open] .accordion-chevron { transform: rotate(90deg); background: var(--surf3); }
+
+.accordion-title { flex: 1; font-size: 0.84rem; color: var(--text2); font-weight: 500; }
+
+/* === RELEASE TIMELINE === */
+.release-timeline {
+  position: relative;
+  padding-left: 1.5rem;
+}
+.release-timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 16px;
+  bottom: 16px;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--border) 0%, transparent 100%);
+}
+
+.release-card {
+  position: relative;
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+  transition: border-color var(--transition);
+  animation: card-in 0.35s ease both;
+}
+.release-card:hover { border-color: var(--border-hover); }
+.release-card--latest {
+  border-top: 2px solid rgb(var(--rc-r), var(--rc-g), var(--rc-b));
+  border-radius: 0 0 var(--radius) var(--radius);
+  box-shadow: 0 0 30px rgba(var(--rc-r), var(--rc-g), var(--rc-b), 0.06);
+}
+
+.release-dot {
+  position: absolute;
+  left: -1.875rem;
+  top: 1.25rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  border: 2px solid var(--surf);
+}
+.release-card--latest .release-dot {
+  background: rgb(var(--rc-r), var(--rc-g), var(--rc-b));
+  box-shadow: 0 0 8px rgba(var(--rc-r), var(--rc-g), var(--rc-b), 0.5);
+}
+
+.release-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surf2);
+}
+
+.release-ver {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text2);
+}
+.release-ver--major {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+/* === REPORT BODY (rendered markdown) === */
+.report-body {
+  padding: 1.25rem 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.8;
+  color: var(--text2);
+}
+.accordion-card .report-body { border-top: 1px solid var(--border); }
+
+.report-body h1 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin: 1.25rem 0 0.5rem; color: var(--text); letter-spacing: -0.02em; }
+.report-body h2 { font-size: 0.9rem; font-weight: 700; margin: 1rem 0 0.45rem; color: var(--text); }
+.report-body h3 { font-size: 0.85rem; font-weight: 600; margin: 0.875rem 0 0.4rem; color: var(--text2); }
+.report-body h1:first-child, .report-body h2:first-child, .report-body h3:first-child { margin-top: 0; }
+.report-body p { margin-bottom: 0.625rem; }
+.report-body ul, .report-body ol { padding-left: 1.4rem; margin-bottom: 0.625rem; }
+.report-body li { margin-bottom: 0.25rem; }
+.report-body strong { color: var(--text); font-weight: 600; }
+.report-body em { color: var(--text3); font-style: italic; }
+.report-body a { color: var(--blue); text-decoration: none; transition: color var(--transition); }
+.report-body a:hover { color: #7dbfff; text-decoration: underline; }
+.report-body a:focus-visible { outline: 2px solid var(--blue); border-radius: 2px; }
+.report-body hr { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+
+.report-body code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8em;
+  background: var(--surf3);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: #f0883e;
+}
+
+.report-body pre {
+  background: var(--surf3);
+  border: 1px solid var(--border);
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin-bottom: 0.875rem;
+}
+.report-body pre code { background: none; border: none; padding: 0; color: var(--text2); }
+
+.report-body table { border-collapse: collapse; width: 100%; margin-bottom: 0.875rem; font-size: 0.8rem; }
+.report-body th, .report-body td { border: 1px solid var(--border); padding: 0.4rem 0.75rem; text-align: left; }
+.report-body th { background: var(--surf2); font-weight: 600; color: var(--text); font-size: 0.77rem; }
+.report-body tr:hover td { background: rgba(255,255,255,0.015); }
+
+.report-body blockquote {
+  border-left: 2px solid var(--border-hover);
+  padding-left: 1rem;
+  color: var(--text3);
+  margin-bottom: 0.625rem;
+}
+
+/* Achievements overrides */
+.achv-body h2 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text3);
+  margin-top: 1.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+}
+.achv-body h3 { color: var(--text); font-size: 0.875rem; font-weight: 600; }
+
+/* === EMPTY STATE === */
+.empty-state {
+  text-align: center;
+  padding: 3.5rem 1rem;
+  color: var(--text3);
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.empty-icon { font-size: 2.25rem; margin-bottom: 0.875rem; opacity: 0.6; }
+.empty-state p { font-size: 0.875rem; }
+.empty-sub { margin-top: 0.375rem; font-size: 0.78rem; color: var(--text3); }
+
+/* === FOOTER === */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.71rem;
+  color: var(--text3);
+  margin-top: 2.5rem;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text3);
+}
+
+.footer-links { display: flex; gap: 1rem; }
+.footer-links a {
+  color: var(--text3);
+  text-decoration: none;
+  transition: color var(--transition);
+  font-family: 'JetBrains Mono', monospace;
+}
+.footer-links a:hover { color: var(--text2); }
+.footer-links a:focus-visible { outline: 2px solid var(--blue); border-radius: 2px; }
+
+/* === RESPONSIVE === */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+
+  .sidebar {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .sidebar::-webkit-scrollbar { display: none; }
+  .sidebar-lbl { display: none; }
+
+  .nav-sub, .nav-count { display: none; }
+
+  .nav-link {
+    padding: 0.75rem 1rem;
+    border-left: none;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .nav-link.active { border-bottom-color: var(--blue); border-left-color: transparent; background: transparent; }
+
+  .nav-icon { width: 22px; height: 22px; border: none; background: transparent; }
+
+  .main { padding: 1.5rem 1.25rem; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .dev-stats { display: none; }
+  .hdr-time { display: none; }
+  .footer { flex-direction: column; gap: 0.75rem; text-align: center; }
+  .release-timeline { padding-left: 0; }
+  .release-timeline::before { display: none; }
+  .release-dot { display: none; }
+}
+
+@media (max-width: 480px) {
+  .hdr { padding: 0 1rem; }
+  .hdr-org { display: none; }
+  .hdr-divider { display: none; }
+}
+
+/* === PRINT === */
+@media print {
+  .hdr, .sidebar { display: none; }
+  .layout { display: block; }
+  .section { page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<header class="hdr" role="banner">
+  <a href="#" class="hdr-logo" aria-label="MediaJel Relations home">
+    <div class="hdr-gem" aria-hidden="true">⚡</div>
+    <span class="hdr-name">Relations</span>
+  </a>
+  <div class="hdr-divider" aria-hidden="true"></div>
+  <span class="hdr-org">MediaJel Engineering</span>
+  <div class="hdr-space"></div>
+  <div class="live-pill" aria-label="Live dashboard">
+    <span class="live-dot" aria-hidden="true"></span>
+    Live
+  </div>
+  <time class="hdr-time" datetime="2026-05-23T10:42:22.569Z">Sat, 23 May 2026 10:42:22 GMT</time>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" aria-label="Page sections">
+    <div class="sidebar-lbl" aria-hidden="true">Navigate</div>
+    
+<a href="#section-performance" class="nav-link" data-section="performance" aria-label="Weekly Performance: 2 reports">
+  <span class="nav-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1 11l3.5-4 3 3L11 5l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+  <span class="nav-txt">
+    <span class="nav-label">Weekly Performance</span>
+    <span class="nav-sub">Developer velocity and ticket metrics by week</span>
+  </span>
+  <span class="nav-count" aria-hidden="true">2</span>
+</a>
+
+<a href="#section-achievements" class="nav-link" data-section="achievements" aria-label="Achievements Wall: 2 reports">
+  <span class="nav-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1l1.854 3.757L14 5.517l-3 2.924.708 4.13L8 10.5l-3.708 2.07L5 8.44 2 5.517l4.146-.76L8 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>
+  <span class="nav-txt">
+    <span class="nav-label">Achievements Wall</span>
+    <span class="nav-sub">Team wins, milestones, and highlights</span>
+  </span>
+  <span class="nav-count" aria-hidden="true">2</span>
+</a>
+
+<a href="#section-releases" class="nav-link" data-section="releases" aria-label="Release Notes: 2 reports">
+  <span class="nav-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.5C8 1.5 13 4 13 8.5a5 5 0 01-10 0C3 4 8 1.5 8 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="8" cy="8.5" r="1.5" fill="currentColor"/></svg></span>
+  <span class="nav-txt">
+    <span class="nav-label">Release Notes</span>
+    <span class="nav-sub">Full versioned changelog, newest first</span>
+  </span>
+  <span class="nav-count" aria-hidden="true">2</span>
+</a>
+  </nav>
+  <div>
+    <main class="main" id="main-content">
+      
+<section class="section" id="section-performance" aria-labelledby="section-title-performance">
+  <header class="section-hd">
+    <div class="section-icon" style="--si-r:88;--si-g:166;--si-b:255" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1 11l3.5-4 3 3L11 5l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div>
+      <h2 class="section-title" id="section-title-performance">Weekly Performance</h2>
+      <p class="section-desc">Developer velocity and ticket metrics by week</p>
+    </div>
+  </header>
+  
+<div class="featured-card" style="--fc-r:88;--fc-g:166;--fc-b:255">
+  <div class="featured-header">
+    <div class="chip-row">
+      <span class="badge badge--latest" style="--badge-r:88;--badge-g:166;--badge-b:255">Latest</span>
+      <span class="slug-chip" style="--chip-r:88;--chip-g:166;--chip-b:255">2026-W21</span>
+    </div>
+    <h3 class="featured-title">Dev Performance — Week 2026-W21</h3>
+  </div>
+  
+<div class="leaderboard">
+  
+<div class="stat-grid" role="list">
+  <div class="stat-card" role="listitem">
+    <span class="stat-val">44</span>
+    <span class="stat-key">Total tickets</span>
+  </div>
+  <div class="stat-card stat-card--green" role="listitem">
+    <span class="stat-val">26</span>
+    <span class="stat-key">Closed</span>
+  </div>
+  <div class="stat-card stat-card--orange" role="listitem">
+    <span class="stat-val">18</span>
+    <span class="stat-key">Moved to QA</span>
+  </div>
+  <div class="stat-card" role="listitem">
+    <span class="stat-val">10</span>
+    <span class="stat-key">Active engineers</span>
+  </div>
+</div>
+  <div class="dev-list" role="list" aria-label="Developer leaderboard">
+    
+<div class="dev-card dev-card--first" style="--card-accent-r:88;--card-accent-g:166;--card-accent-b:255;animation-delay:0ms">
+  <div class="dev-rank"><span class="rank-medal" aria-label="rank 1">🥇</span></div>
+  <div class="dev-body">
+    <div class="dev-name">Russell0813</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="29" aria-valuemin="0" aria-valuemax="100" aria-label="Russell0813 performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:29%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">3 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">3 QA</span>
+    <span class="dev-total">6</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:40ms">
+  <div class="dev-rank"><span class="rank-medal" aria-label="rank 2">🥈</span></div>
+  <div class="dev-body">
+    <div class="dev-name">icarlofer</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="19" aria-valuemin="0" aria-valuemax="100" aria-label="icarlofer performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:19%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">3 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">1 QA</span>
+    <span class="dev-total">4</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:80ms">
+  <div class="dev-rank"><span class="rank-medal" aria-label="rank 3">🥉</span></div>
+  <div class="dev-body">
+    <div class="dev-name">ramzell</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="19" aria-valuemin="0" aria-valuemax="100" aria-label="ramzell performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:19%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">3 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">1 QA</span>
+    <span class="dev-total">4</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:120ms">
+  <div class="dev-rank"><span class="rank-num" aria-label="rank 4">4</span></div>
+  <div class="dev-body">
+    <div class="dev-name">randallegend</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" aria-label="randallegend performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:10%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">0 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">2 QA</span>
+    <span class="dev-total">2</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:160ms">
+  <div class="dev-rank"><span class="rank-num" aria-label="rank 5">5</span></div>
+  <div class="dev-body">
+    <div class="dev-name">verdelmediajel</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" aria-label="verdelmediajel performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:10%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">2 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">0 QA</span>
+    <span class="dev-total">2</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:200ms">
+  <div class="dev-rank"><span class="rank-num" aria-label="rank 6">6</span></div>
+  <div class="dev-body">
+    <div class="dev-name">danaszova</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100" aria-label="danaszova performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:5%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">1 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">0 QA</span>
+    <span class="dev-total">1</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:240ms">
+  <div class="dev-rank"><span class="rank-num" aria-label="rank 7">7</span></div>
+  <div class="dev-body">
+    <div class="dev-name">elmobunani21</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100" aria-label="elmobunani21 performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:5%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">0 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">1 QA</span>
+    <span class="dev-total">1</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:280ms">
+  <div class="dev-rank"><span class="rank-num" aria-label="rank 8">8</span></div>
+  <div class="dev-body">
+    <div class="dev-name">johnjoseph28</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100" aria-label="johnjoseph28 performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:5%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">0 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">1 QA</span>
+    <span class="dev-total">1</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:320ms">
+  <div class="dev-rank"><span class="rank-num" aria-label="rank 9">9</span></div>
+  <div class="dev-body">
+    <div class="dev-name">ZeeLiger</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100" aria-label="ZeeLiger performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:5%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">0 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">1 QA</span>
+    <span class="dev-total">1</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:360ms">
+  <div class="dev-rank"><span class="rank-num" aria-label="rank 10">10</span></div>
+  <div class="dev-body">
+    <div class="dev-name">martin0x</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100" aria-label="martin0x performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:5%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">1 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">0 QA</span>
+    <span class="dev-total">1</span>
+  </div>
+</div>
+  </div>
+</div>
+<details class="expand-details">
+  <summary class="expand-summary">
+    <span class="expand-icon" aria-hidden="true"></span>
+    <span>Full report</span>
+  </summary>
+  <div class="report-body"><h1>Dev Performance — Week 2026-W21</h1>
+<p>Period: 2026-05-16 → 2026-05-23</p>
+<p><em>Generated by DevPerformanceAgent from MediaJel ENGINEERING BOARD (Project #25)</em></p>
+<h2>Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Engineer</th>
+<th>Closed</th>
+<th>Moved to QA</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>unassigned</td>
+<td>13</td>
+<td>8</td>
+<td>21</td>
+</tr>
+<tr>
+<td>Russell0813</td>
+<td>3</td>
+<td>3</td>
+<td>6</td>
+</tr>
+<tr>
+<td>icarlofer</td>
+<td>3</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>ramzell</td>
+<td>3</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>randallegend</td>
+<td>0</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr>
+<td>verdelmediajel</td>
+<td>2</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>danaszova</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>elmobunani21</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>johnjoseph28</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>ZeeLiger</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>martin0x</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<h2>Highlights</h2>
+<ul>
+<li>Top contributor: <strong>unassigned</strong> with 21 tickets</li>
+<li>Total tickets closed: 26</li>
+<li>Total tickets moved to QA: 18</li>
+<li>Engineers active this week: 10</li>
+</ul>
+<h2>Details</h2>
+<h3>unassigned</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/10645">#10645</a> — Campaign Update <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11143">#11143</a> — Fix: Stop all Nexxen Ads when deleting AdGroupCreative with multiple medias <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/10642">#10642</a> — [Bug] Verifying Tag Domain triggers other input field errors <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/10447">#10447</a> — [Bug] User gets logged out when moving org with lesser permission <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/10646">#10646</a> — Accurate reporting and pacing calculations <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11089">#11089</a> — Update Campaign Testing <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-gql-service/issues/7380">#7380</a> — Fix CPMList upsert error when IDs are null in updateParentOrg <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11224">#11224</a> — [Bug] A specific tag is redirecting users to white screen <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/amplication-nestjs-microservices/issues/2132">#2132</a> — Fix: IO and Package name not updated when campaign name changes <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11263">#11263</a> — [Bug] White screen occurs after changing user password <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11265">#11265</a> — [Bug] User unable to logout when no avatar is set <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11267">#11267</a> — [Bug] Dojo webapp server restarts when someone changes password <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11268">#11268</a> — Homepage RollUp shows non-zero impressions/revenue for orgs with no live or in-attribution campaigns <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-gql-service/issues/7033">#7033</a> — Multi-Flight Schedule Support at Campaign Level (Nexxen IO Schedules) <em>(QA)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/10627">#10627</a> — [Enhancement] Order Queue &gt; Queued Stage | For Delivery Button <em>(QA)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/10754">#10754</a> — Proposal - QAJel <em>(QA)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11175">#11175</a> — Remove Past Month Filter from Campaign Table <em>(QA)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11190">#11190</a> — [Bug] GraphQL AttributionMethodCommerce validation error on campaign transaction upsert <em>(QA)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11241">#11241</a> — Add &quot;Prospecting&quot; Org Type <em>(QA)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11240">#11240</a> — Add &quot;Channel Partner Direct&quot; Org Type <em>(QA)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11307">#11307</a> — Hotfix Tag table issues <em>(QA)</em></li>
+</ul>
+<h3>Russell0813</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11376">#11376</a> — NexTek, SRS Distribution preview: app crashes after accessing Library <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11225">#11225</a> — [Bug] Unable to select any location from dropdown <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11327">#11327</a> — [Bug] No data in creatives when searching from the last pagination <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11364">#11364</a> — Dashboard Dark Mode <em>(QA)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11341">#11341</a> — [Bug] Error 404 when creating location in Prodstage <em>(QA)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11379">#11379</a> — Deprecated heatmap <em>(QA)</em></li>
+</ul>
+<h3>icarlofer</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11360">#11360</a> — Paid Search data stops at May 7 on dashboard <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/10864">#10864</a> — Refactor Display Campaign Pipeline to use the Data in Clickhouse <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11361">#11361</a> — Paid Search dashboard: white screen when accessing empty Paid Search (TypeError reading &#39;xAxis&#39;) <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11129">#11129</a> — [Enhancement] Clear button should reset the filters without needing to click Apply <em>(QA)</em></li>
+</ul>
+<h3>ramzell</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11223">#11223</a> — [Bug] Team member and Owner dropdown filter does not display the Selected filters <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11206">#11206</a> — [Bug] Task History tab shows 0 and only updates upon clicking <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/10006">#10006</a> — PCL | Campaign requester load data on demand <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11325">#11325</a> — [Bug] Page flickers after clicking task link <em>(QA)</em></li>
+</ul>
+<h3>randallegend</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11305">#11305</a> — [Bug] Missing start date in Campaign display report <em>(QA)</em></li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11129">#11129</a> — [Enhancement] Clear button should reset the filters without needing to click Apply <em>(QA)</em></li>
+</ul>
+<h3>verdelmediajel</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/amplication-nestjs-microservices/issues/2194">#2194</a> — 500 Internal Server Error on Verify Data Integrity Results Page — &quot;The Landing - Denver&quot; Dataset <em>(Closed)</em></li>
+<li><a href="https://github.com/MediaJel/amplication-nestjs-microservices/issues/2195">#2195</a> — [Widget Development] Connect Button Unresponsive Due to 401 Unauthorized on Initial API Request <em>(Closed)</em></li>
+</ul>
+<h3>danaszova</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/10864">#10864</a> — Refactor Display Campaign Pipeline to use the Data in Clickhouse <em>(Closed)</em></li>
+</ul>
+<h3>elmobunani21</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/mediajel-gql-service/issues/7483">#7483</a> — dsp-campaigns-nexxen-prisma6 DAG failure — unhandled 400 from Nexxen Creatives API crashes worker po <em>(QA)</em></li>
+</ul>
+<h3>johnjoseph28</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/mediajel-gql-service/issues/7483">#7483</a> — dsp-campaigns-nexxen-prisma6 DAG failure — unhandled 400 from Nexxen Creatives API crashes worker po <em>(QA)</em></li>
+</ul>
+<h3>ZeeLiger</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/10386">#10386</a> — filter out IP addresses of bots DERVICED_CONTEXTS deviceFamily: Spider* <em>(QA)</em></li>
+</ul>
+<h3>martin0x</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/amplication-nestjs-microservices/issues/2194">#2194</a> — 500 Internal Server Error on Verify Data Integrity Results Page — &quot;The Landing - Denver&quot; Dataset <em>(Closed)</em></li>
+</ul>
+</div>
+</details>
+</div>
+<details class="accordion-card">
+  <summary class="accordion-summary">
+    <span class="accordion-chevron" aria-hidden="true">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="slug-chip" style="--chip-r:88;--chip-g:166;--chip-b:255">2026-W20</span>
+    <span class="accordion-title">Dev Performance — 2026-W20</span>
+  </summary>
+  
+<div class="leaderboard">
+  
+<div class="stat-grid" role="list">
+  <div class="stat-card" role="listitem">
+    <span class="stat-val">14</span>
+    <span class="stat-key">Total tickets</span>
+  </div>
+  <div class="stat-card stat-card--green" role="listitem">
+    <span class="stat-val">12</span>
+    <span class="stat-key">Closed</span>
+  </div>
+  <div class="stat-card stat-card--orange" role="listitem">
+    <span class="stat-val">2</span>
+    <span class="stat-key">Moved to QA</span>
+  </div>
+  <div class="stat-card" role="listitem">
+    <span class="stat-val">9</span>
+    <span class="stat-key">Active engineers</span>
+  </div>
+</div>
+  <div class="dev-list" role="list" aria-label="Developer leaderboard">
+    
+<div class="dev-card dev-card--first" style="--card-accent-r:88;--card-accent-g:166;--card-accent-b:255;animation-delay:0ms">
+  <div class="dev-rank"><span class="rank-medal" aria-label="rank 1">🥇</span></div>
+  <div class="dev-body">
+    <div class="dev-name">randallegend</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="randallegend performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:100%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">2 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">1 QA</span>
+    <span class="dev-total">3</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:40ms">
+  <div class="dev-rank"><span class="rank-medal" aria-label="rank 2">🥈</span></div>
+  <div class="dev-body">
+    <div class="dev-name">ramzell</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="ramzell performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:100%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">3 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">0 QA</span>
+    <span class="dev-total">3</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:80ms">
+  <div class="dev-rank"><span class="rank-medal" aria-label="rank 3">🥉</span></div>
+  <div class="dev-body">
+    <div class="dev-name">elmobunani21</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="67" aria-valuemin="0" aria-valuemax="100" aria-label="elmobunani21 performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:67%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">1 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">1 QA</span>
+    <span class="dev-total">2</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:120ms">
+  <div class="dev-rank"><span class="rank-num" aria-label="rank 4">4</span></div>
+  <div class="dev-body">
+    <div class="dev-name">martin0x</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" aria-label="martin0x performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:33%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">1 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">0 QA</span>
+    <span class="dev-total">1</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:160ms">
+  <div class="dev-rank"><span class="rank-num" aria-label="rank 5">5</span></div>
+  <div class="dev-body">
+    <div class="dev-name">verdelmediajel</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" aria-label="verdelmediajel performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:33%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">1 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">0 QA</span>
+    <span class="dev-total">1</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:200ms">
+  <div class="dev-rank"><span class="rank-num" aria-label="rank 6">6</span></div>
+  <div class="dev-body">
+    <div class="dev-name">ZeeLiger</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" aria-label="ZeeLiger performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:33%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">1 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">0 QA</span>
+    <span class="dev-total">1</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:240ms">
+  <div class="dev-rank"><span class="rank-num" aria-label="rank 7">7</span></div>
+  <div class="dev-body">
+    <div class="dev-name">JC-DMZ22</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" aria-label="JC-DMZ22 performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:33%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">1 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">0 QA</span>
+    <span class="dev-total">1</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:280ms">
+  <div class="dev-rank"><span class="rank-num" aria-label="rank 8">8</span></div>
+  <div class="dev-body">
+    <div class="dev-name">Russell0813</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" aria-label="Russell0813 performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:33%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">1 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">0 QA</span>
+    <span class="dev-total">1</span>
+  </div>
+</div>
+<div class="dev-card" style="animation-delay:320ms">
+  <div class="dev-rank"><span class="rank-num" aria-label="rank 9">9</span></div>
+  <div class="dev-body">
+    <div class="dev-name">_(unassigned)_</div>
+    <div class="dev-bar-track" role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" aria-label="_(unassigned)_ performance">
+      <div class="dev-bar" style="--bar-r:88;--bar-g:166;--bar-b:255;--bar-pct:33%"></div>
+    </div>
+  </div>
+  <div class="dev-stats">
+    <span class="pill pill--green" title="Closed tickets">1 closed</span>
+    <span class="pill pill--orange" title="Moved to QA">0 QA</span>
+    <span class="dev-total">1</span>
+  </div>
+</div>
+  </div>
+</div>
+  <div class="report-body"><h1>Dev Performance — 2026-W20</h1>
+<p>Period: 2026-05-11 → 2026-05-17</p>
+<h2>Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Engineer</th>
+<th>Closed</th>
+<th>Moved to QA</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>randallegend</td>
+<td>2</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr>
+<td>ramzell</td>
+<td>3</td>
+<td>0</td>
+<td>3</td>
+</tr>
+<tr>
+<td>elmobunani21</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr>
+<td>martin0x</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>verdelmediajel</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>ZeeLiger</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>JC-DMZ22</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Russell0813</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td><em>(unassigned)</em></td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<h2>Highlights</h2>
+<ul>
+<li><strong>randallegend</strong> and <strong>ramzell</strong> tied for the lead with 3 tickets each — randallegend drove fixes across the dashboard and GQL service, while ramzell shipped three enhancements.</li>
+<li><strong>elmobunani21</strong> advanced both the K8s cluster migration (closed) and the CI/GitOps refactor (moved to QA).</li>
+<li><strong>#1640 Q4 GOALS: Data Factory Service</strong> was a collaborative close shared by four engineers: martin0x, verdelmediajel, ZeeLiger, and JC-DMZ22.</li>
+<li>8 issues closed and 3 issues moved to QA across 8 engineers this week.</li>
+</ul>
+<h2>Details</h2>
+<h3>randallegend</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11212">[Bug] Invalid date under Start and End Time for publisher</a> — closed 2026-05-14</li>
+<li><a href="https://github.com/MediaJel/mediajel-gql-service/issues/7458">Orphan Issue + Partial Upsert of Publisher Transaction</a> — closed 2026-05-14</li>
+<li><a href="https://github.com/MediaJel/mediajel-gql-service/issues/7421">No spend reported for Auction Plus (campaignOrder.pricingModel) campai</a> — moved to QA 2026-05-13</li>
+</ul>
+<h3>ramzell</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11309">[Enhancement] Task File Upload - Increase the 2MB Cap</a> — closed 2026-05-14</li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11206">[Bug] Task History tab shows 0 and only updates upon clicking</a> — closed 2026-05-14</li>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11021">[Enhancement] Adjust for readability of task status</a> — closed 2026-05-14</li>
+</ul>
+<h3>elmobunani21</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/k8s-infra/issues/34">Move Non-Critical apps to Deploy on a new staging K8s Cluster</a> — closed 2026-05-11</li>
+<li><a href="https://github.com/MediaJel/k8s-infra/issues/48">Refactor CI workflows for microservices to adopt GitOps workflow and r</a> — moved to QA 2026-05-13</li>
+</ul>
+<h3>martin0x</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/amplication-nestjs-microservices/issues/1640">Q4 GOALS: Data Factory Service</a> — closed 2026-05-14</li>
+</ul>
+<h3>verdelmediajel</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/amplication-nestjs-microservices/issues/1640">Q4 GOALS: Data Factory Service</a> — closed 2026-05-14</li>
+</ul>
+<h3>ZeeLiger</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/amplication-nestjs-microservices/issues/1640">Q4 GOALS: Data Factory Service</a> — closed 2026-05-14</li>
+</ul>
+<h3>JC-DMZ22</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/amplication-nestjs-microservices/issues/1640">Q4 GOALS: Data Factory Service</a> — closed 2026-05-14</li>
+</ul>
+<h3>Russell0813</h3>
+<ul>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11021">[Enhancement] Adjust for readability of task status</a> — closed 2026-05-14</li>
+</ul>
+<h3><em>(unassigned)</em></h3>
+<ul>
+<li><a href="https://github.com/MediaJel/mediajel-dashboard/issues/11094">Creatives Bulk Rename feature</a> — closed 2026-05-14</li>
+</ul>
+</div>
+</details>
+</section>
+
+<section class="section" id="section-achievements" aria-labelledby="section-title-achievements">
+  <header class="section-hd">
+    <div class="section-icon" style="--si-r:247;--si-g:129;--si-b:102" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1l1.854 3.757L14 5.517l-3 2.924.708 4.13L8 10.5l-3.708 2.07L5 8.44 2 5.517l4.146-.76L8 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+    </div>
+    <div>
+      <h2 class="section-title" id="section-title-achievements">Achievements Wall</h2>
+      <p class="section-desc">Team wins, milestones, and highlights</p>
+    </div>
+  </header>
+  
+<div class="featured-card" style="--fc-r:247;--fc-g:129;--fc-b:102">
+  <div class="featured-header">
+    <div class="chip-row">
+      <span class="badge badge--latest" style="--badge-r:247;--badge-g:129;--badge-b:102">Latest</span>
+      <span class="slug-chip" style="--chip-r:247;--chip-g:129;--chip-b:102">2026-W21</span>
+    </div>
+    <h3 class="featured-title">Achievements — 2026-W21</h3>
+  </div>
+  <div class="report-body achv-body"><h1>Achievements — 2026-W21</h1>
+<p>Period: 2026-05-18 → 2026-05-24</p>
+<h2>This week we shipped</h2>
+<h3>Features</h3>
+<ul>
+<li><strong>Slice #1 MVP end-to-end</strong> — First complete product feature delivered from definition to production (<a href="/MED/issues/MED-46">MED-46</a>)</li>
+<li><strong>Budget Tracker visual polish</strong> — Refined UI/UX across the Budget Tracker module, with a full QA pass confirming correctness (<a href="/MED/issues/MED-32">MED-32</a>, <a href="/MED/issues/MED-33">MED-33</a>)</li>
+<li><strong>Opportunity Details Page beautification</strong> — Enhanced visual design and improved the Salesforce integration tab UX on the Opportunity page (<a href="/MED/issues/MED-120">MED-120</a>, <a href="/MED/issues/MED-121">MED-121</a>, <a href="/MED/issues/MED-122">MED-122</a>, <a href="/MED/issues/MED-134">MED-134</a>)</li>
+</ul>
+<h3>Bug Fixes</h3>
+<ul>
+<li><strong>Tag Domain validation regression</strong> — Fixed input field errors erroneously triggered when verifying a Tag Domain; full plan, implementation, code review, and QA cycle completed in-week (<a href="/MED/issues/MED-89">MED-89</a>, <a href="/MED/issues/MED-90">MED-90</a>, <a href="/MED/issues/MED-92">MED-92</a>, <a href="/MED/issues/MED-93">MED-93</a>, <a href="/MED/issues/MED-94">MED-94</a>)</li>
+</ul>
+<h3>Infrastructure &amp; Automation</h3>
+<ul>
+<li><strong>Relations reporting pipeline</strong> — Bootstrapped the <code>med-relations</code> repo and launched three automated weekly agents: DevPerformanceAgent, AchievementsAgent, and ReleaseNotesAgent — delivering automated team metrics from day one (<a href="/MED/issues/MED-123">MED-123</a>, <a href="/MED/issues/MED-125">MED-125</a>, <a href="/MED/issues/MED-126">MED-126</a>, <a href="/MED/issues/MED-128">MED-128</a>)</li>
+<li><strong>GitHub integration wired</strong> — Enabled agentic read/write of repo state across <code>mediajel-gql-service</code>, <code>mediajel-dashboard</code>, and <code>amplication-nestjs-microservices</code> (<a href="/MED/issues/MED-24">MED-24</a>)</li>
+<li><strong>Engineering process established</strong> — Defined development workflow, hired first engineer, and established hiring plan (<a href="/MED/issues/MED-1">MED-1</a>, <a href="/MED/issues/MED-82">MED-82</a>)</li>
+</ul>
+<h2>By the numbers</h2>
+<ul>
+<li>123 tickets closed</li>
+<li>99 PRs merged</li>
+<li>11 contributors active</li>
+</ul>
+</div>
+</div>
+<details class="accordion-card">
+  <summary class="accordion-summary">
+    <span class="accordion-chevron" aria-hidden="true">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+    <span class="slug-chip" style="--chip-r:247;--chip-g:129;--chip-b:102">2026-W20</span>
+    <span class="accordion-title">Achievements — 2026-W20</span>
+  </summary>
+  
+  <div class="report-body"><h1>Achievements — 2026-W20</h1>
+<p>Period: 2026-05-11 → 2026-05-17</p>
+<p>No tickets were closed or PRs merged during this period.</p>
+<h2>By the numbers</h2>
+<ul>
+<li>0 tickets closed</li>
+<li>0 PRs merged</li>
+</ul>
+</div>
+</details>
+</section>
+
+<section class="section" id="section-releases" aria-labelledby="section-title-releases">
+  <header class="section-hd">
+    <div class="section-icon" style="--si-r:63;--si-g:185;--si-b:80" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.5C8 1.5 13 4 13 8.5a5 5 0 01-10 0C3 4 8 1.5 8 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="8" cy="8.5" r="1.5" fill="currentColor"/></svg>
+    </div>
+    <div>
+      <h2 class="section-title" id="section-title-releases">Release Notes</h2>
+      <p class="section-desc">Full versioned changelog, newest first</p>
+    </div>
+  </header>
+  
+<div class="release-timeline" role="list">
+  
+<article class="release-card release-card--latest" role="listitem" style="--rc-r:63;--rc-g:185;--rc-b:80">
+  <div class="release-dot" aria-hidden="true"></div>
+  <div class="release-header">
+    <span class="release-ver release-ver--major" style="color:#3fb950">v1.0.0</span>
+    <span class="badge badge--latest" style="--badge-r:63;--badge-g:185;--badge-b:80">Latest</span>
+  </div>
+  <div class="report-body"><h1>Release Notes — v1.0.0</h1>
+<p><strong>Deployed:</strong> 2026-05-22T20:07:25Z<br><strong>Environment:</strong> production<br><strong>PR:</strong> <a href="https://github.com/MediaJel/mediajel-dashboard/pull/11397">#11397</a></p>
+<p>Production deployment — hotfix restructure + staging validation</p>
+<h2>What&#39;s new</h2>
+<h3>Bug fixes</h3>
+<ul>
+<li><strong>Restructure task management route to avoid flickering</strong> — The Task Management section flickered on every page refresh across board, project details, and task detail views. Root cause: React Router was unmounting and remounting the <code>/tasks</code> route due to an unstable reference. Fixed by wrapping the route component in <code>useCallback</code> keyed on <code>currentUser</code>, making the route reference stable and preventing needless remounts. (<a href="https://github.com/MediaJel/mediajel-dashboard/pull/11395">#11395</a>, MD-11325)</li>
+</ul>
+<h3>Chores / maintenance</h3>
+<ul>
+<li>Merge master into production-stage (<a href="https://github.com/MediaJel/mediajel-dashboard/pull/11396">#11396</a>)</li>
+</ul>
+<h2>Commits included</h2>
+<table>
+<thead>
+<tr>
+<th>SHA</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>a7563a5f</code></td>
+<td>MD-#11325 Restructure task management route to avoid flickering</td>
+</tr>
+<tr>
+<td><code>875b3824</code></td>
+<td>Merge pull request #11395 from MediaJel/MD-##11325-reopen</td>
+</tr>
+<tr>
+<td><code>b6787223</code></td>
+<td>Merge pull request #11396 from MediaJel/master</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>Generated by <a href="https://paperclips.pacholoamit.com/MED/agents/nodeengineer">ReleaseNotesAgent</a> on 2026-05-23T03:22:00Z</em></p>
+</div>
+</article>
+<article class="release-card" role="listitem">
+  <div class="release-dot" aria-hidden="true"></div>
+  <div class="release-header">
+    <span class="release-ver">v0.1.0</span>
+    
+  </div>
+  <div class="report-body"><h1>Release Notes — v0.1.0</h1>
+<p><strong>Deployed:</strong> 2026-05-23T09:00:00Z
+<strong>Environment:</strong> production
+<strong>PR:</strong> <a href="https://github.com/pacholoamit/med/pull/1">#1</a></p>
+<p>Initial release of the MED Relations pipeline system.</p>
+<h2>What&#39;s new</h2>
+<h3>Features</h3>
+<ul>
+<li><a href="/MED/issues/MED-123">MED-123</a> — Relations — Team productivity reporting system</li>
+<li><a href="/MED/issues/MED-125">MED-125</a> — Relations: Phase 1 — Infra setup (GitHub repo, Pages pipeline)</li>
+<li><a href="/MED/issues/MED-131">MED-131</a> — Relations: Phase 2 — DevPerformanceAgent, AchievementsAgent &amp; ReleaseNotesAgent</li>
+</ul>
+<hr>
+<p><em>Generated by ReleaseNotesAgent</em></p>
+</div>
+</article>
+</div>
+</section>
+    </main>
+    <footer class="footer" role="contentinfo">
+      <div class="footer-brand">
+        <span>MediaJel Relations</span>
+        <span class="footer-dot" aria-hidden="true"></span>
+        <span>Auto-generated by the Relations pipeline</span>
+      </div>
+      <nav class="footer-links" aria-label="External links">
+        <a href="https://github.com/MediaJel/med-relations" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/MediaJel/med-relations/actions" target="_blank" rel="noopener noreferrer">Actions</a>
+        <a href="https://github.com/MediaJel/med-relations/tree/main/reports" target="_blank" rel="noopener noreferrer">Reports</a>
+      </nav>
+    </footer>
+  </div>
+</div>
+
+<script>
+(function () {
+  var sections = document.querySelectorAll('.section');
+  var links = document.querySelectorAll('.nav-link');
+
+  function setActive(id) {
+    links.forEach(function (l) {
+      l.classList.toggle('active', l.dataset.section === id);
+    });
+  }
+
+  if (!('IntersectionObserver' in window)) {
+    if (sections[0]) setActive(sections[0].id.replace('section-', ''));
+    return;
+  }
+
+  var obs = new IntersectionObserver(
+    function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) setActive(e.target.id.replace('section-', ''));
+      });
+    },
+    { rootMargin: '-20% 0px -65% 0px' }
+  );
+
+  sections.forEach(function (s) { obs.observe(s); });
+  if (sections[0]) setActive(sections[0].id.replace('section-', ''));
+
+  var barObs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        e.target.style.animationPlayState = 'running';
+        barObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.dev-bar').forEach(function (bar) {
+    bar.style.animationPlayState = 'paused';
+    barObs.observe(bar);
+  });
+})();
+</script>
+</body>
+</html>
