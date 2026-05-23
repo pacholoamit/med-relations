@@ -1,0 +1,12 @@
+{
+  "name": "med-relations",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "dev": "node scripts/build.js && echo 'Open dist/index.html in your browser'"
+  },
+  "dependencies": {
+    "marked": "^12.0.0"
+  }
+}
