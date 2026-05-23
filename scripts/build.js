@@ -762,7 +762,7 @@ function generateHTML(data) {
     <p class="sidebar-lbl" aria-hidden="true">Sections</p>
     ${navItems}
     <p class="sidebar-lbl" style="margin-top:0.75rem" aria-hidden="true">Pages</p>
-    <a href="/releases/" class="nav-link" aria-label="Dedicated release notes page">
+    <a href="releases/" class="nav-link" aria-label="Dedicated release notes page">
       <span class="nav-icon">${releasesMeta.icon}</span>
       <span class="nav-label">Release Notes ↗</span>
     </a>
@@ -808,40 +808,23 @@ function generateReleasesHTML(releases) {
 <body>
 
 <header class="hdr" role="banner">
-  <a href="../" class="hdr-logo" aria-label="MediaJel Relations home">
+  <div class="hdr-logo">
     <div class="hdr-mark" aria-hidden="true">MJ</div>
-    Relations
-  </a>
-  <span class="hdr-sep" aria-hidden="true">/</span>
-  <span class="hdr-org">Release Notes</span>
+    Release Notes
+  </div>
   <div class="hdr-space"></div>
   <time class="hdr-date" datetime="${new Date().toISOString()}">${buildDate}</time>
 </header>
 
-<div class="layout">
-  <nav class="sidebar" aria-label="Page navigation">
-    <p class="sidebar-lbl" aria-hidden="true">Navigation</p>
-    <a href="../" class="nav-link" aria-label="Back to all reports">
-      <span class="nav-icon">
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M9.5 3.5L5.5 7.5L9.5 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </span>
-      <span class="nav-label">← All reports</span>
-    </a>
+<main class="main" id="main-content">
+  ${releasesSection}
+</main>
+<footer class="footer" role="contentinfo">
+  <span>MediaJel &middot; Release Notes &middot; Generated ${buildDate}</span>
+  <nav class="footer-links" aria-label="External links">
+    <a href="https://github.com/MediaJel/med-relations" target="_blank" rel="noopener noreferrer">GitHub</a>
   </nav>
-  <div>
-    <main class="main" id="main-content">
-      ${releasesSection}
-    </main>
-    <footer class="footer" role="contentinfo">
-      <span>MediaJel Relations &middot; Generated ${buildDate}</span>
-      <nav class="footer-links" aria-label="External links">
-        <a href="https://github.com/MediaJel/med-relations" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a href="https://github.com/MediaJel/med-relations/actions" target="_blank" rel="noopener noreferrer">Actions</a>
-        <a href="https://github.com/MediaJel/med-relations/tree/main/reports" target="_blank" rel="noopener noreferrer">Reports</a>
-      </nav>
-    </footer>
-  </div>
-</div>
+</footer>
 
 <script>${getJS()}</script>
 </body>
