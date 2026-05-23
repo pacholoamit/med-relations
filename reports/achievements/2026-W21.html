@@ -29,27 +29,30 @@
   .section { margin-bottom: 2rem; }
   h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;
        padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
-  .charts-row { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
-  .chart-container { flex: 1; min-width: 280px; display: flex; align-items: center; gap: 2rem;
-                     background: var(--card); border: 1px solid var(--border);
-                     border-radius: .75rem; padding: 1.5rem; }
-  .chart-wrap { width: 200px; height: 200px; flex-shrink: 0; }
-  .legend { display: flex; flex-direction: column; gap: .75rem; }
-  .legend-item { display: flex; align-items: center; gap: .5rem; font-size: .875rem; }
-  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .charts-row { display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .charts-row .chart-container { flex: 1; min-width: 280px; }
+  .chart-container { background: var(--card); border: 1px solid var(--border);
+                     border-radius: .75rem; padding: 1.5rem;
+                     display: flex; align-items: center; gap: 1.5rem; }
+  .chart-wrap { width: 160px; height: 160px; flex-shrink: 0; }
+  .chart-title { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em;
+                 color: var(--muted); margin-bottom: .75rem; }
+  .legend { display: flex; flex-direction: column; gap: .6rem; }
+  .legend-item { display: flex; align-items: center; gap: .5rem; font-size: .8rem; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
   table { width: 100%; border-collapse: collapse; font-size: .85rem; }
   th { text-align: left; padding: .6rem .75rem; color: var(--muted);
        font-weight: 500; border-bottom: 1px solid var(--border); }
-  td { padding: .6rem .75rem; border-bottom: 1px solid var(--border); }
+  td { padding: .6rem .75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
   .badge { display: inline-block; padding: .15rem .5rem; border-radius: .375rem;
-           font-size: .75rem; font-weight: 500; }
+           font-size: .75rem; font-weight: 500; white-space: nowrap; }
   .badge-bug { background: rgba(239,68,68,.15); color: #f87171; }
   .badge-feature { background: rgba(99,102,241,.15); color: #818cf8; }
   .badge-enhancement { background: rgba(16,185,129,.15); color: #34d399; }
   .badge-critical { background: rgba(245,158,11,.15); color: var(--yellow); }
   .badge-high { background: rgba(248,113,113,.15); color: #f87171; }
-  .badge-normal { background: rgba(113,128,150,.1); color: var(--muted); }
+  .badge-normal { background: rgba(148,163,184,.15); color: #94a3b8; }
   .badge-low { background: rgba(52,211,153,.15); color: #34d399; }
   .lines-added { color: var(--green); }
   .lines-removed { color: var(--red); }
@@ -61,13 +64,8 @@
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
   .empty-note { color: var(--muted); font-style: italic; padding: 1rem 0; }
-  .priority-breakdown { font-size: .85rem; }
-  .priority-critical { color: var(--yellow); font-weight: 500; }
-  .priority-high { color: #f87171; font-weight: 500; }
-  .priority-normal { color: var(--muted); font-weight: 500; }
-  .priority-low { color: #34d399; font-weight: 500; }
-  .legend-section-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .06em;
-                           color: var(--muted); margin-bottom: .25rem; font-weight: 600; }
+  .priority-breakdown { display: flex; align-items: center; flex-wrap: wrap; gap: .25rem; }
+  .priority-sep { color: var(--muted); margin: 0 .1rem; }
 </style>
 </head>
 <body>
@@ -90,7 +88,7 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">Hotfixes</div>
-    <div class="stat-value yellow">20</div>
+    <div class="stat-value yellow">19</div>
   </div>
 </div>
 
@@ -98,18 +96,20 @@
   <h2>Category &amp; Priority Breakdown</h2>
   <div class="charts-row">
     <div class="chart-container">
-      <div class="chart-wrap">
-        <canvas id="donutChart"></canvas>
+      <div>
+        <div class="chart-title">Category</div>
+        <div class="chart-wrap">
+          <canvas id="categoryChart"></canvas>
+        </div>
       </div>
       <div class="legend">
-        <div class="legend-section-label">Category</div>
         <div class="legend-item">
           <div class="legend-dot" style="background:#f87171"></div>
-          <span>Bug Fixes — 27</span>
+          <span>Bug Fixes — 26</span>
         </div>
         <div class="legend-item">
           <div class="legend-dot" style="background:#818cf8"></div>
-          <span>New Features — 1</span>
+          <span>New Features — 2</span>
         </div>
         <div class="legend-item">
           <div class="legend-dot" style="background:#34d399"></div>
@@ -118,14 +118,16 @@
       </div>
     </div>
     <div class="chart-container">
-      <div class="chart-wrap">
-        <canvas id="priorityChart"></canvas>
+      <div>
+        <div class="chart-title">Priority</div>
+        <div class="chart-wrap">
+          <canvas id="priorityChart"></canvas>
+        </div>
       </div>
       <div class="legend">
-        <div class="legend-section-label">Priority Breakdown</div>
         <div class="legend-item">
           <div class="legend-dot" style="background:#f59e0b"></div>
-          <span>Critical — 20</span>
+          <span>Critical — 19</span>
         </div>
         <div class="legend-item">
           <div class="legend-dot" style="background:#f87171"></div>
@@ -133,7 +135,7 @@
         </div>
         <div class="legend-item">
           <div class="legend-dot" style="background:#94a3b8"></div>
-          <span>Normal — 9</span>
+          <span>Normal — 10</span>
         </div>
         <div class="legend-item">
           <div class="legend-dot" style="background:#34d399"></div>
@@ -146,18 +148,14 @@
 
 <div class="section">
   <h2>Pull Requests</h2>
-
-    <table>
+  <table>
     <thead>
       <tr>
-        <th style="width:50%">Title</th>
-        <th style="width:15%">Category</th>
-        <th style="width:15%">Priority</th>
-        <th style="width:20%">Lines</th>
+        <th>Title</th><th>Category</th><th>Priority</th><th>Lines</th>
       </tr>
     </thead>
     <tbody>
-      <!-- Bug Fix rows (chronological order) -->
+      <!-- Bug Fixes (sorted by merged_at ascending) -->
       <tr>
         <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11346" target="_blank">Campaign Approval for PCL</a></td>
         <td><span class="badge badge-bug">Bug Fix</span></td>
@@ -177,19 +175,13 @@
         <td><span class="lines-added">+11</span> / <span class="lines-removed">-1</span></td>
       </tr>
       <tr>
-        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11352" target="_blank">Campaign Requestor Enhancements and Line Item Management</a></td>
-        <td><span class="badge badge-bug">Bug Fix</span></td>
-        <td><span class="badge badge-normal">Normal</span></td>
-        <td><span class="lines-added">+2005</span> / <span class="lines-removed">-370</span></td>
-      </tr>
-      <tr>
         <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11340" target="_blank">Add type field to all campaign order report queries for Demo Campaign</a></td>
         <td><span class="badge badge-bug">Bug Fix</span></td>
         <td><span class="badge badge-critical">Critical</span></td>
         <td><span class="lines-added">+8</span> / <span class="lines-removed">-0</span></td>
       </tr>
       <tr>
-        <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7481" target="_blank">Demo Campaign</a></td>
+        <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7481" target="_blank">Fix Demo Campaign</a></td>
         <td><span class="badge badge-bug">Bug Fix</span></td>
         <td><span class="badge badge-critical">Critical</span></td>
         <td><span class="lines-added">+4</span> / <span class="lines-removed">-4</span></td>
@@ -261,7 +253,7 @@
         <td><span class="lines-added">+16</span> / <span class="lines-removed">-7</span></td>
       </tr>
       <tr>
-        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11332" target="_blank">Page flickers after clicking task link</a></td>
+        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11332" target="_blank">Fix page flickers after clicking task link</a></td>
         <td><span class="badge badge-bug">Bug Fix</span></td>
         <td><span class="badge badge-critical">Critical</span></td>
         <td><span class="lines-added">+426</span> / <span class="lines-removed">-29</span></td>
@@ -293,7 +285,7 @@
       <tr>
         <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11378" target="_blank">Pin Google Maps API to v3.64 to restore HeatmapLayer</a></td>
         <td><span class="badge badge-bug">Bug Fix</span></td>
-        <td><span class="badge badge-critical">Critical</span></td>
+        <td><span class="badge badge-normal">Normal</span></td>
         <td><span class="lines-added">+1</span> / <span class="lines-removed">-1</span></td>
       </tr>
       <tr>
@@ -320,16 +312,22 @@
         <td><span class="badge badge-normal">Normal</span></td>
         <td><span class="lines-added">+35</span> / <span class="lines-removed">-11</span></td>
       </tr>
-      <!-- New Feature rows -->
+      <!-- New Features (sorted by merged_at ascending) -->
       <tr>
         <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2076" target="_blank">Add sync modes across data-factory v1 + v2 UIs with adapter-managed defaults</a></td>
         <td><span class="badge badge-feature">New Feature</span></td>
         <td><span class="badge badge-normal">Normal</span></td>
         <td><span class="lines-added">+2309</span> / <span class="lines-removed">-132</span></td>
       </tr>
-      <!-- Enhancement rows -->
       <tr>
-        <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7493" target="_blank">Revert &quot;[HOTFIX] Salesforce Additional Fields in PCL&quot;</a></td>
+        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11352" target="_blank">Campaign Requestor Enhancements and Line Item Management</a></td>
+        <td><span class="badge badge-feature">New Feature</span></td>
+        <td><span class="badge badge-normal">Normal</span></td>
+        <td><span class="lines-added">+2005</span> / <span class="lines-removed">-370</span></td>
+      </tr>
+      <!-- Enhancements (sorted by merged_at ascending) -->
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7493" target="_blank">Revert "[HOTFIX] Salesforce Additional Fields in PCL"</a></td>
         <td><span class="badge badge-enhancement">Enhancement</span></td>
         <td><span class="badge badge-critical">Critical</span></td>
         <td><span class="lines-added">+0</span> / <span class="lines-removed">-8</span></td>
@@ -340,63 +338,100 @@
 
 <div class="section">
   <h2>Contributors</h2>
-
-    <table>
+  <table>
     <thead>
       <tr><th>Contributor</th><th>Priority Breakdown</th><th>Lines Added</th><th>Lines Removed</th></tr>
     </thead>
     <tbody>
       <tr>
         <td><a href="https://github.com/JC-DMZ22" target="_blank">JC-DMZ22</a></td>
-        <td class="priority-breakdown"><span class="priority-critical">6 Critical</span></td>
+        <td>
+          <div class="priority-breakdown">
+            <span class="badge badge-critical">6 Critical</span>
+          </div>
+        </td>
         <td class="lines-added">+243</td>
         <td class="lines-removed">-58</td>
       </tr>
       <tr>
         <td><a href="https://github.com/verdelmediajel" target="_blank">verdelmediajel</a></td>
-        <td class="priority-breakdown"><span class="priority-critical">4 Critical</span> · <span class="priority-normal">2 Normal</span></td>
+        <td>
+          <div class="priority-breakdown">
+            <span class="badge badge-critical">4 Critical</span>
+            <span class="priority-sep">·</span>
+            <span class="badge badge-normal">2 Normal</span>
+          </div>
+        </td>
         <td class="lines-added">+9643</td>
         <td class="lines-removed">-427</td>
       </tr>
       <tr>
         <td><a href="https://github.com/johnjoseph28" target="_blank">johnjoseph28</a></td>
-        <td class="priority-breakdown"><span class="priority-critical">5 Critical</span></td>
+        <td>
+          <div class="priority-breakdown">
+            <span class="badge badge-critical">5 Critical</span>
+          </div>
+        </td>
         <td class="lines-added">+47</td>
         <td class="lines-removed">-213</td>
       </tr>
       <tr>
         <td><a href="https://github.com/icarlofer" target="_blank">icarlofer</a></td>
-        <td class="priority-breakdown"><span class="priority-normal">4 Normal</span></td>
+        <td>
+          <div class="priority-breakdown">
+            <span class="badge badge-normal">4 Normal</span>
+          </div>
+        </td>
         <td class="lines-added">+222</td>
         <td class="lines-removed">-49</td>
       </tr>
       <tr>
         <td><a href="https://github.com/bertwin-mediajel" target="_blank">bertwin-mediajel</a></td>
-        <td class="priority-breakdown"><span class="priority-normal">2 Normal</span></td>
+        <td>
+          <div class="priority-breakdown">
+            <span class="badge badge-normal">2 Normal</span>
+          </div>
+        </td>
         <td class="lines-added">+2012</td>
         <td class="lines-removed">-457</td>
       </tr>
       <tr>
         <td><a href="https://github.com/ramzell" target="_blank">ramzell</a></td>
-        <td class="priority-breakdown"><span class="priority-critical">2 Critical</span></td>
+        <td>
+          <div class="priority-breakdown">
+            <span class="badge badge-critical">2 Critical</span>
+          </div>
+        </td>
         <td class="lines-added">+443</td>
         <td class="lines-removed">-38</td>
       </tr>
       <tr>
         <td><a href="https://github.com/rmm03" target="_blank">rmm03</a></td>
-        <td class="priority-breakdown"><span class="priority-critical">2 Critical</span></td>
+        <td>
+          <div class="priority-breakdown">
+            <span class="badge badge-critical">2 Critical</span>
+          </div>
+        </td>
         <td class="lines-added">+12</td>
         <td class="lines-removed">-4</td>
       </tr>
       <tr>
         <td><a href="https://github.com/Russell0813" target="_blank">Russell0813</a></td>
-        <td class="priority-breakdown"><span class="priority-critical">1 Critical</span></td>
+        <td>
+          <div class="priority-breakdown">
+            <span class="badge badge-normal">1 Normal</span>
+          </div>
+        </td>
         <td class="lines-added">+1</td>
         <td class="lines-removed">-1</td>
       </tr>
       <tr>
         <td><a href="https://github.com/ZeeLiger" target="_blank">ZeeLiger</a></td>
-        <td class="priority-breakdown"><span class="priority-normal">1 Normal</span></td>
+        <td>
+          <div class="priority-breakdown">
+            <span class="badge badge-normal">1 Normal</span>
+          </div>
+        </td>
         <td class="lines-added">+23</td>
         <td class="lines-removed">-41</td>
       </tr>
@@ -410,6 +445,10 @@
     <div class="metric-item">
       <div class="metric-label">Most Active Repo</div>
       <div class="metric-value">mediajel-dashboard</div>
+    </div>
+    <div class="metric-item">
+      <div class="metric-label">Contributors</div>
+      <div class="metric-value">9</div>
     </div>
     <div class="metric-item">
       <div class="metric-label">Avg PR Size (lines)</div>
@@ -429,77 +468,42 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 (function() {
-  var ctx = document.getElementById('donutChart').getContext('2d');
-  var bugCount = 27;
-  var featCount = 1;
-  var enhCount = 1;
-  var total = bugCount + featCount + enhCount;
-  new Chart(ctx, {
+  var catCtx = document.getElementById('categoryChart').getContext('2d');
+  var bugCount = 26; var featCount = 2; var enhCount = 1;
+  var catTotal = bugCount + featCount + enhCount;
+  new Chart(catCtx, {
     type: 'doughnut',
     data: {
       labels: ['Bug Fixes', 'New Features', 'Enhancements'],
-      datasets: [{
-        data: total > 0 ? [bugCount, featCount, enhCount] : [1, 0, 0],
-        backgroundColor: ['#f87171', '#818cf8', '#34d399'],
-        borderColor: '#1a1d27',
-        borderWidth: 3,
-        hoverOffset: 8
-      }]
+      datasets: [{ data: catTotal > 0 ? [bugCount, featCount, enhCount] : [1,0,0],
+        backgroundColor: ['#f87171','#818cf8','#34d399'],
+        borderColor: '#1a1d27', borderWidth: 3, hoverOffset: 8 }]
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      cutout: '65%',
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) {
-              if (total === 0) return ctx.label + ': 0';
-              return ctx.label + ': ' + ctx.raw +
-                     ' (' + Math.round(ctx.raw / total * 100) + '%)';
-            }
-          }
-        }
-      }
-    }
+    options: { responsive: true, maintainAspectRatio: true, cutout: '65%',
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: function(ctx) {
+          if (catTotal === 0) return ctx.label + ': 0';
+          return ctx.label + ': ' + ctx.raw + ' (' + Math.round(ctx.raw/catTotal*100) + '%)';
+        }}}}}
   });
 
-  var pCtx = document.getElementById('priorityChart').getContext('2d');
-  var critCount = 20;
-  var highCount = 0;
-  var normCount = 9;
-  var lowCount = 0;
-  var pTotal = critCount + highCount + normCount + lowCount;
-  new Chart(pCtx, {
+  var priCtx = document.getElementById('priorityChart').getContext('2d');
+  var critCount = 19; var highCount = 0; var normCount = 10; var lowCount = 0;
+  var priTotal = critCount + highCount + normCount + lowCount;
+  new Chart(priCtx, {
     type: 'doughnut',
     data: {
       labels: ['Critical', 'High', 'Normal', 'Low'],
-      datasets: [{
-        data: pTotal > 0 ? [critCount, highCount, normCount, lowCount] : [1, 0, 0, 0],
-        backgroundColor: ['#f59e0b', '#f87171', '#94a3b8', '#34d399'],
-        borderColor: '#1a1d27',
-        borderWidth: 3,
-        hoverOffset: 8
-      }]
+      datasets: [{ data: priTotal > 0 ? [critCount, highCount, normCount, lowCount] : [1,0,0,0],
+        backgroundColor: ['#f59e0b','#f87171','#94a3b8','#34d399'],
+        borderColor: '#1a1d27', borderWidth: 3, hoverOffset: 8 }]
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      cutout: '65%',
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) {
-              if (pTotal === 0) return ctx.label + ': 0';
-              return ctx.label + ': ' + ctx.raw +
-                     ' (' + Math.round(ctx.raw / pTotal * 100) + '%)';
-            }
-          }
-        }
-      }
-    }
+    options: { responsive: true, maintainAspectRatio: true, cutout: '65%',
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: function(ctx) {
+          if (priTotal === 0) return ctx.label + ': 0';
+          return ctx.label + ': ' + ctx.raw + ' (' + Math.round(ctx.raw/priTotal*100) + '%)';
+        }}}}}
   });
 })();
 </script>
