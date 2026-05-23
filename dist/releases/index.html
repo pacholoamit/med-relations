@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Release Notes — MediaJel Relations</title>
+  <meta name="description" content="Full versioned changelog for the MediaJel engineering team, newest first.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg:       #f8fafc;
+  --surface:  #ffffff;
+  --surface-2:#f1f5f9;
+  --border:   #e2e8f0;
+  --border-2: #cbd5e1;
+  --text:     #0f172a;
+  --text-2:   #475569;
+  --text-3:   #94a3b8;
+  --accent:   #6366f1;
+  --accent-bg:#eef2ff;
+  --accent-bd:#c7d2fe;
+  --green:    #16a34a;
+  --green-bg: #f0fdf4;
+  --green-bd: #bbf7d0;
+  --orange:   #ea580c;
+  --orange-bg:#fff7ed;
+  --orange-bd:#fed7aa;
+  --hdr-h:    56px;
+  --side-w:   232px;
+  --radius:   8px;
+  --t:        150ms ease;
+}
+
+html[data-theme="dark"] {
+  --bg:       #0f1117;
+  --surface:  #1e293b;
+  --surface-2:#1e293b;
+  --border:   #334155;
+  --border-2: #475569;
+  --text:     #f1f5f9;
+  --text-2:   #94a3b8;
+  --text-3:   #64748b;
+  --accent:   #6366f1;
+  --accent-bg:#1e1b4b;
+  --accent-bd:#3730a3;
+  --green:    #22c55e;
+  --green-bg: #052e16;
+  --green-bd: #166534;
+  --orange:   #f97316;
+  --orange-bg:#431407;
+  --orange-bd:#9a3412;
+}
+
+html.theme-ready *,
+html.theme-ready *::before,
+html.theme-ready *::after {
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease !important;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.hdr {
+  position: sticky; top: 0; z-index: 100;
+  height: var(--hdr-h);
+  padding: 0 1.5rem;
+  display: flex; align-items: center; gap: 0.75rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.hdr-logo {
+  display: flex; align-items: center; gap: 0.5rem;
+  text-decoration: none; color: var(--text);
+  font-size: 0.9375rem; font-weight: 600;
+}
+.hdr-logo:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.hdr-mark {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+  letter-spacing: -0.02em;
+}
+.hdr-sep { color: var(--border-2); font-weight: 300; font-size: 1.1rem; }
+.hdr-org { font-size: 0.8125rem; color: var(--text-2); font-weight: 500; }
+.hdr-space { flex: 1; }
+.hdr-date { font-size: 0.75rem; color: var(--text-3); }
+.theme-toggle {
+  width: 32px; height: 32px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 6px; cursor: pointer; color: var(--text-2);
+  padding: 0;
+}
+.theme-toggle:hover { background: var(--border); color: var(--text); }
+.theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.theme-icon { display: block; pointer-events: none; }
+html[data-theme="dark"] .theme-icon--moon { display: none; }
+html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
+
+/* ── Layout ─────────────────────────────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: var(--side-w) 1fr;
+  min-height: calc(100vh - var(--hdr-h));
+}
+
+/* ── Sidebar ────────────────────────────────────────────────────────────── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 1.25rem 0;
+  position: sticky; top: var(--hdr-h);
+  height: calc(100vh - var(--hdr-h));
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.sidebar-lbl {
+  font-size: 0.6875rem; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-3); padding: 0 1rem 0.625rem;
+}
+.nav-link {
+  display: flex; align-items: center; gap: 0.625rem;
+  padding: 0.5625rem 1rem;
+  text-decoration: none; color: var(--text-2);
+  font-size: 0.875rem; font-weight: 500;
+  border-left: 2px solid transparent;
+  transition: background var(--t), color var(--t), border-color var(--t);
+}
+.nav-link:hover { background: var(--bg); color: var(--text); }
+.nav-link.active {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-left-color: var(--accent);
+}
+.nav-link:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.nav-icon { display: flex; align-items: center; justify-content: center; flex-shrink: 0; opacity: 0.75; }
+.nav-link.active .nav-icon { opacity: 1; }
+.nav-label { flex: 1; }
+.nav-count {
+  font-size: 0.6875rem; color: var(--text-3);
+  background: var(--surface-2); border: 1px solid var(--border);
+  padding: 1px 6px; border-radius: 10px; min-width: 20px; text-align: center;
+}
+.nav-link.active .nav-count {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-bd);
+}
+
+/* ── Main ───────────────────────────────────────────────────────────────── */
+.main { padding: 2rem 2.5rem; max-width: 880px; }
+
+/* ── Section ────────────────────────────────────────────────────────────── */
+.section { margin-bottom: 4rem; scroll-margin-top: calc(var(--hdr-h) + 16px); }
+.section-hd {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  margin-bottom: 1.25rem; padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.section-icon {
+  width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-2);
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px;
+}
+.section-title { font-size: 1rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.section-desc { font-size: 0.8125rem; color: var(--text-3); margin-top: 2px; }
+
+/* ── Badges & pills ─────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center;
+  font-size: 0.6875rem; font-weight: 600;
+  padding: 1px 7px; border-radius: 10px; letter-spacing: 0.02em;
+}
+.badge--accent {
+  color: var(--accent); background: var(--accent-bg); border: 1px solid var(--accent-bd);
+}
+.slug-pill {
+  display: inline-flex; align-items: center;
+  font-size: 0.6875rem; font-weight: 500;
+  padding: 1px 7px; border-radius: 4px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-2); font-variant-numeric: tabular-nums;
+}
+.tag {
+  font-size: 0.6875rem; font-weight: 500;
+  padding: 1px 6px; border-radius: 10px; white-space: nowrap;
+}
+.tag--green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bd); }
+.tag--orange { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bd); }
+
+/* ── Featured card ──────────────────────────────────────────────────────── */
+.featured-card {
+  background: var(--surface);
+  border: 1px solid var(--accent-bd);
+  border-top: 2px solid var(--accent);
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow: hidden; margin-bottom: 0.75rem;
+}
+.card-header {
+  padding: 1rem 1.25rem 0.875rem;
+  border-bottom: 1px solid var(--border);
+}
+.card-meta { display: flex; align-items: center; gap: 0.375rem; margin-bottom: 0.4rem; }
+.card-title { font-size: 0.9375rem; font-weight: 600; color: var(--text); }
+
+/* ── Stat grid ──────────────────────────────────────────────────────────── */
+.stat-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--border);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.stat-card {
+  background: var(--surface);
+  padding: 0.875rem 0.75rem;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px;
+}
+.stat-val {
+  font-size: 1.5rem; font-weight: 700; line-height: 1; letter-spacing: -0.03em;
+  color: var(--text); font-variant-numeric: tabular-nums;
+}
+.stat-val--green { color: var(--green); }
+.stat-val--orange { color: var(--orange); }
+.stat-lbl { font-size: 0.6875rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+
+/* ── Leaderboard ────────────────────────────────────────────────────────── */
+.leaderboard { padding-bottom: 0.25rem; }
+.dev-list { display: flex; flex-direction: column; padding: 0.75rem 1.25rem; gap: 0.375rem; }
+.dev-row {
+  display: flex; align-items: flex-start; gap: 0.5rem;
+  padding: 0.5rem 0.625rem; border-radius: 6px;
+  border: 1px solid transparent;
+}
+.dev-row:hover { background: var(--bg); }
+.dev-row--top { background: var(--accent-bg); border-color: var(--accent-bd); }
+.dev-row--top:hover { background: var(--accent-bg); }
+.dev-rank { width: 24px; text-align: center; flex-shrink: 0; padding-top: 1px; }
+.rank-medal { font-size: 1rem; line-height: 1; }
+.rank-num { font-size: 0.75rem; color: var(--text-3); font-weight: 600; }
+.dev-body { flex: 1; min-width: 0; }
+.dev-name-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.5rem; margin-bottom: 5px;
+}
+.dev-name { font-size: 0.875rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dev-stats { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
+.dev-total { font-size: 0.8125rem; font-weight: 700; color: var(--text); min-width: 16px; text-align: right; font-variant-numeric: tabular-nums; }
+.dev-bar-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.dev-bar { height: 100%; border-radius: 2px; background: var(--accent); max-width: 100%; }
+
+/* ── Expand toggle ──────────────────────────────────────────────────────── */
+.expand-details { border-top: 1px solid var(--border); }
+.expand-summary {
+  display: flex; align-items: center; gap: 0.375rem;
+  padding: 0.5rem 1.25rem; cursor: pointer; list-style: none;
+  font-size: 0.8125rem; color: var(--text-3); user-select: none;
+  transition: color var(--t);
+}
+.expand-summary::-webkit-details-marker { display: none; }
+.expand-summary:hover { color: var(--text-2); }
+.expand-icon { flex-shrink: 0; transition: transform 0.15s; }
+.expand-details[open] .expand-icon { transform: rotate(90deg); }
+
+/* ── Archive list ───────────────────────────────────────────────────────── */
+.archive { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
+
+/* ── Accordion ──────────────────────────────────────────────────────────── */
+.accordion {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  transition: border-color var(--t);
+}
+.accordion:hover { border-color: var(--border-2); }
+.accordion-summary {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1rem; cursor: pointer; list-style: none;
+  user-select: none; font-size: 0.875rem;
+  transition: background var(--t);
+}
+.accordion-summary::-webkit-details-marker { display: none; }
+.accordion-summary:hover { background: var(--bg); }
+.accordion-icon { flex-shrink: 0; color: var(--text-3); transition: transform 0.15s; }
+.accordion[open] .accordion-icon { transform: rotate(90deg); }
+.accordion-title { flex: 1; color: var(--text-2); font-weight: 500; }
+.accordion .report-body { border-top: 1px solid var(--border); }
+
+/* ── Release list ───────────────────────────────────────────────────────── */
+.release-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.release-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  transition: border-color var(--t);
+}
+.release-card:hover { border-color: var(--border-2); }
+.release-card--latest {
+  border-color: var(--accent-bd);
+  border-top: 2px solid var(--accent);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.release-header {
+  padding: 1rem 1.25rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.release-meta { display: flex; align-items: center; gap: 0.375rem; margin-bottom: 0.25rem; }
+.release-ver { font-size: 0.9375rem; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.release-ver--major { color: var(--accent); font-size: 1.0625rem; }
+.release-title { font-size: 0.9375rem; font-weight: 600; color: var(--text); }
+
+/* ── Report body ────────────────────────────────────────────────────────── */
+.report-body { padding: 1.125rem 1.25rem; font-size: 0.875rem; line-height: 1.75; color: var(--text-2); }
+.report-body h1, .report-body h2, .report-body h3 { color: var(--text); font-weight: 600; line-height: 1.35; margin: 1.25rem 0 0.5rem; }
+.report-body h1 { font-size: 1rem; }
+.report-body h2 { font-size: 0.9375rem; }
+.report-body h3 { font-size: 0.875rem; }
+.report-body h1:first-child, .report-body h2:first-child, .report-body h3:first-child { margin-top: 0; }
+.report-body p { margin-bottom: 0.625rem; }
+.report-body ul, .report-body ol { padding-left: 1.375rem; margin-bottom: 0.625rem; }
+.report-body li { margin-bottom: 0.25rem; }
+.report-body strong { color: var(--text); font-weight: 600; }
+.report-body a { color: var(--accent); text-decoration: none; }
+.report-body a:hover { text-decoration: underline; }
+.report-body a:focus-visible { outline: 2px solid var(--accent); border-radius: 2px; }
+.report-body hr { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+.report-body code {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 0.8125em; background: var(--surface-2);
+  border: 1px solid var(--border); padding: 1px 5px; border-radius: 4px; color: var(--text);
+}
+.report-body pre {
+  background: var(--surface-2); border: 1px solid var(--border);
+  padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 0.875rem;
+}
+.report-body pre code { background: none; border: none; padding: 0; }
+.report-body table { border-collapse: collapse; width: 100%; margin-bottom: 0.875rem; font-size: 0.8125rem; }
+.report-body th, .report-body td { border: 1px solid var(--border); padding: 0.4rem 0.75rem; text-align: left; }
+.report-body th { background: var(--surface-2); font-weight: 600; color: var(--text); font-size: 0.75rem; letter-spacing: 0.02em; }
+.report-body tr:nth-child(even) td { background: var(--bg); }
+.report-body tr:hover td { background: var(--surface-2); }
+.report-body blockquote { border-left: 3px solid var(--border-2); padding-left: 0.875rem; color: var(--text-3); margin-bottom: 0.625rem; }
+
+/* ── Achievements preview (main page) ───────────────────────────────────── */
+.ach-prev { border-bottom: 1px solid var(--border); }
+.ach-prev-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.ach-prev-stat {
+  background: var(--surface);
+  padding: 0.875rem 0.75rem;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px;
+}
+.ach-prev-val {
+  font-size: 1.5rem; font-weight: 700; line-height: 1; letter-spacing: -0.03em;
+  color: var(--text); font-variant-numeric: tabular-nums;
+}
+.ach-prev-lbl {
+  font-size: 0.6875rem; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;
+}
+.ach-prev-chart-row {
+  display: flex; align-items: center; gap: 1.5rem;
+  padding: 1.25rem 1.25rem 0;
+}
+.ach-prev-chart-wrap { width: 140px; height: 140px; flex-shrink: 0; }
+.ach-prev-legend { display: flex; flex-direction: column; gap: 0.5rem; }
+.ach-prev-legend-item { display: flex; align-items: center; gap: 0.375rem; font-size: 0.8125rem; color: var(--text-2); }
+.ach-prev-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.ach-prev-link {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.8125rem;
+}
+.ach-prev-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
+.ach-prev-link a:hover { text-decoration: underline; }
+@media (max-width: 900px) {
+  .ach-prev-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── Empty state ────────────────────────────────────────────────────────── */
+.empty-state {
+  text-align: center; padding: 3rem 1rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text-3);
+}
+.empty-heading { font-size: 0.9375rem; font-weight: 500; color: var(--text-2); margin-bottom: 0.375rem; }
+.empty-sub { font-size: 0.8125rem; }
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid var(--border); padding: 1.25rem 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 0.75rem; color: var(--text-3);
+  background: var(--surface); margin-top: 2rem;
+}
+.footer-links { display: flex; gap: 1rem; }
+.footer-links a { color: var(--text-3); text-decoration: none; transition: color var(--t); }
+.footer-links a:hover { color: var(--text-2); }
+.footer-links a:focus-visible { outline: 2px solid var(--accent); border-radius: 2px; }
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar {
+    position: static; height: auto; border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0; display: flex; overflow-x: auto; scrollbar-width: none;
+  }
+  .sidebar::-webkit-scrollbar { display: none; }
+  .sidebar-lbl { display: none; }
+  .nav-link {
+    padding: 0.75rem 0.875rem; border-left: none;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .nav-link.active { border-bottom-color: var(--accent); border-left-color: transparent; background: transparent; }
+  .nav-count { display: none; }
+  .main { padding: 1.25rem 1rem; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .dev-stats { display: none; }
+  .hdr-date { display: none; }
+  .footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+}
+@media (max-width: 480px) {
+  .hdr-org { display: none; }
+  .hdr-sep { display: none; }
+}
+@media print {
+  .hdr, .sidebar { display: none; }
+  .layout { display: block; }
+  .section { page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<header class="hdr" role="banner">
+  <div class="hdr-logo">
+    <div class="hdr-mark" aria-hidden="true">MJ</div>
+    Release Notes
+  </div>
+  <div class="hdr-space"></div>
+  <time class="hdr-date" datetime="2026-05-23T18:29:15.483Z">May 23, 2026</time>
+</header>
+
+<main class="main" id="main-content">
+  
+<section class="section" id="section-releases" aria-labelledby="section-title-releases">
+  <header class="section-hd">
+    <div class="section-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M7.5 1.5C7.5 1.5 12 3.5 12 7.5a4.5 4.5 0 01-9 0c0-4 4.5-6 4.5-6z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="7.5" cy="7.5" r="1.25" fill="currentColor"/></svg></div>
+    <div>
+      <h2 class="section-title" id="section-title-releases">Release Notes</h2>
+      <p class="section-desc">Full versioned changelog, newest first</p>
+    </div>
+  </header>
+  
+<div class="release-list" role="list">
+  
+<article class="release-card release-card--latest" role="listitem">
+  <div class="release-header">
+    <div class="release-meta">
+      <span class="release-ver release-ver--major">2026-05-23</span>
+      <span class="badge badge--accent">Latest</span>
+    </div>
+    <h3 class="release-title">Release Notes — 2026-05-23</h3>
+  </div>
+  <div class="report-body"><h1>Release Notes — 2026-05-23</h1>
+<p><strong>Period:</strong> 2026-05-18 → 2026-05-23</p>
+<p>29 PR(s) merged to master across 3 repo(s) — 19 hotfix(es), 10 planned release(s).</p>
+<hr>
+<h2>Hotfixes</h2>
+<h3>Campaign Approval for PCL</h3>
+<p>Restored campaign approval functionality for PCL by uncommenting the approval handler call that had been disabled, unblocking the PCL approval flow.</p>
+<h3>Remove Statara Partitions job</h3>
+<p>Removed the Statara Partitions scheduled job from the Helm configuration to clean up deprecated infrastructure that was no longer needed.</p>
+<h3>Add new internal service env to production</h3>
+<p>Added a missing environment variable for a new internal service to the production Helm configuration so the service can start correctly in the production environment.</p>
+<h3>Add type field to all campaign order report queries for Demo Campaign</h3>
+<p>Added the missing <code>type</code> field to all campaign order report GraphQL queries, fixing Demo Campaign report data loading.</p>
+<h3>Fix Demo Campaign</h3>
+<p>Updated the campaign order query resolver to fix an issue preventing Demo Campaign data from loading correctly.</p>
+<h3>Remove Audience Type dropdown from Demograph reach panel</h3>
+<p>Removed the Audience Type dropdown from the Demograph reach panel because it was functionally cosmetic — none of the underlying GraphQL mutations accept or return an <code>audienceType</code> field — and caused contradictory UI state when toggled. The reach gauge now always reflects the device count, matching the persisted <code>reachCount</code> and the 10,000-device submission guard.</p>
+<h3>Removed Salesforce Rate-Limit</h3>
+<p>Removed Salesforce API rate-limiting logic to resolve throttling issues that were causing Salesforce requests to fail under load.</p>
+<h3>Salesforce Additional Fields in PCL</h3>
+<p>Added optional Salesforce fields (<code>LeadSource</code>, <code>Serviced_Account__c</code>, <code>RecordTypeId</code>, <code>Deal_Signatory__c</code>, <code>Cpm__c</code>) to the GQL schema for the PCL opportunity creation flow, forwarding them to Salesforce without breaking existing callers.</p>
+<h3>Fix reprocess button not process on cluster</h3>
+<p>Fixed the campaign reprocess button failing to trigger processing in the cluster environment.</p>
+<h3>For reprocess button remove the prisma1 query</h3>
+<p>Simplified the campaign tools reprocess workflow by removing all logic for the legacy <code>getLogs</code> job, focusing the processor on display campaigns, events, and consolidated S3 reports only.</p>
+<h3>Added Salesforce Fields and CPM</h3>
+<p>Rewired the Create Salesforce Opportunity flow on Campaign Requestor to properly resolve Channel-Partner account IDs, calculate CPM-based line item pricing, add a configurable Months input, and format the opportunity name from the campaign form. Also added a &quot;Skip PandaDoc&quot; toggle on the Campaign Order Queue approval modal and surfaced the Salesforce Opportunity link in the review summary.</p>
+<h3>Salesforce Additional Fields in PCL (re-apply + new fields)</h3>
+<p>Re-applied the previously reverted Salesforce additional fields change and extended it with additional PCL flow fields (<code>Deal_Signatory__c</code>, <code>Contract_Type__c</code>, <code>Number_of_months__c</code>, <code>ServiceDate</code>, <code>Service_End_Datee__c</code>, <code>Cpm__c</code>). All additions are optional so existing callers are unaffected.</p>
+<h3>Removed Console Log</h3>
+<p>Removed leftover console log statements from the codebase.</p>
+<h3>Fix page flickers after clicking task link</h3>
+<p>Added defensive coding to eliminate page flickers when navigating to task links or refreshing task detail pages.</p>
+<h3>Prevent 401 on first load of Widget Dev page</h3>
+<p>Fixed widget manager components on the Widget Development page firing API calls before a bearer token was available, producing silent 401 errors on every page load. Gated all queries on token presence, invalidate cached queries immediately after Connect, and surface auth failures as a Radix Toast notification.</p>
+<h3>Unblock Ingest button for fixed-template adapters</h3>
+<p>Unblocked the Ingest button for Jane, Shopify, and Dutchie datasets, which were always triggering a spurious &quot;column mapping required&quot; warning because their schemas are backend-dictated and cannot have column mappings configured. Also fixed a backend bug where a failed manual ingestion against a scheduled config would silently kill the scheduled-job chain for non-Nexxen adapters.</p>
+<h3>Pin Google Maps API to v3.64 to restore HeatmapLayer</h3>
+<p>Five dashboard pages were crashing with a white screen after Google silently removed <code>HeatmapLayer</code> from Maps JS API v3.65, which the shared loader was picking up via its <code>weekly</code> version channel. Pinned the loader to <code>v3.64</code> to restore all five affected heatmap pages while a migration to deck.gl is planned.</p>
+<h3>Fix publish pipeline - address out-of-memory, resume from remaining chunk to be upload</h3>
+<p>Hardened the Statara/Nexxen publish pipeline to handle 6+ GB audience files without crashing: fixed storage leaks on failed attempts, added a Redis-backed resume-from-checkpoint mechanism that survives pod restarts, scoped temp-file sweeps per job to prevent cross-replica file deletion races, persisted Nexxen taxonomy IDs across retries to avoid duplicate taxonomies, added cooperative-cancel endpoints for operators, and hardened the SFTP pool with a stall watchdog and unhealthy-connection recycling.</p>
+<h3>Restructure task management route to avoid flickering</h3>
+<p>The entire Task Management section was flickering on page refresh because the <code>/tasks</code> route was recreated on every render, causing React Router to repeatedly remount the component tree. Stabilized the route reference with <code>useCallback</code> keyed on <code>currentUser</code>, and also standardized loading spinners and browser tab title updates across Task Details and Project Details.</p>
+<hr>
+<h2>Planned Releases</h2>
+<h3>Add sync modes across data-factory v1 + v2 UIs with adapter-managed defaults</h3>
+<p>Added per-dataset Sync Mode (Full Refresh / Incremental) and Write Mode (Append, Overwrite, Append+Dedup, Overwrite+Dedup) configuration to both the Data Factory v1 and v2 UIs. Adapter-managed defaults handle primary keys, cursor columns, and dedup strategy automatically so users only make the two decisions that matter. Also added a column-mapping warning before ingestion fires on unmapped datasets, and ClickHouse data wipe on dataset deletion.</p>
+<h3>Campaign Requestor Enhancements and Line Item Management</h3>
+<p>Added bulk line item management with AI-powered column mapping, bulk targeting type and audience tabs, Campaign Deal IDs bulk-apply, Nexxen segment list API integration, and individual line item save functionality to the Campaign Requestor.</p>
+<h3>Nexxen Integration Fixes and Data Factory Cleanup</h3>
+<p>Reverted unsupported <code>includeSegmentId</code> Nexxen API changes (Nexxen only supports <code>behavioralSegmentSetId</code> and <code>retargetingSegmentId</code>), fixed insertion-order DTO types, removed data factory sync mode configuration added in error, cleaned up ClickHouse destination defaults, and added a repair-statara-partitions job template.</p>
+<h3>NexxenCredentialForwardFix</h3>
+<p>Stopped forwarding Nexxen credentials (<code>clientId</code>, <code>clientSecret</code>, <code>nexxenApiUrl</code>) from the data factory service to external-service, where they were being unnecessarily exposed.</p>
+<h3>Revert &quot;[HOTFIX] Salesforce Additional Fields in PCL&quot;</h3>
+<p>Reverted the initial Salesforce Additional Fields in PCL change after issues were discovered post-merge; a corrected version was re-applied in a subsequent PR.</p>
+<h3>Multiple Transactions Fix</h3>
+<p>Fixed the campaign transaction table showing duplicate entries by filtering out parent-campaign-level transactions, ensuring only the correct transaction records are displayed.</p>
+<h3>Guard xAxis access when Google data is empty</h3>
+<p>Fixed a white-screen crash on the Paid Search (Google) module for accounts with no data by adding null and undefined guards around <code>xAxis</code> and <code>byDate</code> property accesses, and covered the empty-data paths with enzyme tests.</p>
+<h3>Fix Paid Search Missing Dates</h3>
+<p>Fixed five compounding bugs that had frozen paid search reporting at 2026-05-07: stale unique-key conflicts preventing new date rows from saving, campaigns without an end date pulling 14 years of data and timing out, a missing null guard causing crashes on empty API responses, a chunk slice off-by-one dropping one record per thousand, and <code>concat(false)</code> polluting the consolidated date array. All fixes applied across both the Prisma v1 and Prisma 6 job paths.</p>
+<h3>Stop ingestion scheduler infinite loop</h3>
+<p>Fixed two interacting bugs in <code>DataIngestionConsumer</code> that caused scheduled ingestion jobs to re-arm every few milliseconds instead of waiting for the configured interval, hammering external DSP APIs with production credentials. The safety-net now checks all active job states, and zero-delay values are clamped to a full sync-frequency interval so a cron-style schedule never fires immediately.</p>
+<h3>Fix paid-search-prisma6 crashes: empty campaigns and Decimal aggregation</h3>
+<p>Fixed two production bugs in the paid-search-prisma6 job: campaigns that belonged to a different org&#39;s summary were no longer reconnected during update, causing a crash when dereferencing the result array; and Prisma 6&#39;s <code>Decimal</code> return type was being string-concatenated instead of numerically summed, producing malformed channel total values that failed Prisma&#39;s own decimal validation.</p>
+<hr>
+<p><em>Generated by ReleaseNotesAgent</em></p>
+</div>
+</article>
+</div>
+</section>
+</main>
+<footer class="footer" role="contentinfo">
+  <span>MediaJel &middot; Release Notes &middot; Generated May 23, 2026</span>
+  <nav class="footer-links" aria-label="External links">
+    <a href="https://github.com/MediaJel/med-relations" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </nav>
+</footer>
+
+<script>
+(function () {
+  // Theme toggle
+  var btn = document.getElementById('theme-toggle');
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    if (btn) {
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+  }
+  // Enable transitions after initial paint to avoid flash
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      document.documentElement.classList.add('theme-ready');
+    });
+  });
+  if (btn) {
+    btn.addEventListener('click', function () {
+      var current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
+    // Set initial aria-label
+    var initial = document.documentElement.getAttribute('data-theme') || 'dark';
+    btn.setAttribute('aria-label', initial === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+
+  // Active nav highlight
+  var sections = document.querySelectorAll('.section');
+  var links = document.querySelectorAll('.nav-link');
+  function setActive(id) {
+    links.forEach(function (l) { l.classList.toggle('active', l.dataset.section === id); });
+  }
+  if (!('IntersectionObserver' in window)) {
+    if (sections[0]) setActive(sections[0].id.replace('section-', ''));
+    return;
+  }
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) setActive(e.target.id.replace('section-', '')); });
+  }, { rootMargin: '-20% 0px -65% 0px' });
+  sections.forEach(function (s) { obs.observe(s); });
+  if (sections[0]) setActive(sections[0].id.replace('section-', ''));
+})();
+</script>
+</body>
+</html>

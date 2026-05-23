@@ -73,6 +73,48 @@ async function readHtmlReports(category) {
     });
 }
 
+async function parseLatestAchievementHTML() {
+  const dir = join(REPORTS_DIR, 'achievements');
+  let files;
+  try {
+    files = await readdir(dir);
+  } catch {
+    return null;
+  }
+  const htmlFiles = files
+    .filter(f => extname(f) === '.html' && f !== '.gitkeep')
+    .sort()
+    .reverse();
+  if (htmlFiles.length === 0) return null;
+
+  let content;
+  try {
+    content = await readFile(join(dir, htmlFiles[0]), 'utf-8');
+  } catch {
+    return null;
+  }
+
+  const stats = {};
+  const statCardRe = /<div class="stat-label">([^<]+)<\/div>\s*<div class="stat-value[^"]*">([^<]+)<\/div>/g;
+  let m;
+  while ((m = statCardRe.exec(content)) !== null) {
+    stats[m[1].trim()] = m[2].trim();
+  }
+
+  const bugM = content.match(/var bugCount = (\d+)/);
+  const featM = content.match(/var featCount = (\d+)/);
+  const enhM = content.match(/var enhCount = (\d+)/);
+
+  return {
+    stats,
+    chart: {
+      bugCount: bugM ? parseInt(bugM[1], 10) : 0,
+      featCount: featM ? parseInt(featM[1], 10) : 0,
+      enhCount: enhM ? parseInt(enhM[1], 10) : 0,
+    },
+  };
+}
+
 function esc(str) {
   return str
     .replace(/&/g, '&amp;')
@@ -220,11 +262,57 @@ function renderPerformanceSection(reports) {
   return `${featured}${archived ? `<div class="archive">${archived}</div>` : ''}`;
 }
 
-function renderAchievementsSection(reports) {
+function renderAchievementsPreview(latestStats) {
+  if (!latestStats) return '';
+  const { stats, chart } = latestStats;
+
+  const prs = esc(stats['PRs Merged'] || '—');
+  const added = esc(stats['Lines Added'] || '—');
+  const removed = esc(stats['Lines Removed'] || '—');
+  const hotfixes = esc(stats['Hotfixes'] || '—');
+
+  const { bugCount, featCount, enhCount } = chart;
+  const total = bugCount + featCount + enhCount;
+
+  const statGrid = `
+<div class="ach-prev-stats">
+  <div class="ach-prev-stat"><span class="ach-prev-val">${prs}</span><span class="ach-prev-lbl">PRs Merged</span></div>
+  <div class="ach-prev-stat"><span class="ach-prev-val" style="color:var(--green)">${added}</span><span class="ach-prev-lbl">Lines Added</span></div>
+  <div class="ach-prev-stat"><span class="ach-prev-val" style="color:var(--orange)">${removed}</span><span class="ach-prev-lbl">Lines Removed</span></div>
+  <div class="ach-prev-stat"><span class="ach-prev-val" style="color:#f59e0b">${hotfixes}</span><span class="ach-prev-lbl">Hotfixes</span></div>
+</div>`;
+
+  const chartBlock = total > 0 ? `
+<div class="ach-prev-chart-row">
+  <div class="ach-prev-chart-wrap">
+    <canvas id="achPrevDonut" width="140" height="140"></canvas>
+  </div>
+  <div class="ach-prev-legend">
+    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#f87171"></span><span>Bug Fixes — ${bugCount}</span></div>
+    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#818cf8"></span><span>New Features — ${featCount}</span></div>
+    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#34d399"></span><span>Enhancements — ${enhCount}</span></div>
+  </div>
+</div>
+<script>
+(function(){
+  if(typeof Chart==='undefined')return;
+  var ctx=document.getElementById('achPrevDonut');
+  if(!ctx)return;
+  new Chart(ctx.getContext('2d'),{type:'doughnut',data:{labels:['Bug Fixes','New Features','Enhancements'],datasets:[{data:[${bugCount},${featCount},${enhCount}],backgroundColor:['#f87171','#818cf8','#34d399'],borderColor:'var(--surface)',borderWidth:3,hoverOffset:6}]},options:{responsive:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+' ('+Math.round(c.raw/${total}*100)+'%)';}}}}}});
+})();
+</script>` : '';
+
+  const viewLink = `<div class="ach-prev-link"><a href="achievements/">View full achievements →</a></div>`;
+
+  return `<div class="ach-prev">${statGrid}${chartBlock}${viewLink}</div>`;
+}
+
+function renderAchievementsSection(reports, latestStats) {
+  const preview = renderAchievementsPreview(latestStats);
   const latest = reports[0];
   const featured = renderFeaturedCard(
     latest,
-    `<div class="report-body">${latest.html}</div>`,
+    `${preview}<div class="report-body">${latest.html}</div>`,
   );
   const archived = reports.slice(1).map(r => renderAccordion(r)).join('');
   return `${featured}${archived ? `<div class="archive">${archived}</div>` : ''}`;
@@ -251,10 +339,10 @@ function renderReleasesSection(reports) {
 </div>`;
 }
 
-function renderSection(s, reports) {
+function renderSection(s, reports, extra) {
   const renderers = {
     performance: renderPerformanceSection,
-    achievements: renderAchievementsSection,
+    achievements: (rpts) => renderAchievementsSection(rpts, extra),
     releases: renderReleasesSection,
   };
   const content = reports.length === 0
@@ -304,7 +392,7 @@ function getCSS() {
 }
 
 html[data-theme="dark"] {
-  --bg:       #0f172a;
+  --bg:       #0f1117;
   --surface:  #1e293b;
   --surface-2:#1e293b;
   --border:   #334155;
@@ -625,6 +713,44 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .report-body tr:hover td { background: var(--surface-2); }
 .report-body blockquote { border-left: 3px solid var(--border-2); padding-left: 0.875rem; color: var(--text-3); margin-bottom: 0.625rem; }
 
+/* ── Achievements preview (main page) ───────────────────────────────────── */
+.ach-prev { border-bottom: 1px solid var(--border); }
+.ach-prev-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.ach-prev-stat {
+  background: var(--surface);
+  padding: 0.875rem 0.75rem;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px;
+}
+.ach-prev-val {
+  font-size: 1.5rem; font-weight: 700; line-height: 1; letter-spacing: -0.03em;
+  color: var(--text); font-variant-numeric: tabular-nums;
+}
+.ach-prev-lbl {
+  font-size: 0.6875rem; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;
+}
+.ach-prev-chart-row {
+  display: flex; align-items: center; gap: 1.5rem;
+  padding: 1.25rem 1.25rem 0;
+}
+.ach-prev-chart-wrap { width: 140px; height: 140px; flex-shrink: 0; }
+.ach-prev-legend { display: flex; flex-direction: column; gap: 0.5rem; }
+.ach-prev-legend-item { display: flex; align-items: center; gap: 0.375rem; font-size: 0.8125rem; color: var(--text-2); }
+.ach-prev-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.ach-prev-link {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.8125rem;
+}
+.ach-prev-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
+.ach-prev-link a:hover { text-decoration: underline; }
+@media (max-width: 900px) {
+  .ach-prev-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
 /* ── Empty state ────────────────────────────────────────────────────────── */
 .empty-state {
   text-align: center; padding: 3rem 1rem;
@@ -772,7 +898,7 @@ function getAchievementsJS() {
 
 // ─── HTML assembly ────────────────────────────────────────────────────────────
 
-function generateHTML(data, htmlAchievementCount) {
+function generateHTML(data, htmlAchievementCount, latestStats) {
   const buildDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
@@ -786,7 +912,12 @@ function generateHTML(data, htmlAchievementCount) {
 
   const releasesMeta = SECTIONS.find(s => s.key === 'releases');
   const achievementsMeta = SECTIONS.find(s => s.key === 'achievements');
-  const sections = SECTIONS.map(s => renderSection(s, data[s.key])).join('\n');
+  const sections = SECTIONS.map(s =>
+    renderSection(s, data[s.key], s.key === 'achievements' ? latestStats : undefined),
+  ).join('\n');
+  const chartJsCDN = latestStats
+    ? '<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"><\/script>'
+    : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -798,6 +929,7 @@ function generateHTML(data, htmlAchievementCount) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>${getCSS()}</style>
+  ${chartJsCDN}
   <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
 </head>
 <body>
@@ -1111,7 +1243,11 @@ async function build() {
   for (const s of SECTIONS) {
     console.log(`  ${s.label}: ${data[s.key].length} report(s)`);
   }
-  const html = generateHTML(data, 0);
+  const latestStats = await parseLatestAchievementHTML();
+  if (latestStats) {
+    console.log('  Achievements preview stats parsed from latest HTML report');
+  }
+  const html = generateHTML(data, 0, latestStats);
   await writeFile(`${DIST_DIR}/index.html`, html, 'utf-8');
   console.log(`\n✓  Built dist/index.html (${html.length.toLocaleString()} bytes)`);
 
@@ -1136,7 +1272,7 @@ async function build() {
   console.log(`✓  Built dist/achievements/index.html (${achievementsHtml.length.toLocaleString()} bytes)`);
 
   // Re-write index.html with correct HTML report count for the sidebar badge
-  const htmlFinal = generateHTML(data, htmlReports.length);
+  const htmlFinal = generateHTML(data, htmlReports.length, latestStats);
   await writeFile(`${DIST_DIR}/index.html`, htmlFinal, 'utf-8');
 }
 
