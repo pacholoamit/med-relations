@@ -41,3 +41,8 @@ open dist/index.html
 | `ReleaseNotesAgent` | On demand | API call (deployment PR number) |
 
 See `docs/routine-schemas.md` for Paperclip routine configuration and `docs/trigger-payload.md` for the ReleaseNotesAgent trigger spec.
+
+## Links
+
+- **Repo:** https://github.com/MediaJel/med-relations
+- **Live site:** https://mediajel.github.io/med-relations/
