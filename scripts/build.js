@@ -725,6 +725,7 @@ function generateHTML(data) {
   <span class="nav-count" aria-hidden="true">${data[s.key].length}</span>
 </a>`).join('\n');
 
+  const releasesMeta = SECTIONS.find(s => s.key === 'releases');
   const sections = SECTIONS.map(s => renderSection(s, data[s.key])).join('\n');
 
   return `<!DOCTYPE html>
@@ -760,10 +761,76 @@ function generateHTML(data) {
   <nav class="sidebar" aria-label="Page sections">
     <p class="sidebar-lbl" aria-hidden="true">Sections</p>
     ${navItems}
+    <p class="sidebar-lbl" style="margin-top:0.75rem" aria-hidden="true">Pages</p>
+    <a href="/releases/" class="nav-link" aria-label="Dedicated release notes page">
+      <span class="nav-icon">${releasesMeta.icon}</span>
+      <span class="nav-label">Release Notes ↗</span>
+    </a>
   </nav>
   <div>
     <main class="main" id="main-content">
       ${sections}
+    </main>
+    <footer class="footer" role="contentinfo">
+      <span>MediaJel Relations &middot; Generated ${buildDate}</span>
+      <nav class="footer-links" aria-label="External links">
+        <a href="https://github.com/MediaJel/med-relations" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/MediaJel/med-relations/actions" target="_blank" rel="noopener noreferrer">Actions</a>
+        <a href="https://github.com/MediaJel/med-relations/tree/main/reports" target="_blank" rel="noopener noreferrer">Reports</a>
+      </nav>
+    </footer>
+  </div>
+</div>
+
+<script>${getJS()}</script>
+</body>
+</html>`;
+}
+
+function generateReleasesHTML(releases) {
+  const buildDate = new Date().toLocaleDateString('en-US', {
+    year: 'numeric', month: 'long', day: 'numeric',
+  });
+  const releasesMeta = SECTIONS.find(s => s.key === 'releases');
+  const releasesSection = renderSection(releasesMeta, releases);
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Release Notes — MediaJel Relations</title>
+  <meta name="description" content="Full versioned changelog for the MediaJel engineering team, newest first.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>${getCSS()}</style>
+</head>
+<body>
+
+<header class="hdr" role="banner">
+  <a href="../" class="hdr-logo" aria-label="MediaJel Relations home">
+    <div class="hdr-mark" aria-hidden="true">MJ</div>
+    Relations
+  </a>
+  <span class="hdr-sep" aria-hidden="true">/</span>
+  <span class="hdr-org">Release Notes</span>
+  <div class="hdr-space"></div>
+  <time class="hdr-date" datetime="${new Date().toISOString()}">${buildDate}</time>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" aria-label="Page navigation">
+    <p class="sidebar-lbl" aria-hidden="true">Navigation</p>
+    <a href="../" class="nav-link" aria-label="Back to all reports">
+      <span class="nav-icon">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M9.5 3.5L5.5 7.5L9.5 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="nav-label">← All reports</span>
+    </a>
+  </nav>
+  <div>
+    <main class="main" id="main-content">
+      ${releasesSection}
     </main>
     <footer class="footer" role="contentinfo">
       <span>MediaJel Relations &middot; Generated ${buildDate}</span>
@@ -793,6 +860,11 @@ async function build() {
   const html = generateHTML(data);
   await writeFile(`${DIST_DIR}/index.html`, html, 'utf-8');
   console.log(`\n✓  Built dist/index.html (${html.length.toLocaleString()} bytes)`);
+
+  await mkdir(join(DIST_DIR, 'releases'), { recursive: true });
+  const releasesHtml = generateReleasesHTML(data.releases);
+  await writeFile(join(DIST_DIR, 'releases', 'index.html'), releasesHtml, 'utf-8');
+  console.log(`✓  Built dist/releases/index.html (${releasesHtml.length.toLocaleString()} bytes)`);
 }
 
 build().catch(err => {
