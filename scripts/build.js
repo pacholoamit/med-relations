@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readdir, readFile, writeFile, mkdir } from 'fs/promises';
+import { readdir, readFile, writeFile, mkdir, copyFile } from 'fs/promises';
 import { join, basename, extname, resolve } from 'path';
 import { marked } from 'marked';
 
@@ -52,6 +52,25 @@ async function readReports(category) {
       return { slug, title, html, raw };
     }),
   );
+}
+
+async function readHtmlReports(category) {
+  const dir = join(REPORTS_DIR, category);
+  let files;
+  try {
+    files = await readdir(dir);
+  } catch {
+    return [];
+  }
+  return files
+    .filter(f => extname(f) === '.html' && f !== '.gitkeep')
+    .sort()
+    .reverse()
+    .map(file => {
+      const slug = basename(file, '.html');
+      const title = `Week ${slug}`;
+      return { slug, title, file };
+    });
 }
 
 function esc(str) {
@@ -711,9 +730,49 @@ function getJS() {
 `;
 }
 
+// ─── Achievements page JS ─────────────────────────────────────────────────────
+
+function getAchievementsJS() {
+  return `
+(function () {
+  var btns = document.querySelectorAll('.ach-week-btn');
+  var frames = document.querySelectorAll('.ach-frame');
+  var titleEl = document.getElementById('ach-viewer-title');
+
+  function show(slug) {
+    btns.forEach(function (b) { b.classList.toggle('active', b.dataset.slug === slug); });
+    frames.forEach(function (f) {
+      var visible = f.dataset.slug === slug;
+      f.style.display = visible ? 'block' : 'none';
+      f.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    });
+    if (titleEl) {
+      var btn = document.querySelector('.ach-week-btn[data-slug="' + slug + '"]');
+      titleEl.textContent = btn ? btn.textContent.trim() : slug;
+    }
+    try { history.replaceState(null, '', '#' + slug); } catch (e) {}
+  }
+
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () { show(b.dataset.slug); });
+    b.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(b.dataset.slug); }
+    });
+  });
+
+  // Honour URL hash on load
+  var hash = location.hash.replace('#', '');
+  var initial = (hash && document.querySelector('.ach-week-btn[data-slug="' + hash + '"]'))
+    ? hash
+    : (btns[0] ? btns[0].dataset.slug : null);
+  if (initial) show(initial);
+})();
+`;
+}
+
 // ─── HTML assembly ────────────────────────────────────────────────────────────
 
-function generateHTML(data) {
+function generateHTML(data, htmlAchievementCount) {
   const buildDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
@@ -726,6 +785,7 @@ function generateHTML(data) {
 </a>`).join('\n');
 
   const releasesMeta = SECTIONS.find(s => s.key === 'releases');
+  const achievementsMeta = SECTIONS.find(s => s.key === 'achievements');
   const sections = SECTIONS.map(s => renderSection(s, data[s.key])).join('\n');
 
   return `<!DOCTYPE html>
@@ -762,6 +822,10 @@ function generateHTML(data) {
     <p class="sidebar-lbl" aria-hidden="true">Sections</p>
     ${navItems}
     <p class="sidebar-lbl" style="margin-top:0.75rem" aria-hidden="true">Pages</p>
+    <a href="achievements/" class="nav-link" aria-label="Dedicated achievements page (${htmlAchievementCount} HTML reports)">
+      <span class="nav-icon">${achievementsMeta.icon}</span>
+      <span class="nav-label">Achievements ↗</span>
+    </a>
     <a href="releases/" class="nav-link" aria-label="Dedicated release notes page">
       <span class="nav-icon">${releasesMeta.icon}</span>
       <span class="nav-label">Release Notes ↗</span>
@@ -831,6 +895,213 @@ function generateReleasesHTML(releases) {
 </html>`;
 }
 
+function generateAchievementsHTML(mdReports, htmlReports) {
+  const buildDate = new Date().toLocaleDateString('en-US', {
+    year: 'numeric', month: 'long', day: 'numeric',
+  });
+  const achievementsMeta = SECTIONS.find(s => s.key === 'achievements');
+  const hasHtml = htmlReports.length > 0;
+
+  const weekList = hasHtml
+    ? htmlReports.map((r, idx) => `
+<button
+  class="ach-week-btn${idx === 0 ? ' active' : ''}"
+  data-slug="${esc(r.slug)}"
+  aria-label="View ${esc(r.title)}"
+  tabindex="0"
+>
+  <span class="ach-week-slug">${esc(r.slug)}</span>
+  <span class="ach-week-label">${esc(r.title)}</span>
+  ${idx === 0 ? '<span class="badge badge--accent" aria-hidden="true">Latest</span>' : ''}
+</button>`).join('\n')
+    : '<p class="ach-empty-list">No HTML reports yet.</p>';
+
+  const iframes = hasHtml
+    ? htmlReports.map((r, idx) => `
+<iframe
+  class="ach-frame"
+  data-slug="${esc(r.slug)}"
+  src="./reports/${esc(r.file)}"
+  title="${esc(r.title)}"
+  loading="lazy"
+  style="display:${idx === 0 ? 'block' : 'none'}"
+  aria-hidden="${idx === 0 ? 'false' : 'true'}"
+></iframe>`).join('\n')
+    : `<div class="ach-viewer-empty">
+  <div class="empty-state" role="status">
+    <p class="empty-heading">No HTML reports yet</p>
+    <p class="empty-sub">HTML achievement reports will appear here once the AchievementsAgent publishes them.</p>
+  </div>
+</div>`;
+
+  const mdSection = mdReports.length > 0
+    ? `
+<section class="ach-legacy" aria-label="Legacy markdown reports">
+  <h2 class="ach-legacy-title">Legacy Reports (Markdown)</h2>
+  <div class="archive">
+    ${mdReports.map(r => renderAccordion(r)).join('\n')}
+  </div>
+</section>`
+    : '';
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Achievements — MediaJel Relations</title>
+  <meta name="description" content="Weekly achievement reports for the MediaJel engineering team.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+${getCSS()}
+
+/* ── Achievements page layout ─────────────────────────────────────────── */
+.ach-layout {
+  display: flex;
+  min-height: calc(100vh - var(--hdr-h));
+}
+.ach-panel {
+  width: var(--side-w);
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 1.25rem 0;
+  position: sticky;
+  top: var(--hdr-h);
+  height: calc(100vh - var(--hdr-h));
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.ach-panel-lbl {
+  font-size: 0.6875rem; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-3); padding: 0 1rem 0.625rem;
+}
+.ach-week-btn {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 0.375rem;
+  width: 100%; padding: 0.625rem 1rem;
+  background: none; border: none; border-left: 2px solid transparent;
+  text-align: left; cursor: pointer; color: var(--text-2);
+  font-size: 0.875rem; font-family: inherit;
+  transition: background var(--t), color var(--t), border-color var(--t);
+}
+.ach-week-btn:hover { background: var(--bg); color: var(--text); }
+.ach-week-btn.active {
+  color: var(--accent); background: var(--accent-bg);
+  border-left-color: var(--accent);
+}
+.ach-week-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.ach-week-slug {
+  font-size: 0.6875rem; font-weight: 500; font-variant-numeric: tabular-nums;
+  padding: 1px 7px; border-radius: 4px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-2);
+}
+.ach-week-btn.active .ach-week-slug {
+  background: var(--accent-bg); border-color: var(--accent-bd); color: var(--accent);
+}
+.ach-week-label { flex: 1; font-weight: 500; }
+.ach-empty-list { padding: 0.75rem 1rem; font-size: 0.8125rem; color: var(--text-3); }
+
+.ach-viewer-wrap {
+  flex: 1; display: flex; flex-direction: column;
+  min-height: calc(100vh - var(--hdr-h));
+}
+.ach-viewer-hd {
+  padding: 1rem 1.5rem 0.875rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky; top: var(--hdr-h); z-index: 10;
+  display: flex; align-items: center; gap: 0.625rem;
+}
+.ach-viewer-icon {
+  width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-2);
+  display: flex; align-items: center; justify-content: center;
+}
+.ach-viewer-title { font-size: 0.9375rem; font-weight: 600; color: var(--text); }
+.ach-frame {
+  width: 100%; flex: 1;
+  border: none;
+  min-height: calc(100vh - var(--hdr-h) - 57px);
+}
+.ach-viewer-empty { padding: 2.5rem; }
+.ach-legacy {
+  padding: 2rem 2.5rem;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.ach-legacy-title {
+  font-size: 0.875rem; font-weight: 600; color: var(--text-3);
+  letter-spacing: 0.04em; text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+/* ── Responsive (achievements) ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .ach-layout { flex-direction: column; }
+  .ach-panel {
+    position: static; height: auto; border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0; display: flex; overflow-x: auto; scrollbar-width: none;
+    width: 100%;
+  }
+  .ach-panel::-webkit-scrollbar { display: none; }
+  .ach-panel-lbl { display: none; }
+  .ach-week-btn {
+    padding: 0.75rem 0.875rem; border-left: none;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap; flex-shrink: 0; flex-wrap: nowrap;
+  }
+  .ach-week-btn.active { border-bottom-color: var(--accent); border-left-color: transparent; background: transparent; color: var(--accent); }
+  .ach-legacy { padding: 1.25rem 1rem; }
+}
+  </style>
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+<body>
+
+<header class="hdr" role="banner">
+  <a href="../" class="hdr-logo" aria-label="MediaJel Relations home">
+    <div class="hdr-mark" aria-hidden="true">MJ</div>
+    Relations
+  </a>
+  <span class="hdr-sep" aria-hidden="true">/</span>
+  <span class="hdr-org">Achievements</span>
+  <div class="hdr-space"></div>
+  <time class="hdr-date" datetime="${new Date().toISOString()}">${buildDate}</time>
+  <button class="theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Toggle light/dark mode">
+    <svg class="theme-icon theme-icon--sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <svg class="theme-icon theme-icon--moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</header>
+
+<div class="ach-layout">
+  <nav class="ach-panel" aria-label="Achievement reports">
+    <p class="ach-panel-lbl" aria-hidden="true">Weekly Reports</p>
+    ${weekList}
+  </nav>
+  <div class="ach-viewer-wrap">
+    <div class="ach-viewer-hd">
+      <div class="ach-viewer-icon" aria-hidden="true">${achievementsMeta.icon}</div>
+      <span class="ach-viewer-title" id="ach-viewer-title">${hasHtml ? esc(htmlReports[0].title) : 'Achievements'}</span>
+    </div>
+    ${iframes}
+    ${mdSection}
+  </div>
+</div>
+
+<script>
+${getJS()}
+${getAchievementsJS()}
+</script>
+</body>
+</html>`;
+}
+
 // ─── Entry point ──────────────────────────────────────────────────────────────
 
 async function build() {
@@ -840,7 +1111,7 @@ async function build() {
   for (const s of SECTIONS) {
     console.log(`  ${s.label}: ${data[s.key].length} report(s)`);
   }
-  const html = generateHTML(data);
+  const html = generateHTML(data, 0);
   await writeFile(`${DIST_DIR}/index.html`, html, 'utf-8');
   console.log(`\n✓  Built dist/index.html (${html.length.toLocaleString()} bytes)`);
 
@@ -848,6 +1119,25 @@ async function build() {
   const releasesHtml = generateReleasesHTML(data.releases);
   await writeFile(join(DIST_DIR, 'releases', 'index.html'), releasesHtml, 'utf-8');
   console.log(`✓  Built dist/releases/index.html (${releasesHtml.length.toLocaleString()} bytes)`);
+
+  // Build achievements page
+  const htmlReports = await readHtmlReports('achievements');
+  console.log(`  Achievements (HTML): ${htmlReports.length} report(s)`);
+
+  await mkdir(join(DIST_DIR, 'achievements', 'reports'), { recursive: true });
+  for (const r of htmlReports) {
+    const src = join(REPORTS_DIR, 'achievements', r.file);
+    const dst = join(DIST_DIR, 'achievements', 'reports', r.file);
+    await copyFile(src, dst);
+  }
+
+  const achievementsHtml = generateAchievementsHTML(data.achievements, htmlReports);
+  await writeFile(join(DIST_DIR, 'achievements', 'index.html'), achievementsHtml, 'utf-8');
+  console.log(`✓  Built dist/achievements/index.html (${achievementsHtml.length.toLocaleString()} bytes)`);
+
+  // Re-write index.html with correct HTML report count for the sidebar badge
+  const htmlFinal = generateHTML(data, htmlReports.length);
+  await writeFile(`${DIST_DIR}/index.html`, htmlFinal, 'utf-8');
 }
 
 build().catch(err => {
