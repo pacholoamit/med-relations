@@ -614,8 +614,8 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 }
 .section-icon {
   width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0;
-  background: var(--surface-2); border: 1px solid var(--border);
-  color: var(--text-2);
+  background: var(--accent-bg); border: 1px solid var(--accent-bd);
+  color: var(--accent);
   display: flex; align-items: center; justify-content: center;
   margin-top: 1px;
 }
@@ -666,6 +666,11 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   border-top: 2px solid var(--accent);
   border-radius: 0 0 var(--radius) var(--radius);
   overflow: hidden; margin-bottom: 0.75rem;
+  transition: box-shadow var(--t), border-color var(--t);
+}
+.featured-card:hover {
+  box-shadow: 0 8px 28px rgba(99,102,241,.16);
+  border-color: rgba(99,102,241,.45);
 }
 .card-header {
   padding: 1rem 1.25rem 0.875rem;
@@ -684,7 +689,10 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   background: var(--surface);
   padding: 0.875rem 0.75rem;
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px;
+  transition: background var(--t);
+  cursor: default;
 }
+.stat-card:hover { background: var(--surface-2); }
 .stat-val {
   font-size: 1.5rem; font-weight: 700; line-height: 1; letter-spacing: -0.03em;
   color: var(--text); font-variant-numeric: tabular-nums;
@@ -715,8 +723,8 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .dev-name { font-size: 0.875rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dev-stats { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
 .dev-total { font-size: 0.8125rem; font-weight: 700; color: var(--text); min-width: 16px; text-align: right; font-variant-numeric: tabular-nums; }
-.dev-bar-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.dev-bar { height: 100%; border-radius: 2px; background: var(--accent); max-width: 100%; }
+.dev-bar-track { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.dev-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), #818cf8); max-width: 100%; }
 
 /* ── Expand toggle ──────────────────────────────────────────────────────── */
 .expand-details { border-top: 1px solid var(--border); }
@@ -738,9 +746,10 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .accordion {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); overflow: hidden;
-  transition: border-color var(--t);
+  transition: border-color var(--t), box-shadow var(--t);
 }
 .accordion:hover { border-color: var(--border-2); }
+.accordion[open] { border-color: var(--accent-bd); }
 .accordion-summary {
   display: flex; align-items: center; gap: 0.5rem;
   padding: 0.75rem 1rem; cursor: pointer; list-style: none;
@@ -759,9 +768,9 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .release-card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); overflow: hidden;
-  transition: border-color var(--t);
+  transition: border-color var(--t), box-shadow var(--t);
 }
-.release-card:hover { border-color: var(--border-2); }
+.release-card:hover { border-color: var(--border-2); box-shadow: 0 6px 20px rgba(0,0,0,.18); }
 .release-card--latest {
   border-color: var(--accent-bd);
   border-top: 2px solid var(--accent);
@@ -773,8 +782,17 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   background: var(--surface);
 }
 .release-meta { display: flex; align-items: center; gap: 0.375rem; margin-bottom: 0.25rem; }
-.release-ver { font-size: 0.9375rem; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; }
-.release-ver--major { color: var(--accent); font-size: 1.0625rem; }
+.release-ver {
+  display: inline-flex; align-items: center;
+  font-size: 0.8125rem; font-weight: 600;
+  padding: 2px 8px; border-radius: 6px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-2); font-variant-numeric: tabular-nums;
+}
+.release-ver--major {
+  background: var(--accent-bg); border-color: var(--accent-bd);
+  color: var(--accent); font-size: 0.875rem;
+}
 .release-title { font-size: 0.9375rem; font-weight: 600; color: var(--text); }
 
 /* ── Report body ────────────────────────────────────────────────────────── */
@@ -820,7 +838,10 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   background: var(--surface);
   padding: 0.875rem 0.75rem;
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px;
+  transition: background var(--t);
+  cursor: default;
 }
+.ach-prev-stat:hover { background: var(--surface-2); }
 .ach-prev-val {
   font-size: 1.5rem; font-weight: 700; line-height: 1; letter-spacing: -0.03em;
   color: var(--text); font-variant-numeric: tabular-nums;
@@ -900,6 +921,9 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   .layout { display: block; }
   .section { page-break-inside: avoid; }
 }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
 `;
 }
 
@@ -959,18 +983,40 @@ function getAchievementsJS() {
 (function () {
   var btns = document.querySelectorAll('.ach-week-btn');
   var frames = document.querySelectorAll('.ach-frame');
-  var titleEl = document.getElementById('ach-viewer-title');
+  var loader = document.querySelector('.ach-loader');
+
+  function showLoader() {
+    if (loader) loader.classList.remove('ach-loader--hidden');
+  }
+  function hideLoader() {
+    if (loader) loader.classList.add('ach-loader--hidden');
+  }
 
   function show(slug) {
     btns.forEach(function (b) { b.classList.toggle('active', b.dataset.slug === slug); });
+    var activeFrame = null;
     frames.forEach(function (f) {
       var visible = f.dataset.slug === slug;
       f.style.display = visible ? 'block' : 'none';
       f.setAttribute('aria-hidden', visible ? 'false' : 'true');
+      if (visible) activeFrame = f;
     });
-    if (titleEl) {
-      var btn = document.querySelector('.ach-week-btn[data-slug="' + slug + '"]');
-      titleEl.textContent = btn ? btn.textContent.trim() : slug;
+    if (activeFrame) {
+      showLoader();
+      var onLoad = function () {
+        hideLoader();
+        activeFrame.removeEventListener('load', onLoad);
+      };
+      try {
+        var doc = activeFrame.contentDocument || activeFrame.contentWindow.document;
+        if (doc && doc.readyState === 'complete') {
+          hideLoader();
+        } else {
+          activeFrame.addEventListener('load', onLoad);
+        }
+      } catch (e) {
+        activeFrame.addEventListener('load', onLoad);
+      }
     }
     try { history.replaceState(null, '', '#' + slug); } catch (e) {}
   }
@@ -990,6 +1036,28 @@ function getAchievementsJS() {
   if (initial) show(initial);
 })();
 `;
+}
+
+// ─── ISO week date helper ─────────────────────────────────────────────────────
+
+function getDateOfISOWeek(year, week) {
+  const jan4 = new Date(Date.UTC(year, 0, 4));
+  const dayOfWeek = jan4.getUTCDay() || 7;
+  const weekStart = new Date(jan4);
+  weekStart.setUTCDate(jan4.getUTCDate() - (dayOfWeek - 1) + (week - 1) * 7);
+  return weekStart;
+}
+
+function formatWeekDateRange(slug) {
+  const m = slug.match(/^(\d{4})-W(\d{2})$/);
+  if (!m) return '';
+  const year = parseInt(m[1], 10);
+  const week = parseInt(m[2], 10);
+  const start = getDateOfISOWeek(year, week);
+  const end = new Date(start);
+  end.setUTCDate(start.getUTCDate() + 6);
+  const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  return `${fmt(start)} – ${fmt(end)}`;
 }
 
 // ─── HTML assembly ────────────────────────────────────────────────────────────
@@ -1100,10 +1168,12 @@ function generateReleasesHTML(releases) {
 <body>
 
 <header class="hdr" role="banner">
-  <div class="hdr-logo">
+  <a href="../" class="hdr-logo" aria-label="MediaJel Relations home">
     <div class="hdr-mark" aria-hidden="true">MJ</div>
-    Release Notes
-  </div>
+    Relations
+  </a>
+  <span class="hdr-sep" aria-hidden="true">/</span>
+  <span class="hdr-org">Release Notes</span>
   <div class="hdr-space"></div>
   <time class="hdr-date" datetime="${new Date().toISOString()}">${buildDate}</time>
 </header>
@@ -1131,7 +1201,9 @@ function generateAchievementsHTML(mdReports, htmlReports) {
   const hasHtml = htmlReports.length > 0;
 
   const weekList = hasHtml
-    ? htmlReports.map((r, idx) => `
+    ? htmlReports.map((r, idx) => {
+        const dateRange = formatWeekDateRange(r.slug);
+        return `
 <button
   class="ach-week-btn${idx === 0 ? ' active' : ''}"
   data-slug="${esc(r.slug)}"
@@ -1141,7 +1213,9 @@ function generateAchievementsHTML(mdReports, htmlReports) {
   <span class="ach-week-slug">${esc(r.slug)}</span>
   <span class="ach-week-label">${esc(r.title)}</span>
   ${idx === 0 ? '<span class="badge badge--accent" aria-hidden="true">Latest</span>' : ''}
-</button>`).join('\n')
+  ${dateRange ? `<span class="ach-week-dates">${esc(dateRange)}</span>` : ''}
+</button>`;
+      }).join('\n')
     : '<p class="ach-empty-list">No HTML reports yet.</p>';
 
   const iframes = hasHtml
@@ -1236,25 +1310,12 @@ ${getCSS()}
 .ach-viewer-wrap {
   flex: 1; display: flex; flex-direction: column;
   min-height: calc(100vh - var(--hdr-h));
+  position: relative;
 }
-.ach-viewer-hd {
-  padding: 1rem 1.5rem 0.875rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  position: sticky; top: var(--hdr-h); z-index: 10;
-  display: flex; align-items: center; gap: 0.625rem;
-}
-.ach-viewer-icon {
-  width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0;
-  background: var(--surface-2); border: 1px solid var(--border);
-  color: var(--text-2);
-  display: flex; align-items: center; justify-content: center;
-}
-.ach-viewer-title { font-size: 0.9375rem; font-weight: 600; color: var(--text); }
 .ach-frame {
   width: 100%; flex: 1;
   border: none;
-  min-height: calc(100vh - var(--hdr-h) - 57px);
+  min-height: calc(100vh - var(--hdr-h));
 }
 .ach-viewer-empty { padding: 2.5rem; }
 .ach-legacy {
@@ -1266,6 +1327,31 @@ ${getCSS()}
   font-size: 0.875rem; font-weight: 600; color: var(--text-3);
   letter-spacing: 0.04em; text-transform: uppercase;
   margin-bottom: 1rem;
+}
+
+/* ── Loading spinner ───────────────────────────────────────────────────── */
+.ach-loader {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg); z-index: 5;
+  transition: opacity 0.25s;
+  top: 0;
+}
+.ach-loader--hidden { opacity: 0; pointer-events: none; }
+.ach-spinner {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid var(--border); border-top-color: var(--accent);
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Sidebar week date range ───────────────────────────────────────────── */
+.ach-week-dates {
+  width: 100%;
+  font-size: 0.6875rem;
+  color: var(--text-3);
+  padding-left: 0.125rem;
+  margin-top: -0.125rem;
 }
 
 /* ── Responsive (achievements) ─────────────────────────────────────────── */
@@ -1285,6 +1371,7 @@ ${getCSS()}
     white-space: nowrap; flex-shrink: 0; flex-wrap: nowrap;
   }
   .ach-week-btn.active { border-bottom-color: var(--accent); border-left-color: transparent; background: transparent; color: var(--accent); }
+  .ach-week-dates { display: none; }
   .ach-legacy { padding: 1.25rem 1rem; }
 }
   </style>
@@ -1313,9 +1400,8 @@ ${getCSS()}
     ${weekList}
   </nav>
   <div class="ach-viewer-wrap">
-    <div class="ach-viewer-hd">
-      <div class="ach-viewer-icon" aria-hidden="true">${achievementsMeta.icon}</div>
-      <span class="ach-viewer-title" id="ach-viewer-title">${hasHtml ? esc(htmlReports[0].title) : 'Achievements'}</span>
+    <div class="ach-loader" role="status" aria-label="Loading report">
+      <div class="ach-spinner" aria-hidden="true"></div>
     </div>
     ${iframes}
     ${mdSection}

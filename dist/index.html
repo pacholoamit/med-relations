@@ -175,8 +175,8 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 }
 .section-icon {
   width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0;
-  background: var(--surface-2); border: 1px solid var(--border);
-  color: var(--text-2);
+  background: var(--accent-bg); border: 1px solid var(--accent-bd);
+  color: var(--accent);
   display: flex; align-items: center; justify-content: center;
   margin-top: 1px;
 }
@@ -227,6 +227,11 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   border-top: 2px solid var(--accent);
   border-radius: 0 0 var(--radius) var(--radius);
   overflow: hidden; margin-bottom: 0.75rem;
+  transition: box-shadow var(--t), border-color var(--t);
+}
+.featured-card:hover {
+  box-shadow: 0 8px 28px rgba(99,102,241,.16);
+  border-color: rgba(99,102,241,.45);
 }
 .card-header {
   padding: 1rem 1.25rem 0.875rem;
@@ -245,7 +250,10 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   background: var(--surface);
   padding: 0.875rem 0.75rem;
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px;
+  transition: background var(--t);
+  cursor: default;
 }
+.stat-card:hover { background: var(--surface-2); }
 .stat-val {
   font-size: 1.5rem; font-weight: 700; line-height: 1; letter-spacing: -0.03em;
   color: var(--text); font-variant-numeric: tabular-nums;
@@ -276,8 +284,8 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .dev-name { font-size: 0.875rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dev-stats { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
 .dev-total { font-size: 0.8125rem; font-weight: 700; color: var(--text); min-width: 16px; text-align: right; font-variant-numeric: tabular-nums; }
-.dev-bar-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.dev-bar { height: 100%; border-radius: 2px; background: var(--accent); max-width: 100%; }
+.dev-bar-track { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.dev-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), #818cf8); max-width: 100%; }
 
 /* ── Expand toggle ──────────────────────────────────────────────────────── */
 .expand-details { border-top: 1px solid var(--border); }
@@ -299,9 +307,10 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .accordion {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); overflow: hidden;
-  transition: border-color var(--t);
+  transition: border-color var(--t), box-shadow var(--t);
 }
 .accordion:hover { border-color: var(--border-2); }
+.accordion[open] { border-color: var(--accent-bd); }
 .accordion-summary {
   display: flex; align-items: center; gap: 0.5rem;
   padding: 0.75rem 1rem; cursor: pointer; list-style: none;
@@ -320,9 +329,9 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .release-card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); overflow: hidden;
-  transition: border-color var(--t);
+  transition: border-color var(--t), box-shadow var(--t);
 }
-.release-card:hover { border-color: var(--border-2); }
+.release-card:hover { border-color: var(--border-2); box-shadow: 0 6px 20px rgba(0,0,0,.18); }
 .release-card--latest {
   border-color: var(--accent-bd);
   border-top: 2px solid var(--accent);
@@ -334,8 +343,17 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   background: var(--surface);
 }
 .release-meta { display: flex; align-items: center; gap: 0.375rem; margin-bottom: 0.25rem; }
-.release-ver { font-size: 0.9375rem; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; }
-.release-ver--major { color: var(--accent); font-size: 1.0625rem; }
+.release-ver {
+  display: inline-flex; align-items: center;
+  font-size: 0.8125rem; font-weight: 600;
+  padding: 2px 8px; border-radius: 6px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-2); font-variant-numeric: tabular-nums;
+}
+.release-ver--major {
+  background: var(--accent-bg); border-color: var(--accent-bd);
+  color: var(--accent); font-size: 0.875rem;
+}
 .release-title { font-size: 0.9375rem; font-weight: 600; color: var(--text); }
 
 /* ── Report body ────────────────────────────────────────────────────────── */
@@ -381,7 +399,10 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   background: var(--surface);
   padding: 0.875rem 0.75rem;
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px;
+  transition: background var(--t);
+  cursor: default;
 }
+.ach-prev-stat:hover { background: var(--surface-2); }
 .ach-prev-val {
   font-size: 1.5rem; font-weight: 700; line-height: 1; letter-spacing: -0.03em;
   color: var(--text); font-variant-numeric: tabular-nums;
@@ -461,6 +482,9 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   .layout { display: block; }
   .section { page-break-inside: avoid; }
 }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
 </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
@@ -475,7 +499,7 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   <span class="hdr-sep" aria-hidden="true">/</span>
   <span class="hdr-org">Engineering Team</span>
   <div class="hdr-space"></div>
-  <time class="hdr-date" datetime="2026-05-24T08:18:12.220Z">May 24, 2026</time>
+  <time class="hdr-date" datetime="2026-05-24T08:18:55.083Z">May 24, 2026</time>
   <button class="theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Toggle light/dark mode">
     <svg class="theme-icon theme-icon--sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
     <svg class="theme-icon theme-icon--moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -492,10 +516,10 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   <span class="nav-count" aria-hidden="true">2</span>
 </a>
 
-<a href="#section-achievements" class="nav-link" data-section="achievements" aria-label="Achievements: 2 reports">
+<a href="#section-achievements" class="nav-link" data-section="achievements" aria-label="Achievements: 1 reports">
   <span class="nav-icon"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M7.5 1l1.618 3.28L13 5.09l-2.75 2.68.649 3.78L7.5 9.75l-3.399 1.8L4.75 7.77 2 5.09l3.882-.81L7.5 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span>
   <span class="nav-label">Achievements</span>
-  <span class="nav-count" aria-hidden="true">2</span>
+  <span class="nav-count" aria-hidden="true">1</span>
 </a>
 
 <a href="#section-releases" class="nav-link" data-section="releases" aria-label="Release Notes: 1 reports">
@@ -1182,19 +1206,19 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   
     <div class="ach-prev">
 <div class="ach-prev-stats">
-  <div class="ach-prev-stat"><span class="ach-prev-val">29</span><span class="ach-prev-lbl">PRs Merged</span></div>
-  <div class="ach-prev-stat"><span class="ach-prev-val" style="color:var(--green)">+12646</span><span class="ach-prev-lbl">Lines Added</span></div>
-  <div class="ach-prev-stat"><span class="ach-prev-val" style="color:var(--orange)">-1288</span><span class="ach-prev-lbl">Lines Removed</span></div>
-  <div class="ach-prev-stat"><span class="ach-prev-val" style="color:#f59e0b">20</span><span class="ach-prev-lbl">Hotfixes</span></div>
+  <div class="ach-prev-stat"><span class="ach-prev-val">—</span><span class="ach-prev-lbl">PRs Merged</span></div>
+  <div class="ach-prev-stat"><span class="ach-prev-val" style="color:var(--green)">—</span><span class="ach-prev-lbl">Lines Added</span></div>
+  <div class="ach-prev-stat"><span class="ach-prev-val" style="color:var(--orange)">—</span><span class="ach-prev-lbl">Lines Removed</span></div>
+  <div class="ach-prev-stat"><span class="ach-prev-val" style="color:#f59e0b">—</span><span class="ach-prev-lbl">Hotfixes</span></div>
 </div>
 <div class="ach-prev-chart-row">
   <div class="ach-prev-chart-wrap">
     <canvas id="achPrevDonut" width="140" height="140"></canvas>
   </div>
   <div class="ach-prev-legend">
-    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#f87171"></span><span>Bug Fixes — 15</span></div>
-    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#818cf8"></span><span>New Features — 6</span></div>
-    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#34d399"></span><span>Enhancements — 8</span></div>
+    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#f87171"></span><span>Bug Fixes — 24</span></div>
+    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#818cf8"></span><span>New Features — 2</span></div>
+    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#34d399"></span><span>Enhancements — 3</span></div>
   </div>
 </div>
 <script>
@@ -1202,7 +1226,7 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   if(typeof Chart==='undefined')return;
   var ctx=document.getElementById('achPrevDonut');
   if(!ctx)return;
-  new Chart(ctx.getContext('2d'),{type:'doughnut',data:{labels:['Bug Fixes','New Features','Enhancements'],datasets:[{data:[15,6,8],backgroundColor:['#f87171','#818cf8','#34d399'],borderColor:'var(--surface)',borderWidth:3,hoverOffset:6}]},options:{responsive:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+' ('+Math.round(c.raw/29*100)+'%)';}}}}}});
+  new Chart(ctx.getContext('2d'),{type:'doughnut',data:{labels:['Bug Fixes','New Features','Enhancements'],datasets:[{data:[24,2,3],backgroundColor:['#f87171','#818cf8','#34d399'],borderColor:'var(--surface)',borderWidth:3,hoverOffset:6}]},options:{responsive:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+' ('+Math.round(c.raw/29*100)+'%)';}}}}}});
 })();
 </script><div class="ach-prev-link"><a href="achievements/">View full achievements →</a></div></div>
     <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)"><div class="stat-card"><span class="stat-val stat-val--green">123</span><span class="stat-lbl">Tickets closed</span></div><div class="stat-card"><span class="stat-val">29</span><span class="stat-lbl">PRs merged</span></div><div class="stat-card"><span class="stat-val">9</span><span class="stat-lbl">Contributors</span></div></div>
@@ -1234,24 +1258,7 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 </ul>
 </div>
   
-</div><div class="archive">
-<details class="accordion">
-  <summary class="accordion-summary">
-    <svg class="accordion-icon" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <span class="slug-pill">2026-W20</span>
-    <span class="accordion-title">Achievements — 2026-W20</span>
-  </summary>
-  
-  <div class="report-body"><h1>Achievements — 2026-W20</h1>
-<p>Period: 2026-05-11 → 2026-05-17</p>
-<p>No tickets were closed or PRs merged during this period.</p>
-<h2>By the numbers</h2>
-<ul>
-<li>0 tickets closed</li>
-<li>0 PRs merged</li>
-</ul>
 </div>
-</details></div>
 </section>
 
 <section class="section" id="section-releases" aria-labelledby="section-title-releases">

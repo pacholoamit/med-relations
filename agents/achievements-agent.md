@@ -28,16 +28,27 @@ Each report is a **self-contained HTML file** (no external CSS dependencies). It
 
 ## 1. Stat grid
 
-Four stat cards in a CSS grid:
+Four stat cards in a CSS grid. Each card uses a color-variant modifier class and contains an SVG icon, a value, a label, and a "this week" context sublabel.
 
-| Label | Format |
-|---|---|
-| PRs Merged | integer |
-| Lines Added | `+N` (green) |
-| Lines Removed | `-N` (red) |
-| Hotfixes | integer (yellow) |
+| Label | Value format | Card class | Icon |
+|---|---|---|---|
+| PRs Merged | integer | `stat-card--accent` | git-pull-request |
+| Lines Added | `+N` (green) | `stat-card--green` | trending-up |
+| Lines Removed | `-N` (red) | `stat-card--red` | trending-down |
+| Hotfixes | integer (yellow) | `stat-card--yellow` | zap |
 
-Use classes: `stat-label`, `stat-value`, `stat-value.green`, `stat-value.red`, `stat-value.yellow`.
+HTML structure per card:
+
+```html
+<div class="stat-card stat-card--accent">
+  <div class="stat-icon" aria-hidden="true"><!-- SVG icon --></div>
+  <div class="stat-value">29</div>
+  <div class="stat-label">PRs Merged</div>
+  <div class="stat-period">this week</div>
+</div>
+```
+
+Value color classes: `stat-value.green`, `stat-value.red`, `stat-value.yellow` (PRs Merged has no extra class).
 
 ---
 
@@ -77,10 +88,12 @@ Each chart container: `<div class="chart-container">` with `<div class="chart-wr
 
 ### Sort order
 
-Sort `<tbody>` rows as follows:
-1. Bug Fix rows first (chronological by `merged_at` ascending within group)
-2. New Feature rows second (chronological within group)
-3. Enhancement rows third (chronological within group)
+Sort `<tbody>` rows as follows (primary: category, secondary: priority):
+1. Bug Fix — Critical first, then Normal/Low/High
+2. New Feature — Critical first, then Normal/Low/High
+3. Enhancement — Critical first, then Normal/Low/High
+
+Priority rank within each category group: Critical (0) → High (1) → Normal (2) → Low (3).
 
 ### Badge classes
 
@@ -143,6 +156,106 @@ A `.metrics-grid` with `.metric-item` cards for supplemental stats (most active 
   --text: #e2e8f0; --muted: #718096; --accent: #6366f1;
   --green: #10b981; --red: #ef4444; --yellow: #f59e0b; --blue: #3b82f6;
 }
+```
+
+## Typography
+
+Import Inter from Google Fonts at the top of `<style>`:
+
+```css
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+```
+
+Set on `body`:
+```css
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; ... }
+```
+
+Also add `<link rel="preconnect">` tags for `fonts.googleapis.com` and `fonts.gstatic.com` in `<head>`.
+
+## Stat card CSS (full)
+
+```css
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.stat-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: .75rem; padding: 1.25rem 1.25rem 1rem;
+  animation: fadeSlideIn 0.4s ease both;
+  position: relative; overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  cursor: default;
+}
+.stat-card:hover { transform: translateY(-3px); }
+.stat-card:nth-child(1) { animation-delay: 0ms; }
+.stat-card:nth-child(2) { animation-delay: 60ms; }
+.stat-card:nth-child(3) { animation-delay: 120ms; }
+.stat-card:nth-child(4) { animation-delay: 180ms; }
+
+/* Top glow accent line */
+.stat-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  border-radius: .75rem .75rem 0 0;
+}
+.stat-card--accent::before { background: var(--accent); box-shadow: 0 0 18px rgba(99,102,241,.65); }
+.stat-card--green::before  { background: var(--green);  box-shadow: 0 0 18px rgba(16,185,129,.65); }
+.stat-card--red::before    { background: var(--red);    box-shadow: 0 0 18px rgba(239,68,68,.65); }
+.stat-card--yellow::before { background: var(--yellow); box-shadow: 0 0 18px rgba(245,158,11,.65); }
+
+/* Color tint bg + hover glow */
+.stat-card--accent { background: linear-gradient(145deg, rgba(99,102,241,.1) 0%, var(--card) 55%);  border-color: rgba(99,102,241,.25); }
+.stat-card--green  { background: linear-gradient(145deg, rgba(16,185,129,.1) 0%, var(--card) 55%);  border-color: rgba(16,185,129,.25); }
+.stat-card--red    { background: linear-gradient(145deg, rgba(239,68,68,.1) 0%, var(--card) 55%);   border-color: rgba(239,68,68,.25); }
+.stat-card--yellow { background: linear-gradient(145deg, rgba(245,158,11,.1) 0%, var(--card) 55%);  border-color: rgba(245,158,11,.25); }
+.stat-card--accent:hover { box-shadow: 0 12px 32px rgba(99,102,241,.22); border-color: rgba(99,102,241,.45); }
+.stat-card--green:hover  { box-shadow: 0 12px 32px rgba(16,185,129,.22);  border-color: rgba(16,185,129,.45); }
+.stat-card--red:hover    { box-shadow: 0 12px 32px rgba(239,68,68,.22);   border-color: rgba(239,68,68,.45); }
+.stat-card--yellow:hover { box-shadow: 0 12px 32px rgba(245,158,11,.22);  border-color: rgba(245,158,11,.45); }
+
+/* Icon badge */
+.stat-icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: .5rem;
+  margin-bottom: .875rem; flex-shrink: 0;
+}
+.stat-card--accent .stat-icon { background: rgba(99,102,241,.18); color: var(--accent); }
+.stat-card--green  .stat-icon { background: rgba(16,185,129,.18);  color: var(--green); }
+.stat-card--red    .stat-icon { background: rgba(239,68,68,.18);   color: var(--red); }
+.stat-card--yellow .stat-icon { background: rgba(245,158,11,.18);  color: var(--yellow); }
+
+.stat-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.stat-value { font-size: 2.5rem; font-weight: 700; line-height: 1; margin-bottom: .3rem; font-variant-numeric: tabular-nums; }
+.stat-value.green { color: var(--green); }
+.stat-value.red { color: var(--red); }
+.stat-value.yellow { color: var(--yellow); }
+.stat-period { font-size: .6875rem; color: rgba(113,128,150,.55); margin-top: .25rem; letter-spacing: .04em; }
+```
+
+## Section headings
+
+Use left accent border instead of bottom border:
+```css
+h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;
+     padding-left: 0.75rem; border-left: 3px solid var(--accent); }
+```
+
+## Tables — striped + hover + sticky headers
+
+```css
+th { position: sticky; top: 0; background: var(--bg); z-index: 1; }
+tbody tr:nth-child(even) td { background: rgba(255,255,255,0.025); }
+tbody tr:hover td { background: rgba(99,102,241,0.08); transition: background 0.15s; }
+```
+
+## Chart containers
+
+```css
+.chart-container { box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.chart-container:nth-child(1) { border-left: 3px solid var(--accent); }
+.chart-container:nth-child(2) { border-left: 3px solid #f59e0b; }
 ```
 
 ---
