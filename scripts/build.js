@@ -1321,6 +1321,14 @@ async function generateAchievementsHTML(mdReports, htmlReports) {
           .replace(/getElementById\("categoryChart"\)/g, `getElementById('categoryChart-${r.slug}')`)
           .replace(/getElementById\('priorityChart'\)/g, `getElementById('priorityChart-${r.slug}')`)
           .replace(/getElementById\("priorityChart"\)/g, `getElementById('priorityChart-${r.slug}')`);
+        // Strip any chart.js CDN script tags from body — the achievements page head loads it unconditionally
+        bodyContent = bodyContent.replace(/<script[^>]+chart\.js[^>]*><\/script>/gi, '');
+        // Validate that scoped canvas IDs are present after transformation
+        const scopedCatId = `categoryChart-${r.slug}`;
+        const scopedPriId = `priorityChart-${r.slug}`;
+        if (!bodyContent.includes(`id="${scopedCatId}"`) || !bodyContent.includes(`id="${scopedPriId}"`)) {
+          console.warn(`  ⚠  Report ${r.slug}: canvas IDs not found after scoping (original IDs may be non-spec). Charts will be missing for this panel.`);
+        }
       } catch {
         bodyContent = '<p style="color:var(--text-3);padding:2rem">Report could not be loaded.</p>';
       }
@@ -1423,6 +1431,7 @@ ${getCSS()}
 ${achPageCSS}
 ${scopedReportCSS ? `/* ── Scoped report styles ─────────────────────────────────────────────── */\n${scopedReportCSS}` : ''}
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"><\/script>
   <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();<\/script>
 </head>
 <body>
@@ -1486,6 +1495,24 @@ async function build() {
   // Re-write index.html with correct HTML report count for sidebar badge
   const htmlFinal = generateHTML(data, htmlReports.length, latestStats);
   await writeFile(`${DIST_DIR}/index.html`, htmlFinal, 'utf-8');
+
+  // Post-build chart canvas guard
+  if (htmlReports.length > 0) {
+    const distAch = await readFile(join(DIST_DIR, 'achievements', 'index.html'), 'utf-8');
+    const missingCanvas = [];
+    for (const r of htmlReports) {
+      if (!distAch.includes(`id="categoryChart-${r.slug}"`)) missingCanvas.push(`categoryChart-${r.slug}`);
+      if (!distAch.includes(`id="priorityChart-${r.slug}"`)) missingCanvas.push(`priorityChart-${r.slug}`);
+    }
+    if (missingCanvas.length > 0) {
+      console.error(`\n✗  BUILD GUARD FAILED: missing canvas IDs in dist/achievements/index.html:`);
+      missingCanvas.forEach(id => console.error(`     - ${id}`));
+      console.error(`  The AchievementsAgent likely generated a report with non-spec canvas IDs.`);
+      console.error(`  Fix the report HTML to use id="categoryChart" and id="priorityChart" in the chart section.`);
+      process.exit(1);
+    }
+    console.log(`\n✓  Build guard: all chart canvas IDs present in dist/achievements/index.html`);
+  }
 }
 
 build().catch(err => {

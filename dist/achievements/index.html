@@ -590,6 +590,7 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,.12); }
                  border-radius: .5rem; padding: 1rem; }[data-report-scope="2026-W20"] .metric-label{ font-size: .75rem; color: var(--muted); margin-bottom: .25rem; }[data-report-scope="2026-W20"] .metric-value{ font-size: 1.1rem; font-weight: 600; }[data-report-scope="2026-W20"] a{ color: var(--accent); text-decoration: none; }[data-report-scope="2026-W20"] a:hover{ text-decoration: underline; }[data-report-scope="2026-W20"] .empty-note{ color: var(--muted); font-style: italic; padding: 1rem 0; }[data-report-scope="2026-W20"] .chart-title{ font-size: .75rem; color: var(--muted); text-align: center; margin-top: .5rem; text-transform: uppercase; letter-spacing: .05em; }
 
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
 </head>
 <body>
@@ -601,7 +602,7 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,.12); }
   <span class="hdr-sep" aria-hidden="true">/</span>
   <span class="hdr-org">Achievements</span>
   <div class="hdr-space"></div>
-  <time class="hdr-date" datetime="2026-05-24T11:25:25.102Z">May 24, 2026</time>
+  <time class="hdr-date" datetime="2026-05-24T13:12:50.650Z">May 24, 2026</time>
   <button class="theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Toggle light/dark mode">
     <svg class="theme-icon theme-icon--sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
     <svg class="theme-icon theme-icon--moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -1024,7 +1025,7 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,.12); }
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
 <script>
 (function() {
   var catCtx = document.getElementById('categoryChart-2026-W21').getContext('2d');
@@ -1386,7 +1387,7 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,.12); }
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
 <script>
 (function() {
   var bugCount = 16;

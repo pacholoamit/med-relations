@@ -10,6 +10,28 @@ Each report is a **self-contained HTML file** (no external CSS dependencies). It
 
 ---
 
+## CRITICAL — pipeline contract
+
+The following names are hard-wired into `scripts/build.js`. **Do not change them.**
+
+| Required element | Exact value |
+|---|---|
+| Category chart canvas ID | `id="categoryChart"` |
+| Priority chart canvas ID | `id="priorityChart"` |
+| Category bug variable | `var bugCount = N;` |
+| Category feature variable | `var featCount = N;` |
+| Category enhancement variable | `var enhCount = N;` |
+| Priority critical variable | `var critCount = N;` |
+| Priority high variable | `var highCount = N;` |
+| Priority normal variable | `var normCount = N;` |
+| Priority low variable | `var lowCount = N;` |
+
+Using any other name (e.g. `donutChart`, `bugFixes`, `const`, `let`) will cause the build to fail with a guard error.
+
+Chart.js CDN script MUST be in `<body>` (or omit it — the achievements page now loads it from `<head>` automatically). Do NOT put it in `<head>` of the report file.
+
+---
+
 ## File naming
 
 `reports/achievements/<YEAR>-W<WW>.html` — e.g. `2026-W22.html`
