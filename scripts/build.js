@@ -149,6 +149,66 @@ function parsePerformanceTable(raw) {
   return rows.length > 0 ? rows : null;
 }
 
+function parseAchievementsStats(raw) {
+  const section = raw.split(/^## By the numbers/m)[1];
+  if (!section) return null;
+  const chunk = section.split(/^## /m)[0];
+  const tickets = chunk.match(/(\d+)\s+tickets? closed/);
+  const prs = chunk.match(/(\d+)\s+PRs? merged/);
+  const contributors = chunk.match(/(\d+)\s+contributors? active/);
+  if (!tickets && !prs && !contributors) return null;
+  return {
+    ticketsClosed: tickets ? parseInt(tickets[1], 10) : null,
+    prsMerged: prs ? parseInt(prs[1], 10) : null,
+    contributorsActive: contributors ? parseInt(contributors[1], 10) : null,
+  };
+}
+
+function parseAchievementCategories(raw) {
+  const section = raw.split(/^## This week we shipped/m)[1];
+  if (!section) return [];
+  const chunk = section.split(/^## /m)[0];
+  const categories = [];
+  const headingRegex = /^### (.+)$/gm;
+  let match;
+  while ((match = headingRegex.exec(chunk)) !== null) {
+    const label = match[1].trim();
+    const afterHeading = chunk.slice(match.index + match[0].length);
+    const nextHeading = afterHeading.search(/^### /m);
+    const body = nextHeading === -1 ? afterHeading : afterHeading.slice(0, nextHeading);
+    const count = (body.match(/^- /gm) || []).length;
+    categories.push({ label, count });
+  }
+  return categories;
+}
+
+const CATEGORY_BADGE_CLASS = { Features: 'badge--feature', 'Bug Fixes': 'badge--fix' };
+
+function renderAchievementStatGrid(stats) {
+  if (!stats) return '';
+  const cells = [
+    stats.ticketsClosed !== null
+      ? `<div class="stat-card"><span class="stat-val stat-val--green">${stats.ticketsClosed}</span><span class="stat-lbl">Tickets closed</span></div>`
+      : null,
+    stats.prsMerged !== null
+      ? `<div class="stat-card"><span class="stat-val">${stats.prsMerged}</span><span class="stat-lbl">PRs merged</span></div>`
+      : null,
+    stats.contributorsActive !== null
+      ? `<div class="stat-card"><span class="stat-val">${stats.contributorsActive}</span><span class="stat-lbl">Contributors</span></div>`
+      : null,
+  ].filter(Boolean);
+  if (cells.length === 0) return '';
+  return `<div class="stat-grid" style="grid-template-columns:repeat(${cells.length},1fr)">${cells.join('')}</div>`;
+}
+
+function renderAchievementCategoryBadges(categories) {
+  if (!categories || categories.length === 0) return '';
+  return categories.map(c => {
+    const cls = CATEGORY_BADGE_CLASS[c.label] ?? 'badge--infra';
+    return `<span class="badge ${cls}">${esc(c.label)} ${c.count}</span>`;
+  }).join('');
+}
+
 // ─── Component renderers ──────────────────────────────────────────────────────
 
 function renderLeaderboard(rows) {
@@ -308,13 +368,35 @@ function renderAchievementsPreview(latestStats) {
 }
 
 function renderAchievementsSection(reports, latestStats) {
-  const preview = renderAchievementsPreview(latestStats);
   const latest = reports[0];
-  const featured = renderFeaturedCard(
-    latest,
-    `${preview}<div class="report-body">${latest.html}</div>`,
-  );
-  const archived = reports.slice(1).map(r => renderAccordion(r)).join('');
+  const preview = renderAchievementsPreview(latestStats);
+  const stats = parseAchievementsStats(latest.raw);
+  const categories = parseAchievementCategories(latest.raw);
+  const statGrid = renderAchievementStatGrid(stats);
+  const categoryBadges = renderAchievementCategoryBadges(categories);
+
+  const cardBody = `
+    ${preview}
+    ${statGrid}
+    ${categoryBadges ? `<div class="achievement-categories">${categoryBadges}</div>` : ''}
+    <div class="report-body">${latest.html}</div>
+  `;
+  const featured = renderFeaturedCard(latest, cardBody);
+
+  const archived = reports.slice(1).map(r => {
+    const archivedCats = parseAchievementCategories(r.raw);
+    const summaryBadges = archivedCats
+      .map(c => {
+        const cls = CATEGORY_BADGE_CLASS[c.label] ?? 'badge--infra';
+        return `<span class="badge ${cls}">${esc(c.label)} ${c.count}</span>`;
+      })
+      .join('');
+    return renderAccordion(
+      r,
+      summaryBadges ? `<div class="achievement-categories achievement-categories--archived">${summaryBadges}</div>` : '',
+    );
+  }).join('');
+
   return `${featured}${archived ? `<div class="archive">${archived}</div>` : ''}`;
 }
 
@@ -562,6 +644,20 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 }
 .tag--green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bd); }
 .tag--orange { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bd); }
+
+/* Achievement category badges */
+.badge--feature { color: var(--green);  background: var(--green-bg);  border: 1px solid var(--green-bd); }
+.badge--fix     { color: var(--orange); background: var(--orange-bg); border: 1px solid var(--orange-bd); }
+.badge--infra   { color: var(--text-2); background: var(--surface-2); border: 1px solid var(--border); }
+.achievement-categories {
+  display: flex; flex-wrap: wrap; gap: 0.375rem;
+  padding: 0.625rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.achievement-categories--archived {
+  padding: 0.5rem 1rem 0;
+  border-bottom: none;
+}
 
 /* ── Featured card ──────────────────────────────────────────────────────── */
 .featured-card {

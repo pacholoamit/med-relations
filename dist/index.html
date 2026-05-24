@@ -206,6 +206,20 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .tag--green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bd); }
 .tag--orange { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bd); }
 
+/* Achievement category badges */
+.badge--feature { color: var(--green);  background: var(--green-bg);  border: 1px solid var(--green-bd); }
+.badge--fix     { color: var(--orange); background: var(--orange-bg); border: 1px solid var(--orange-bd); }
+.badge--infra   { color: var(--text-2); background: var(--surface-2); border: 1px solid var(--border); }
+.achievement-categories {
+  display: flex; flex-wrap: wrap; gap: 0.375rem;
+  padding: 0.625rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.achievement-categories--archived {
+  padding: 0.5rem 1rem 0;
+  border-bottom: none;
+}
+
 /* ── Featured card ──────────────────────────────────────────────────────── */
 .featured-card {
   background: var(--surface);
@@ -461,7 +475,7 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   <span class="hdr-sep" aria-hidden="true">/</span>
   <span class="hdr-org">Engineering Team</span>
   <div class="hdr-space"></div>
-  <time class="hdr-date" datetime="2026-05-23T18:29:15.485Z">May 23, 2026</time>
+  <time class="hdr-date" datetime="2026-05-24T04:55:55.319Z">May 24, 2026</time>
   <button class="theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Toggle light/dark mode">
     <svg class="theme-icon theme-icon--sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
     <svg class="theme-icon theme-icon--moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -1165,7 +1179,8 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
     </div>
     <h3 class="card-title">Achievements — 2026-W21</h3>
   </div>
-  <div class="ach-prev">
+  
+    <div class="ach-prev">
 <div class="ach-prev-stats">
   <div class="ach-prev-stat"><span class="ach-prev-val">29</span><span class="ach-prev-lbl">PRs Merged</span></div>
   <div class="ach-prev-stat"><span class="ach-prev-val" style="color:var(--green)">+12646</span><span class="ach-prev-lbl">Lines Added</span></div>
@@ -1177,9 +1192,9 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
     <canvas id="achPrevDonut" width="140" height="140"></canvas>
   </div>
   <div class="ach-prev-legend">
-    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#f87171"></span><span>Bug Fixes — 27</span></div>
-    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#818cf8"></span><span>New Features — 1</span></div>
-    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#34d399"></span><span>Enhancements — 1</span></div>
+    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#f87171"></span><span>Bug Fixes — 15</span></div>
+    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#818cf8"></span><span>New Features — 6</span></div>
+    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#34d399"></span><span>Enhancements — 8</span></div>
   </div>
 </div>
 <script>
@@ -1187,9 +1202,12 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   if(typeof Chart==='undefined')return;
   var ctx=document.getElementById('achPrevDonut');
   if(!ctx)return;
-  new Chart(ctx.getContext('2d'),{type:'doughnut',data:{labels:['Bug Fixes','New Features','Enhancements'],datasets:[{data:[27,1,1],backgroundColor:['#f87171','#818cf8','#34d399'],borderColor:'var(--surface)',borderWidth:3,hoverOffset:6}]},options:{responsive:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+' ('+Math.round(c.raw/29*100)+'%)';}}}}}});
+  new Chart(ctx.getContext('2d'),{type:'doughnut',data:{labels:['Bug Fixes','New Features','Enhancements'],datasets:[{data:[15,6,8],backgroundColor:['#f87171','#818cf8','#34d399'],borderColor:'var(--surface)',borderWidth:3,hoverOffset:6}]},options:{responsive:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+' ('+Math.round(c.raw/29*100)+'%)';}}}}}});
 })();
-</script><div class="ach-prev-link"><a href="achievements/">View full achievements →</a></div></div><div class="report-body"><h1>Achievements — 2026-W21</h1>
+</script><div class="ach-prev-link"><a href="achievements/">View full achievements →</a></div></div>
+    <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)"><div class="stat-card"><span class="stat-val stat-val--green">123</span><span class="stat-lbl">Tickets closed</span></div><div class="stat-card"><span class="stat-val">99</span><span class="stat-lbl">PRs merged</span></div><div class="stat-card"><span class="stat-val">11</span><span class="stat-lbl">Contributors</span></div></div>
+    <div class="achievement-categories"><span class="badge badge--feature">Features 3</span><span class="badge badge--fix">Bug Fixes 1</span><span class="badge badge--infra">Infrastructure &amp; Automation 3</span></div>
+    <div class="report-body"><h1>Achievements — 2026-W21</h1>
 <p>Period: 2026-05-18 → 2026-05-24</p>
 <h2>This week we shipped</h2>
 <h3>Features</h3>
@@ -1215,6 +1233,7 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 <li>11 contributors active</li>
 </ul>
 </div>
+  
 </div><div class="archive">
 <details class="accordion">
   <summary class="accordion-summary">
@@ -1327,7 +1346,7 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 </section>
     </main>
     <footer class="footer" role="contentinfo">
-      <span>MediaJel Relations &middot; Generated May 23, 2026</span>
+      <span>MediaJel Relations &middot; Generated May 24, 2026</span>
       <nav class="footer-links" aria-label="External links">
         <a href="https://github.com/MediaJel/med-relations" target="_blank" rel="noopener noreferrer">GitHub</a>
         <a href="https://github.com/MediaJel/med-relations/actions" target="_blank" rel="noopener noreferrer">Actions</a>
