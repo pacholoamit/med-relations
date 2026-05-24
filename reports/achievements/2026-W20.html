@@ -88,7 +88,7 @@
   <h2>Category Breakdown</h2>
   <div class="chart-container">
     <div class="chart-wrap">
-      <canvas id="donutChart"></canvas>
+      <canvas id="categoryChart"></canvas>
     </div>
     <div class="legend">
       <div class="legend-item">
@@ -102,6 +102,22 @@
       <div class="legend-item">
         <div class="legend-dot" style="background:#34d399"></div>
         <span>Enhancements — 5</span>
+      </div>
+    </div>
+  </div>
+  <div class="chart-container">
+    <h3>Priority Breakdown</h3>
+    <div class="chart-wrap">
+      <canvas id="priorityChart"></canvas>
+    </div>
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#f59e0b"></div>
+        <span>Critical — 18</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#94a3b8"></div>
+        <span>Normal — 13</span>
       </div>
     </div>
   </div>
@@ -445,12 +461,12 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 (function() {
-  var ctx = document.getElementById('donutChart').getContext('2d');
   var bugCount = 24;
   var featCount = 2;
   var enhCount = 5;
   var total = bugCount + featCount + enhCount;
-  new Chart(ctx, {
+  var catCtx = document.getElementById('categoryChart').getContext('2d');
+  new Chart(catCtx, {
     type: 'doughnut',
     data: {
       labels: ['Bug Fixes', 'New Features', 'Enhancements'],
@@ -474,6 +490,42 @@
               if (total === 0) return ctx.label + ': 0';
               return ctx.label + ': ' + ctx.raw +
                      ' (' + Math.round(ctx.raw / total * 100) + '%)';
+            }
+          }
+        }
+      }
+    }
+  });
+  var priCtx = document.getElementById('priorityChart').getContext('2d');
+  var critCount = 18;
+  var highCount = 0;
+  var normCount = 13;
+  var lowCount = 0;
+  var priTotal = critCount + highCount + normCount + lowCount;
+  new Chart(priCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Critical', 'High', 'Normal', 'Low'],
+      datasets: [{
+        data: priTotal > 0 ? [critCount, highCount, normCount, lowCount] : [1,0,0,0],
+        backgroundColor: ['#f59e0b','#f87171','#94a3b8','#34d399'],
+        borderColor: '#1a1d27',
+        borderWidth: 3,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      cutout: '65%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(priCtx) {
+              if (priTotal === 0) return priCtx.label + ': 0';
+              return priCtx.label + ': ' + priCtx.raw +
+                     ' (' + Math.round(priCtx.raw / priTotal * 100) + '%)';
             }
           }
         }
