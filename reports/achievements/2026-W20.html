@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Achievements — 2026-W20</title>
+<style>
+  :root {
+    --bg: #0f1117; --card: #1a1d27; --border: #2a2d3a;
+    --text: #e2e8f0; --muted: #718096; --accent: #6366f1;
+    --green: #10b981; --red: #ef4444; --yellow: #f59e0b; --blue: #3b82f6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         background: var(--bg); color: var(--text); padding: 2rem;
+         max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: .25rem; }
+  .period { color: var(--muted); font-size: .875rem; margin-bottom: 2rem; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+               gap: 1rem; margin-bottom: 2rem; }
+  .stat-card { background: var(--card); border: 1px solid var(--border);
+               border-radius: .75rem; padding: 1.25rem; }
+  .stat-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em;
+                color: var(--muted); margin-bottom: .5rem; }
+  .stat-value { font-size: 2rem; font-weight: 700; }
+  .stat-value.green { color: var(--green); }
+  .stat-value.red { color: var(--red); }
+  .stat-value.yellow { color: var(--yellow); }
+  .section { margin-bottom: 2rem; }
+  h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;
+       padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+  .chart-container { display: flex; align-items: center; gap: 2rem;
+                     background: var(--card); border: 1px solid var(--border);
+                     border-radius: .75rem; padding: 1.5rem; margin-bottom: 2rem; }
+  .chart-wrap { width: 200px; height: 200px; flex-shrink: 0; }
+  .legend { display: flex; flex-direction: column; gap: .75rem; }
+  .legend-item { display: flex; align-items: center; gap: .5rem; font-size: .875rem; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  th { text-align: left; padding: .6rem .75rem; color: var(--muted);
+       font-weight: 500; border-bottom: 1px solid var(--border); }
+  td { padding: .6rem .75rem; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: .15rem .5rem; border-radius: .375rem;
+           font-size: .75rem; font-weight: 500; }
+  .badge-bug { background: rgba(239,68,68,.15); color: #f87171; }
+  .badge-feature { background: rgba(99,102,241,.15); color: #818cf8; }
+  .badge-enhancement { background: rgba(16,185,129,.15); color: #34d399; }
+  .badge-critical { background: rgba(245,158,11,.15); color: var(--yellow); }
+  .badge-normal { background: rgba(113,128,150,.1); color: var(--muted); }
+  .lines-added { color: var(--green); }
+  .lines-removed { color: var(--red); }
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+  .metric-item { background: var(--card); border: 1px solid var(--border);
+                 border-radius: .5rem; padding: 1rem; }
+  .metric-label { font-size: .75rem; color: var(--muted); margin-bottom: .25rem; }
+  .metric-value { font-size: 1.1rem; font-weight: 600; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .empty-note { color: var(--muted); font-style: italic; padding: 1rem 0; }
+</style>
+</head>
+<body>
+
+<h1>Achievements — 2026-W20</h1>
+<p class="period">Period: 2026-05-11 → 2026-05-17</p>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-label">PRs Merged</div>
+    <div class="stat-value">23</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Lines Added</div>
+    <div class="stat-value green">+8419</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Lines Removed</div>
+    <div class="stat-value red">-3068</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Hotfixes</div>
+    <div class="stat-value yellow">15</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Category Breakdown</h2>
+  <div class="chart-container">
+    <div class="chart-wrap">
+      <canvas id="donutChart"></canvas>
+    </div>
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#f87171"></div>
+        <span>Bug Fixes — 16</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#818cf8"></div>
+        <span>New Features — 3</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#34d399"></div>
+        <span>Enhancements — 4</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Pull Requests</h2>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th><th>Category</th><th>Priority</th><th>Repo</th><th>Lines</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11269" target="_blank">Simplify post-password-change redirect in NewPassword</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>mediajel-dashboard</td>
+        <td><span class="lines-added">+3</span> / <span class="lines-removed">-41</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7445" target="_blank">Revenue correction</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-normal">Normal</span></td>
+        <td>mediajel-gql-service</td>
+        <td><span class="lines-added">+17</span> / <span class="lines-removed">-10</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11292" target="_blank">Expand org level filter and reformat TaskFormContainer</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-normal">Normal</span></td>
+        <td>mediajel-dashboard</td>
+        <td><span class="lines-added">+193</span> / <span class="lines-removed">-39</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2162" target="_blank">Log input size + split progress around splitCsvFile</a></td>
+        <td><span class="badge badge-feature">New Feature</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>amplication-nestjs-microservices</td>
+        <td><span class="lines-added">+96</span> / <span class="lines-removed">-10</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7450" target="_blank">Revert &quot;FIX Publisher transaction &amp; impression counts undercounted in consolidate-report-s3&quot;</a></td>
+        <td><span class="badge badge-enhancement">Enhancement</span></td>
+        <td><span class="badge badge-normal">Normal</span></td>
+        <td>mediajel-gql-service</td>
+        <td><span class="lines-added">+7</span> / <span class="lines-removed">-459</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7449" target="_blank">Parse Nexxen byDate strings via moment with explicit format</a></td>
+        <td><span class="badge badge-feature">New Feature</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>mediajel-gql-service</td>
+        <td><span class="lines-added">+4</span> / <span class="lines-removed">-2</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11310" target="_blank">Increased the File Upload Cap in File Uploads for Task Management</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>mediajel-dashboard</td>
+        <td><span class="lines-added">+8</span> / <span class="lines-removed">-7</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7456" target="_blank">Impression Goal</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>mediajel-gql-service</td>
+        <td><span class="lines-added">+30</span> / <span class="lines-removed">-96</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11293" target="_blank">Uncommented Disabled Button in PCL</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>mediajel-dashboard</td>
+        <td><span class="lines-added">+7</span> / <span class="lines-removed">-7</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11298" target="_blank">[FOR REVIEW]: Add Campaign Deal IDs bulk-apply feature in CampaignHeader (Advanced Mode) #11297</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>mediajel-dashboard</td>
+        <td><span class="lines-added">+358</span> / <span class="lines-removed">-2</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11274" target="_blank">Salesforce New Fields</a></td>
+        <td><span class="badge badge-feature">New Feature</span></td>
+        <td><span class="badge badge-normal">Normal</span></td>
+        <td>mediajel-dashboard</td>
+        <td><span class="lines-added">+1178</span> / <span class="lines-removed">-187</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11311" target="_blank">Test signal search issue</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>mediajel-dashboard</td>
+        <td><span class="lines-added">+53</span> / <span class="lines-removed">-7</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11275" target="_blank">Disambiguate Demograph's reach as Devices vs. Individuals</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>mediajel-dashboard</td>
+        <td><span class="lines-added">+57</span> / <span class="lines-removed">-5</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7444" target="_blank">No spend reported for Auction Plus (campaignOrder.pricingModel)</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>mediajel-gql-service</td>
+        <td><span class="lines-added">+16</span> / <span class="lines-removed">-8</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7468" target="_blank">For reprocess button migration to prisma6</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>mediajel-gql-service</td>
+        <td><span class="lines-added">+32</span> / <span class="lines-removed">-32</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2167" target="_blank">Stream chunks through upload+backup pipeline</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>amplication-nestjs-microservices</td>
+        <td><span class="lines-added">+1501</span> / <span class="lines-removed">-379</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2184" target="_blank">Make Nexxen credentials optional with env fallback</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-normal">Normal</span></td>
+        <td>amplication-nestjs-microservices</td>
+        <td><span class="lines-added">+2200</span> / <span class="lines-removed">-21</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7479" target="_blank">Update salesforce rate limit balance to 20000</a></td>
+        <td><span class="badge badge-enhancement">Enhancement</span></td>
+        <td><span class="badge badge-normal">Normal</span></td>
+        <td>mediajel-gql-service</td>
+        <td><span class="lines-added">+2</span> / <span class="lines-removed">-2</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11335" target="_blank">MD-11327: reset Creatives library to page 1 on search</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>mediajel-dashboard</td>
+        <td><span class="lines-added">+7</span> / <span class="lines-removed">-2</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11319" target="_blank">[BUG] Transactions not sorting properly</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>mediajel-dashboard</td>
+        <td><span class="lines-added">+63</span> / <span class="lines-removed">-33</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7478" target="_blank">Nexxen Campaign Update Flow - GQL Service Changes</a></td>
+        <td><span class="badge badge-enhancement">Enhancement</span></td>
+        <td><span class="badge badge-normal">Normal</span></td>
+        <td>mediajel-gql-service</td>
+        <td><span class="lines-added">+139</span> / <span class="lines-removed">-17</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2190" target="_blank">Nexxen Campaign Update Flow - External Service Refactor</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>amplication-nestjs-microservices</td>
+        <td><span class="lines-added">+1649</span> / <span class="lines-removed">-1335</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11330" target="_blank">Nexxen Campaign Update Flow - Dashboard Changes</a></td>
+        <td><span class="badge badge-enhancement">Enhancement</span></td>
+        <td><span class="badge badge-normal">Normal</span></td>
+        <td>mediajel-dashboard</td>
+        <td><span class="lines-added">+799</span> / <span class="lines-removed">-367</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h2>Contributors</h2>
+  
+  <table>
+    <thead>
+      <tr><th>Contributor</th><th>PRs</th><th>Lines Added</th><th>Lines Removed</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="https://github.com/bertwin-mediajel" target="_blank">bertwin-mediajel</a></td>
+        <td>4</td>
+        <td class="lines-added">+2945</td>
+        <td class="lines-removed">-1721</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/verdelmediajel" target="_blank">verdelmediajel</a></td>
+        <td>4</td>
+        <td class="lines-added">+3854</td>
+        <td class="lines-removed">-415</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/icarlofer" target="_blank">icarlofer</a></td>
+        <td>3</td>
+        <td class="lines-added">+51</td>
+        <td class="lines-removed">-108</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/johnjoseph28" target="_blank">johnjoseph28</a></td>
+        <td>2</td>
+        <td class="lines-added">+39</td>
+        <td class="lines-removed">-491</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/pacholoamit" target="_blank">pacholoamit</a></td>
+        <td>2</td>
+        <td class="lines-added">+1180</td>
+        <td class="lines-removed">-189</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/randallegend" target="_blank">randallegend</a></td>
+        <td>2</td>
+        <td class="lines-added">+79</td>
+        <td class="lines-removed">-41</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/rmm03" target="_blank">rmm03</a></td>
+        <td>2</td>
+        <td class="lines-added">+196</td>
+        <td class="lines-removed">-80</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/JC-DMZ22" target="_blank">JC-DMZ22</a></td>
+        <td>1</td>
+        <td class="lines-added">+7</td>
+        <td class="lines-removed">-7</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/jonmediajel" target="_blank">jonmediajel</a></td>
+        <td>1</td>
+        <td class="lines-added">+53</td>
+        <td class="lines-removed">-7</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/ramzell" target="_blank">ramzell</a></td>
+        <td>1</td>
+        <td class="lines-added">+8</td>
+        <td class="lines-removed">-7</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/Russell0813" target="_blank">Russell0813</a></td>
+        <td>1</td>
+        <td class="lines-added">+7</td>
+        <td class="lines-removed">-2</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h2>Additional Metrics</h2>
+  <div class="metrics-grid">
+    <div class="metric-item">
+      <div class="metric-label">Most Active Repo</div>
+      <div class="metric-value">mediajel-dashboard</div>
+    </div>
+    <div class="metric-item">
+      <div class="metric-label">Avg PR Size (lines)</div>
+      <div class="metric-value">499</div>
+    </div>
+    <div class="metric-item">
+      <div class="metric-label">Revert Count</div>
+      <div class="metric-value">1</div>
+    </div>
+    <div class="metric-item">
+      <div class="metric-label">PR Velocity (per day)</div>
+      <div class="metric-value">3.29</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  var ctx = document.getElementById('donutChart').getContext('2d');
+  var bugCount = 16;
+  var featCount = 3;
+  var enhCount = 4;
+  var total = bugCount + featCount + enhCount;
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Bug Fixes', 'New Features', 'Enhancements'],
+      datasets: [{
+        data: total > 0 ? [bugCount, featCount, enhCount] : [1, 0, 0],
+        backgroundColor: ['#f87171', '#818cf8', '#34d399'],
+        borderColor: '#1a1d27',
+        borderWidth: 3,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      cutout: '65%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              if (total === 0) return ctx.label + ': 0';
+              return ctx.label + ': ' + ctx.raw +
+                     ' (' + Math.round(ctx.raw / total * 100) + '%)';
+            }
+          }
+        }
+      }
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
