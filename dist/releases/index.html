@@ -175,8 +175,8 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 }
 .section-icon {
   width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0;
-  background: var(--surface-2); border: 1px solid var(--border);
-  color: var(--text-2);
+  background: var(--accent-bg); border: 1px solid var(--accent-bd);
+  color: var(--accent);
   display: flex; align-items: center; justify-content: center;
   margin-top: 1px;
 }
@@ -227,6 +227,11 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   border-top: 2px solid var(--accent);
   border-radius: 0 0 var(--radius) var(--radius);
   overflow: hidden; margin-bottom: 0.75rem;
+  transition: box-shadow var(--t), border-color var(--t);
+}
+.featured-card:hover {
+  box-shadow: 0 8px 28px rgba(99,102,241,.16);
+  border-color: rgba(99,102,241,.45);
 }
 .card-header {
   padding: 1rem 1.25rem 0.875rem;
@@ -245,7 +250,10 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   background: var(--surface);
   padding: 0.875rem 0.75rem;
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px;
+  transition: background var(--t);
+  cursor: default;
 }
+.stat-card:hover { background: var(--surface-2); }
 .stat-val {
   font-size: 1.5rem; font-weight: 700; line-height: 1; letter-spacing: -0.03em;
   color: var(--text); font-variant-numeric: tabular-nums;
@@ -276,8 +284,8 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .dev-name { font-size: 0.875rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dev-stats { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
 .dev-total { font-size: 0.8125rem; font-weight: 700; color: var(--text); min-width: 16px; text-align: right; font-variant-numeric: tabular-nums; }
-.dev-bar-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.dev-bar { height: 100%; border-radius: 2px; background: var(--accent); max-width: 100%; }
+.dev-bar-track { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.dev-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), #818cf8); max-width: 100%; }
 
 /* ── Expand toggle ──────────────────────────────────────────────────────── */
 .expand-details { border-top: 1px solid var(--border); }
@@ -299,9 +307,10 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .accordion {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); overflow: hidden;
-  transition: border-color var(--t);
+  transition: border-color var(--t), box-shadow var(--t);
 }
 .accordion:hover { border-color: var(--border-2); }
+.accordion[open] { border-color: var(--accent-bd); }
 .accordion-summary {
   display: flex; align-items: center; gap: 0.5rem;
   padding: 0.75rem 1rem; cursor: pointer; list-style: none;
@@ -320,9 +329,9 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .release-card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); overflow: hidden;
-  transition: border-color var(--t);
+  transition: border-color var(--t), box-shadow var(--t);
 }
-.release-card:hover { border-color: var(--border-2); }
+.release-card:hover { border-color: var(--border-2); box-shadow: 0 6px 20px rgba(0,0,0,.18); }
 .release-card--latest {
   border-color: var(--accent-bd);
   border-top: 2px solid var(--accent);
@@ -334,8 +343,17 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   background: var(--surface);
 }
 .release-meta { display: flex; align-items: center; gap: 0.375rem; margin-bottom: 0.25rem; }
-.release-ver { font-size: 0.9375rem; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; }
-.release-ver--major { color: var(--accent); font-size: 1.0625rem; }
+.release-ver {
+  display: inline-flex; align-items: center;
+  font-size: 0.8125rem; font-weight: 600;
+  padding: 2px 8px; border-radius: 6px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-2); font-variant-numeric: tabular-nums;
+}
+.release-ver--major {
+  background: var(--accent-bg); border-color: var(--accent-bd);
+  color: var(--accent); font-size: 0.875rem;
+}
 .release-title { font-size: 0.9375rem; font-weight: 600; color: var(--text); }
 
 /* ── Report body ────────────────────────────────────────────────────────── */
@@ -381,7 +399,10 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   background: var(--surface);
   padding: 0.875rem 0.75rem;
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px;
+  transition: background var(--t);
+  cursor: default;
 }
+.ach-prev-stat:hover { background: var(--surface-2); }
 .ach-prev-val {
   font-size: 1.5rem; font-weight: 700; line-height: 1; letter-spacing: -0.03em;
   color: var(--text); font-variant-numeric: tabular-nums;
@@ -461,17 +482,22 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   .layout { display: block; }
   .section { page-break-inside: avoid; }
 }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
 </style>
 </head>
 <body>
 
 <header class="hdr" role="banner">
-  <div class="hdr-logo">
+  <a href="../" class="hdr-logo" aria-label="MediaJel Relations home">
     <div class="hdr-mark" aria-hidden="true">MJ</div>
-    Release Notes
-  </div>
+    Relations
+  </a>
+  <span class="hdr-sep" aria-hidden="true">/</span>
+  <span class="hdr-org">Release Notes</span>
   <div class="hdr-space"></div>
-  <time class="hdr-date" datetime="2026-05-24T06:05:02.084Z">May 24, 2026</time>
+  <time class="hdr-date" datetime="2026-05-24T06:18:54.072Z">May 24, 2026</time>
 </header>
 
 <main class="main" id="main-content">
