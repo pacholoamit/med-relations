@@ -324,3 +324,27 @@ The build script (`scripts/build.js`) reads the latest HTML achievement report v
 - Chart counts from `var bugCount = N` / `var featCount = N` / `var enhCount = N` in the script block
 
 **Important:** Keep the variable names `bugCount`, `featCount`, `enhCount` in the script block exactly as shown — the main page achievements preview section depends on these regex patterns.
+
+---
+
+## Canvas ID scoping (build.js auto-handles)
+
+The build script automatically renames canvas IDs in inlined reports from:
+- `categoryChart` → `categoryChart-{slug}`
+- `priorityChart` → `priorityChart-{slug}`
+
+This prevents conflicts when multiple reports are embedded in the same achievements page. The AchievementsAgent does NOT need to manually scope these IDs.
+
+However, the AchievementsAgent MUST use these EXACT JavaScript variable names in the inline `<script>` block:
+
+```js
+var bugCount = N;
+var featCount = N;
+var enhCount = N;
+var critCount = N;
+var highCount = N;
+var normCount = N;
+var lowCount = N;
+```
+
+The main page achievements preview extracts these via regex from the latest HTML report. Changing these variable names breaks the main page preview.

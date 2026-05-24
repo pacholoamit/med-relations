@@ -246,6 +246,8 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 }
 .stat-val--green { color: var(--green); }
 .stat-val--orange { color: var(--orange); }
+.stat-val--accent { color: var(--accent); }
+.stat-val--yellow { color: #f59e0b; }
 .stat-lbl { font-size: 0.6875rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
 
 /* ── Leaderboard ────────────────────────────────────────────────────────── */
@@ -374,50 +376,7 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .report-body tr:hover td { background: var(--surface-2); }
 .report-body blockquote { border-left: 3px solid var(--border-2); padding-left: 0.875rem; color: var(--text-3); margin-bottom: 0.625rem; }
 
-/* ── Achievements showcase (main page) ───────────────────────────────────── */
-.ach-showcase {
-  background: linear-gradient(135deg, var(--surface) 0%, var(--accent-bg) 100%);
-  border: 1px solid var(--accent-bd);
-  border-top: 2px solid var(--accent);
-  border-radius: 0 0 var(--radius) var(--radius);
-  overflow: hidden; margin-bottom: 0.75rem;
-}
-.ach-showcase-stats {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 1px; background: var(--border);
-  border-bottom: 1px solid var(--border);
-}
-.ach-showcase-stat {
-  background: var(--surface);
-  padding: 1rem 0.75rem;
-  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
-  position: relative; overflow: hidden;
-  transition: background var(--t); cursor: default;
-}
-.ach-showcase-stat::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-}
-.ach-showcase-stat--indigo::before { background: #6366f1; }
-.ach-showcase-stat--green::before  { background: #22c55e; }
-.ach-showcase-stat--orange::before { background: #f97316; }
-.ach-showcase-stat--yellow::before { background: #f59e0b; }
-.ach-showcase-stat--indigo { background: linear-gradient(145deg, rgba(99,102,241,.1) 0%, var(--surface) 60%); }
-.ach-showcase-stat--green  { background: linear-gradient(145deg, rgba(34,197,94,.1) 0%, var(--surface) 60%); }
-.ach-showcase-stat--orange { background: linear-gradient(145deg, rgba(249,115,22,.1) 0%, var(--surface) 60%); }
-.ach-showcase-stat--yellow { background: linear-gradient(145deg, rgba(245,158,11,.1) 0%, var(--surface) 60%); }
-.ach-showcase-stat:hover { background: var(--surface-2); }
-.ach-showcase-stat--indigo:hover { background: linear-gradient(145deg, rgba(99,102,241,.15) 0%, var(--surface-2) 60%); }
-.ach-showcase-stat--green:hover  { background: linear-gradient(145deg, rgba(34,197,94,.15) 0%, var(--surface-2) 60%); }
-.ach-showcase-stat--orange:hover { background: linear-gradient(145deg, rgba(249,115,22,.15) 0%, var(--surface-2) 60%); }
-.ach-showcase-stat--yellow:hover { background: linear-gradient(145deg, rgba(245,158,11,.15) 0%, var(--surface-2) 60%); }
-.ach-showcase-val {
-  font-size: 2rem; font-weight: 700; line-height: 1; letter-spacing: -0.04em;
-  color: var(--text); font-variant-numeric: tabular-nums;
-}
-.ach-showcase-lbl {
-  font-size: 0.625rem; color: var(--text-3);
-  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
-}
+/* ── Achievements chart/pill/cta (main page preview) ─────────────────────── */
 .ach-chart-row {
   display: flex; align-items: center; gap: 1.5rem;
   padding: 1.5rem 1.25rem 0;
@@ -507,7 +466,6 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,.12); }
   .dev-stats { display: none; }
   .hdr-date { display: none; }
   .footer { flex-direction: column; gap: 0.5rem; text-align: center; }
-  .ach-showcase-stats { grid-template-columns: repeat(2, 1fr); }
   .ach-chart-row { flex-direction: column; align-items: flex-start; }
 }
 @media (max-width: 480px) {
@@ -533,7 +491,7 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,.12); }
   <span class="hdr-sep" aria-hidden="true">/</span>
   <span class="hdr-org">Release Notes</span>
   <div class="hdr-space"></div>
-  <time class="hdr-date" datetime="2026-05-24T09:33:44.821Z">May 24, 2026</time>
+  <time class="hdr-date" datetime="2026-05-24T10:07:30.845Z">May 24, 2026</time>
 </header>
 <main class="main" id="main-content">
   
