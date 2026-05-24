@@ -321,9 +321,22 @@ Load before the inline chart initialisation scripts:
 The build script (`scripts/build.js`) reads the latest HTML achievement report via `parseLatestAchievementHTML()` and uses regex to extract:
 
 - Stat values from `.stat-label` / `.stat-value` element pairs
-- Chart counts from `var bugCount = N` / `var featCount = N` / `var enhCount = N` in the script block
+- Category chart counts from `var bugCount = N` / `var featCount = N` / `var enhCount = N` in the script block
+- Priority chart counts from `var critCount = N` / `var highCount = N` / `var normCount = N` / `var lowCount = N` in the script block
 
-**Important:** Keep the variable names `bugCount`, `featCount`, `enhCount` in the script block exactly as shown — the main page achievements preview section depends on these regex patterns.
+**Required variable names — do not rename:** The main page achievements preview depends on these exact regex patterns:
+
+| Variable | Purpose |
+|---|---|
+| `var bugCount` | Bug Fix count for category donut |
+| `var featCount` | New Feature count for category donut |
+| `var enhCount` | Enhancement count for category donut |
+| `var critCount` | Critical count for priority donut |
+| `var highCount` | High count for priority donut |
+| `var normCount` | Normal count for priority donut |
+| `var lowCount` | Low count for priority donut |
+
+**Stat card ordering (required):** The `stat-value` div MUST come BEFORE the `stat-label` div in each stat card. Although `build.js` now handles both orderings defensively, the spec order (value before label) is required for forward compatibility.
 
 ---
 
