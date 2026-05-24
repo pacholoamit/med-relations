@@ -1233,19 +1233,66 @@ function generateReleasesHTML(releases) {
 </html>`;
 }
 
+// ─── CSS scoping helpers ──────────────────────────────────────────────────────
+
+function findCSSBlockEnd(css, openBrace) {
+  let depth = 0;
+  for (let i = openBrace; i < css.length; i++) {
+    if (css[i] === '{') depth++;
+    else if (css[i] === '}') { depth--; if (depth === 0) return i + 1; }
+  }
+  return css.length;
+}
+
+function tokenizeScopeCSS(css, scope) {
+  let result = '';
+  let i = 0;
+  while (i < css.length) {
+    const nextOpen = css.indexOf('{', i);
+    if (nextOpen === -1) { result += css.slice(i); break; }
+    const prelude = css.slice(i, nextOpen);
+    const trimmed = prelude.trim();
+    const blockEnd = findCSSBlockEnd(css, nextOpen);
+    const blockContent = css.slice(nextOpen + 1, blockEnd - 1);
+    if (!trimmed) { result += css.slice(i, nextOpen + 1); i = nextOpen + 1; continue; }
+    if (/^@(-webkit-)?keyframes/i.test(trimmed)) {
+      result += prelude + '{' + blockContent + '}';
+    } else if (/^@(media|supports)/i.test(trimmed)) {
+      result += prelude + '{' + tokenizeScopeCSS(blockContent, scope) + '}';
+    } else if (/^@/.test(trimmed)) {
+      result += prelude + '{' + blockContent + '}';
+    } else {
+      const scopedSelector = trimmed.split(',').map(s => {
+        const t = s.trim();
+        if (!t) return s;
+        if (t === ':root') return scope;
+        if (t === 'body') return scope;
+        return `${scope} ${t}`;
+      }).join(', ');
+      result += scopedSelector + '{' + blockContent + '}';
+    }
+    i = blockEnd;
+  }
+  return result;
+}
+
+function scopeReportCSS(css, slug) {
+  const scope = `[data-report-scope="${slug}"]`;
+  // Remove @import lines (full-line match handles URLs with semicolons like wght@400;500)
+  // Strip CSS comments so they don't bleed into selector text during tokenization
+  const stripped = css
+    .replace(/^[^\S\n]*@import[^\n]*\n?/gm, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  return tokenizeScopeCSS(stripped, scope);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 async function generateAchievementsHTML(mdReports, htmlReports) {
   const buildDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
   const hasHtml = htmlReports.length > 0;
-
-  // Scope :root and body selectors to the report container to prevent CSS variable collision
-  function scopeReportCSS(css, slug) {
-    const scope = `[data-report-scope="${slug}"]`;
-    return css
-      .replace(/:root(\s*\{)/g, `${scope}$1`)
-      .replace(/(?<![a-zA-Z0-9_-])body(\s*\{)/g, `${scope}$1`);
-  }
 
   // Read and extract <body> content + scoped <style> for inline injection (no iframes)
   const panels = await Promise.all(
