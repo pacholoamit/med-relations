@@ -155,7 +155,7 @@
     <div class="stat-icon" aria-hidden="true">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg>
     </div>
-    <div class="stat-value">23</div>
+    <div class="stat-value">31</div>
     <div class="stat-label">PRs Merged</div>
     <div class="stat-period">this week</div>
   </div>
@@ -163,7 +163,7 @@
     <div class="stat-icon" aria-hidden="true">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
     </div>
-    <div class="stat-value green">+8419</div>
+    <div class="stat-value green">+13,557</div>
     <div class="stat-label">Lines Added</div>
     <div class="stat-period">this week</div>
   </div>
@@ -171,7 +171,7 @@
     <div class="stat-icon" aria-hidden="true">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
     </div>
-    <div class="stat-value red">-3068</div>
+    <div class="stat-value red">-3,686</div>
     <div class="stat-label">Lines Removed</div>
     <div class="stat-period">this week</div>
   </div>
@@ -179,7 +179,7 @@
     <div class="stat-icon" aria-hidden="true">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
     </div>
-    <div class="stat-value yellow">15</div>
+    <div class="stat-value yellow">18</div>
     <div class="stat-label">Hotfixes</div>
     <div class="stat-period">this week</div>
   </div>
@@ -548,9 +548,9 @@
 <script>
 (function() {
   var catCtx = document.getElementById('categoryChart').getContext('2d');
-  var bugCount = 16;
-  var featCount = 3;
-  var enhCount = 4;
+  var bugCount = 19;
+  var featCount = 1;
+  var enhCount = 11;
   var catTotal = bugCount + featCount + enhCount;
   new Chart(catCtx, {
     type: 'doughnut',
