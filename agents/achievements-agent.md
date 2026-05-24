@@ -336,6 +336,8 @@ The build script (`scripts/build.js`) reads the latest HTML achievement report v
 | `var normCount` | Normal count for priority donut |
 | `var lowCount` | Low count for priority donut |
 
+**Stat card ordering (required):** The `stat-value` div MUST come BEFORE the `stat-label` div in each stat card. The build.js regex expects this order. Reversing it silently breaks the main page preview.
+
 **Canvas ID scoping (pipeline-resilient):** `build.js` automatically renames `id="categoryChart"` and `id="priorityChart"` to `id="categoryChart-{slug}"` and `id="priorityChart-{slug}"` when inlining each report panel. This prevents cross-panel DOM collisions when multiple reports are embedded on the same page. Do NOT use unique IDs in report files — the build step handles scoping. Always use the canonical names `categoryChart` and `priorityChart` in your report HTML.
 
 ---
