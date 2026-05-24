@@ -77,10 +77,12 @@ Each chart container: `<div class="chart-container">` with `<div class="chart-wr
 
 ### Sort order
 
-Sort `<tbody>` rows as follows:
-1. Bug Fix rows first (chronological by `merged_at` ascending within group)
-2. New Feature rows second (chronological within group)
-3. Enhancement rows third (chronological within group)
+Sort `<tbody>` rows as follows (primary: category, secondary: priority):
+1. Bug Fix — Critical first, then Normal/Low/High
+2. New Feature — Critical first, then Normal/Low/High
+3. Enhancement — Critical first, then Normal/Low/High
+
+Priority rank within each category group: Critical (0) → High (1) → Normal (2) → Low (3).
 
 ### Badge classes
 
@@ -159,38 +161,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 ```
 
 Also add `<link rel="preconnect">` tags for `fonts.googleapis.com` and `fonts.gstatic.com` in `<head>`.
-
-## Hero section
-
-Add a hero section **before** the stat grid:
-
-```html
-<div class="hero">
-  <span class="hero-badge">YYYY-WXX</span>
-  <h1 class="hero-title">This Week in Engineering</h1>
-  <p class="hero-period">Mon DD – Mon DD, YYYY</p>
-</div>
-```
-
-Hero CSS:
-```css
-.hero {
-  background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
-  border-bottom: 1px solid var(--border);
-  padding: 2.5rem 2rem;
-  margin-bottom: 2rem;
-}
-.hero-badge {
-  display: inline-block; padding: .25rem .75rem;
-  background: rgba(99,102,241,.15); color: #818cf8;
-  border: 1px solid rgba(99,102,241,.3); border-radius: .375rem;
-  font-size: .75rem; font-weight: 600; letter-spacing: .06em; margin-bottom: .75rem;
-}
-.hero-title { font-size: 1.75rem; font-weight: 700; margin-bottom: .25rem; }
-.hero-period { color: var(--muted); font-size: .875rem; }
-```
-
-Wrap all content below the hero in `<div class="content">` with `padding: 0 2rem 2rem`.
 
 ## Stat card animations
 

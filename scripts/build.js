@@ -959,7 +959,6 @@ function getAchievementsJS() {
 (function () {
   var btns = document.querySelectorAll('.ach-week-btn');
   var frames = document.querySelectorAll('.ach-frame');
-  var titleEl = document.getElementById('ach-viewer-title');
   var loader = document.querySelector('.ach-loader');
 
   function showLoader() {
@@ -978,11 +977,6 @@ function getAchievementsJS() {
       f.setAttribute('aria-hidden', visible ? 'false' : 'true');
       if (visible) activeFrame = f;
     });
-    if (titleEl) {
-      var btn = document.querySelector('.ach-week-btn[data-slug="' + slug + '"]');
-      var labelEl = btn && btn.querySelector('.ach-week-label');
-      titleEl.textContent = labelEl ? labelEl.textContent.trim() : (btn ? slug : slug);
-    }
     if (activeFrame) {
       showLoader();
       var onLoad = function () {
@@ -1292,24 +1286,10 @@ ${getCSS()}
   min-height: calc(100vh - var(--hdr-h));
   position: relative;
 }
-.ach-viewer-hd {
-  padding: 1rem 1.5rem 0.875rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  position: sticky; top: var(--hdr-h); z-index: 10;
-  display: flex; align-items: center; gap: 0.625rem;
-}
-.ach-viewer-icon {
-  width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0;
-  background: var(--surface-2); border: 1px solid var(--border);
-  color: var(--text-2);
-  display: flex; align-items: center; justify-content: center;
-}
-.ach-viewer-title { font-size: 0.9375rem; font-weight: 600; color: var(--text); }
 .ach-frame {
   width: 100%; flex: 1;
   border: none;
-  min-height: calc(100vh - var(--hdr-h) - 57px);
+  min-height: calc(100vh - var(--hdr-h));
 }
 .ach-viewer-empty { padding: 2.5rem; }
 .ach-legacy {
@@ -1329,7 +1309,7 @@ ${getCSS()}
   display: flex; align-items: center; justify-content: center;
   background: var(--bg); z-index: 5;
   transition: opacity 0.25s;
-  top: 57px; /* below the viewer header */
+  top: 0;
 }
 .ach-loader--hidden { opacity: 0; pointer-events: none; }
 .ach-spinner {
@@ -1394,10 +1374,6 @@ ${getCSS()}
     ${weekList}
   </nav>
   <div class="ach-viewer-wrap">
-    <div class="ach-viewer-hd">
-      <div class="ach-viewer-icon" aria-hidden="true">${achievementsMeta.icon}</div>
-      <span class="ach-viewer-title" id="ach-viewer-title">${hasHtml ? esc(htmlReports[0].title) : 'Achievements'}</span>
-    </div>
     <div class="ach-loader" role="status" aria-label="Loading report">
       <div class="ach-spinner" aria-hidden="true"></div>
     </div>
