@@ -861,7 +861,13 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .report-body blockquote { border-left: 3px solid var(--border-2); padding-left: 0.875rem; color: var(--text-3); margin-bottom: 0.625rem; }
 
 /* ── Achievements showcase (main page) ───────────────────────────────────── */
-.ach-showcase { border-bottom: 1px solid var(--border); }
+.ach-showcase {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--accent-bg) 100%);
+  border: 1px solid var(--accent-bd);
+  border-top: 2px solid var(--accent);
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow: hidden; margin-bottom: 0.75rem;
+}
 .ach-showcase-stats {
   display: grid; grid-template-columns: repeat(4, 1fr);
   gap: 1px; background: var(--border);
@@ -881,7 +887,15 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .ach-showcase-stat--green::before  { background: #22c55e; }
 .ach-showcase-stat--orange::before { background: #f97316; }
 .ach-showcase-stat--yellow::before { background: #f59e0b; }
+.ach-showcase-stat--indigo { background: linear-gradient(145deg, rgba(99,102,241,.1) 0%, var(--surface) 60%); }
+.ach-showcase-stat--green  { background: linear-gradient(145deg, rgba(34,197,94,.1) 0%, var(--surface) 60%); }
+.ach-showcase-stat--orange { background: linear-gradient(145deg, rgba(249,115,22,.1) 0%, var(--surface) 60%); }
+.ach-showcase-stat--yellow { background: linear-gradient(145deg, rgba(245,158,11,.1) 0%, var(--surface) 60%); }
 .ach-showcase-stat:hover { background: var(--surface-2); }
+.ach-showcase-stat--indigo:hover { background: linear-gradient(145deg, rgba(99,102,241,.15) 0%, var(--surface-2) 60%); }
+.ach-showcase-stat--green:hover  { background: linear-gradient(145deg, rgba(34,197,94,.15) 0%, var(--surface-2) 60%); }
+.ach-showcase-stat--orange:hover { background: linear-gradient(145deg, rgba(249,115,22,.15) 0%, var(--surface-2) 60%); }
+.ach-showcase-stat--yellow:hover { background: linear-gradient(145deg, rgba(245,158,11,.15) 0%, var(--surface-2) 60%); }
 .ach-showcase-val {
   font-size: 2rem; font-weight: 700; line-height: 1; letter-spacing: -0.04em;
   color: var(--text); font-variant-numeric: tabular-nums;
@@ -1358,7 +1372,7 @@ async function generateAchievementsHTML(mdReports, htmlReports) {
   position: sticky; top: var(--hdr-h); z-index: 50;
   display: flex; overflow-x: auto; gap: 0.375rem;
   padding: 0.625rem 1rem;
-  background: var(--surface);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
   border-bottom: 1px solid var(--border);
   scrollbar-width: none;
 }
@@ -1372,7 +1386,7 @@ async function generateAchievementsHTML(mdReports, htmlReports) {
   transition: background var(--t), color var(--t), border-color var(--t);
 }
 .ach-tab-btn:hover { background: var(--bg); color: var(--text); border-color: var(--border-2); }
-.ach-tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.ach-tab-btn.active { background: linear-gradient(135deg, var(--accent) 0%, #818cf8 100%); color: #fff; border-color: var(--accent); }
 .ach-tab-btn.active .badge--accent { background: rgba(255,255,255,.22); color: #fff; border-color: rgba(255,255,255,.3); }
 .ach-tab-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .ach-tab-date {
@@ -1388,6 +1402,10 @@ async function generateAchievementsHTML(mdReports, htmlReports) {
   to   { opacity: 1; transform: translateY(0); }
 }
 .ach-report-content { min-height: calc(100vh - var(--hdr-h) - 52px); }
+/* Transparent report scope wrapper so scoped report body bg does not bleed through */
+[data-report-scope] { background: transparent !important; }
+/* ── Main content area gradient ───────────────────────────────────────── */
+#main-content { background: linear-gradient(180deg, var(--accent-bg) 0%, transparent 120px); }
 /* ── Legacy section ───────────────────────────────────────────────────── */
 .ach-legacy { padding: 2rem 2.5rem; border-top: 1px solid var(--border); background: var(--bg); }
 .ach-legacy-title {
