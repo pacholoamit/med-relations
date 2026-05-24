@@ -105,6 +105,10 @@ async function parseLatestAchievementHTML() {
   const bugM = content.match(/var bugCount = (\d+)/);
   const featM = content.match(/var featCount = (\d+)/);
   const enhM = content.match(/var enhCount = (\d+)/);
+  const critM = content.match(/var critCount = (\d+)/);
+  const highM = content.match(/var highCount = (\d+)/);
+  const normM = content.match(/var normCount = (\d+)/);
+  const lowM  = content.match(/var lowCount = (\d+)/);
 
   return {
     stats,
@@ -112,6 +116,12 @@ async function parseLatestAchievementHTML() {
       bugCount: bugM ? parseInt(bugM[1], 10) : 0,
       featCount: featM ? parseInt(featM[1], 10) : 0,
       enhCount: enhM ? parseInt(enhM[1], 10) : 0,
+    },
+    priorityChart: {
+      critCount: critM ? parseInt(critM[1], 10) : 0,
+      highCount: highM ? parseInt(highM[1], 10) : 0,
+      normCount: normM ? parseInt(normM[1], 10) : 0,
+      lowCount:  lowM  ? parseInt(lowM[1],  10) : 0,
     },
   };
 }
@@ -315,7 +325,7 @@ function renderPerformanceSection(reports) {
 
 function renderAchievementsPreview(latestStats) {
   if (!latestStats) return '';
-  const { stats, chart } = latestStats;
+  const { stats, chart, priorityChart } = latestStats;
 
   const prs = esc(stats['PRs Merged'] || '—');
   const added = esc(stats['Lines Added'] || '—');
@@ -329,24 +339,15 @@ function renderAchievementsPreview(latestStats) {
   const { bugCount, featCount, enhCount } = chart;
   const total = bugCount + featCount + enhCount;
 
-  const statGrid = `
-<div class="ach-showcase-stats">
-  <div class="ach-showcase-stat ach-showcase-stat--indigo">
-    <span class="ach-showcase-val"${prsNum ? ` data-count-up="${prsNum}" data-count-display="${prs}"` : ''}>${prs}</span>
-    <span class="ach-showcase-lbl">PRs Merged</span>
-  </div>
-  <div class="ach-showcase-stat ach-showcase-stat--green">
-    <span class="ach-showcase-val"${addedNum ? ` data-count-up="${addedNum}" data-count-display="${added}"` : ''}>${added}</span>
-    <span class="ach-showcase-lbl">Lines Added</span>
-  </div>
-  <div class="ach-showcase-stat ach-showcase-stat--orange">
-    <span class="ach-showcase-val"${removedNum ? ` data-count-up="${removedNum}" data-count-display="${removed}"` : ''}>${removed}</span>
-    <span class="ach-showcase-lbl">Lines Removed</span>
-  </div>
-  <div class="ach-showcase-stat ach-showcase-stat--yellow">
-    <span class="ach-showcase-val"${hotfixesNum ? ` data-count-up="${hotfixesNum}" data-count-display="${hotfixes}"` : ''}>${hotfixes}</span>
-    <span class="ach-showcase-lbl">Hotfixes</span>
-  </div>
+  const { critCount = 0, highCount = 0, normCount = 0, lowCount = 0 } = priorityChart || {};
+  const priTotal = critCount + highCount + normCount + lowCount;
+
+  const statGridHtml = `
+<div class="stat-grid">
+  <div class="stat-card"><span class="stat-val stat-val--accent"${prsNum ? ` data-count-up="${prsNum}" data-count-display="${prs}"` : ''}>${prs}</span><span class="stat-lbl">PRs Merged</span></div>
+  <div class="stat-card"><span class="stat-val stat-val--green"${addedNum ? ` data-count-up="${addedNum}" data-count-display="${added}"` : ''}>${added}</span><span class="stat-lbl">Lines Added</span></div>
+  <div class="stat-card"><span class="stat-val stat-val--orange"${removedNum ? ` data-count-up="${removedNum}" data-count-display="${removed}"` : ''}>${removed}</span><span class="stat-lbl">Lines Removed</span></div>
+  <div class="stat-card"><span class="stat-val stat-val--yellow"${hotfixesNum ? ` data-count-up="${hotfixesNum}" data-count-display="${hotfixes}"` : ''}>${hotfixes}</span><span class="stat-lbl">Hotfixes</span></div>
 </div>`;
 
   const chartBlock = total > 0 ? `
@@ -359,6 +360,15 @@ function renderAchievementsPreview(latestStats) {
     <div class="ach-chart-legend-item"><span class="ach-chart-dot" style="background:#818cf8"></span><span>New Features — ${featCount}</span></div>
     <div class="ach-chart-legend-item"><span class="ach-chart-dot" style="background:#34d399"></span><span>Enhancements — ${enhCount}</span></div>
   </div>
+  ${priTotal > 0 ? `<div class="ach-chart-wrap" style="margin-left:1.5rem">
+    <canvas id="achPrevPriorityDonut" width="180" height="180"></canvas>
+  </div>
+  <div class="ach-chart-legend">
+    <div class="ach-chart-legend-item"><span class="ach-chart-dot" style="background:#f59e0b"></span><span>Critical — ${critCount}</span></div>
+    <div class="ach-chart-legend-item"><span class="ach-chart-dot" style="background:#f87171"></span><span>High — ${highCount}</span></div>
+    <div class="ach-chart-legend-item"><span class="ach-chart-dot" style="background:#94a3b8"></span><span>Normal — ${normCount}</span></div>
+    <div class="ach-chart-legend-item"><span class="ach-chart-dot" style="background:#34d399"></span><span>Low — ${lowCount}</span></div>
+  </div>` : ''}
 </div>
 <script>
 (function(){
@@ -378,6 +388,8 @@ function renderAchievementsPreview(latestStats) {
     c.save();
   }};
   new Chart(ctx.getContext('2d'),{type:'doughnut',data:{labels:['Bug Fixes','New Features','Enhancements'],datasets:[{data:[${bugCount},${featCount},${enhCount}],backgroundColor:['#f87171','#818cf8','#34d399'],borderColor:getComputedStyle(document.documentElement).getPropertyValue('--surface').trim()||'#fff',borderWidth:3,hoverOffset:6}]},options:{responsive:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+' ('+Math.round(c.raw/${total}*100)+'%)';}}}},animation:{animateRotate:true,duration:1000}},plugins:[centerPlugin]});
+  ${priTotal > 0 ? `var priCtx=document.getElementById('achPrevPriorityDonut');
+  if(priCtx){new Chart(priCtx.getContext('2d'),{type:'doughnut',data:{labels:['Critical','High','Normal','Low'],datasets:[{data:[${critCount},${highCount},${normCount},${lowCount}],backgroundColor:['#f59e0b','#f87171','#94a3b8','#34d399'],borderColor:getComputedStyle(document.documentElement).getPropertyValue('--surface').trim()||'#fff',borderWidth:3,hoverOffset:6}]},options:{responsive:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+' ('+Math.round(c.raw/${priTotal}*100)+'%)';}}}},animation:{animateRotate:true,duration:1000}}});}` : ''}
 })();
 </script>` : '';
 
@@ -426,7 +438,15 @@ function renderAchievementsPreview(latestStats) {
 })();
 </script>`;
 
-  return `<div class="ach-showcase">${statGrid}${chartBlock}${catPills}${ctaBtn}${countUpScript}</div>`;
+  return `<div class="featured-card">
+  <div class="card-header">
+    <div class="card-meta">
+      <span class="badge badge--accent">Latest</span>
+    </div>
+    <h3 class="card-title">Weekly Achievements</h3>
+  </div>
+  ${statGridHtml}${chartBlock}${catPills}${ctaBtn}${countUpScript}
+</div>`;
 }
 
 function renderAchievementsSection(reports, latestStats) {
@@ -732,6 +752,8 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 }
 .stat-val--green { color: var(--green); }
 .stat-val--orange { color: var(--orange); }
+.stat-val--accent { color: var(--accent); }
+.stat-val--yellow { color: #f59e0b; }
 .stat-lbl { font-size: 0.6875rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
 
 /* ── Leaderboard ────────────────────────────────────────────────────────── */
@@ -860,50 +882,7 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .report-body tr:hover td { background: var(--surface-2); }
 .report-body blockquote { border-left: 3px solid var(--border-2); padding-left: 0.875rem; color: var(--text-3); margin-bottom: 0.625rem; }
 
-/* ── Achievements showcase (main page) ───────────────────────────────────── */
-.ach-showcase {
-  background: linear-gradient(135deg, var(--surface) 0%, var(--accent-bg) 100%);
-  border: 1px solid var(--accent-bd);
-  border-top: 2px solid var(--accent);
-  border-radius: 0 0 var(--radius) var(--radius);
-  overflow: hidden; margin-bottom: 0.75rem;
-}
-.ach-showcase-stats {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 1px; background: var(--border);
-  border-bottom: 1px solid var(--border);
-}
-.ach-showcase-stat {
-  background: var(--surface);
-  padding: 1rem 0.75rem;
-  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
-  position: relative; overflow: hidden;
-  transition: background var(--t); cursor: default;
-}
-.ach-showcase-stat::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-}
-.ach-showcase-stat--indigo::before { background: #6366f1; }
-.ach-showcase-stat--green::before  { background: #22c55e; }
-.ach-showcase-stat--orange::before { background: #f97316; }
-.ach-showcase-stat--yellow::before { background: #f59e0b; }
-.ach-showcase-stat--indigo { background: linear-gradient(145deg, rgba(99,102,241,.1) 0%, var(--surface) 60%); }
-.ach-showcase-stat--green  { background: linear-gradient(145deg, rgba(34,197,94,.1) 0%, var(--surface) 60%); }
-.ach-showcase-stat--orange { background: linear-gradient(145deg, rgba(249,115,22,.1) 0%, var(--surface) 60%); }
-.ach-showcase-stat--yellow { background: linear-gradient(145deg, rgba(245,158,11,.1) 0%, var(--surface) 60%); }
-.ach-showcase-stat:hover { background: var(--surface-2); }
-.ach-showcase-stat--indigo:hover { background: linear-gradient(145deg, rgba(99,102,241,.15) 0%, var(--surface-2) 60%); }
-.ach-showcase-stat--green:hover  { background: linear-gradient(145deg, rgba(34,197,94,.15) 0%, var(--surface-2) 60%); }
-.ach-showcase-stat--orange:hover { background: linear-gradient(145deg, rgba(249,115,22,.15) 0%, var(--surface-2) 60%); }
-.ach-showcase-stat--yellow:hover { background: linear-gradient(145deg, rgba(245,158,11,.15) 0%, var(--surface-2) 60%); }
-.ach-showcase-val {
-  font-size: 2rem; font-weight: 700; line-height: 1; letter-spacing: -0.04em;
-  color: var(--text); font-variant-numeric: tabular-nums;
-}
-.ach-showcase-lbl {
-  font-size: 0.625rem; color: var(--text-3);
-  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
-}
+/* ── Achievements chart/pill/cta (main page preview) ─────────────────────── */
 .ach-chart-row {
   display: flex; align-items: center; gap: 1.5rem;
   padding: 1.5rem 1.25rem 0;
@@ -993,7 +972,6 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,.12); }
   .dev-stats { display: none; }
   .hdr-date { display: none; }
   .footer { flex-direction: column; gap: 0.5rem; text-align: center; }
-  .ach-showcase-stats { grid-template-columns: repeat(2, 1fr); }
   .ach-chart-row { flex-direction: column; align-items: flex-start; }
 }
 @media (max-width: 480px) {
@@ -1328,6 +1306,14 @@ async function generateAchievementsHTML(mdReports, htmlReports) {
         bodyContent = content
           .replace(/^[\s\S]*?<body[^>]*>/i, '')
           .replace(/<\/body>[\s\S]*$/i, '');
+        // Scope canvas IDs to prevent conflicts across inlined panels
+        bodyContent = bodyContent
+          .replace(/id="categoryChart"/g, `id="categoryChart-${r.slug}"`)
+          .replace(/id="priorityChart"/g, `id="priorityChart-${r.slug}"`)
+          .replace(/getElementById\('categoryChart'\)/g, `getElementById('categoryChart-${r.slug}')`)
+          .replace(/getElementById\("categoryChart"\)/g, `getElementById('categoryChart-${r.slug}')`)
+          .replace(/getElementById\('priorityChart'\)/g, `getElementById('priorityChart-${r.slug}')`)
+          .replace(/getElementById\("priorityChart"\)/g, `getElementById('priorityChart-${r.slug}')`);
       } catch {
         bodyContent = '<p style="color:var(--text-3);padding:2rem">Report could not be loaded.</p>';
       }
