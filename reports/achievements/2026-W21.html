@@ -21,7 +21,7 @@
   .stat-card { background: var(--card); border: 1px solid var(--border);
                border-radius: .75rem; padding: 1.25rem; }
   .stat-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em;
-                color: var(--muted); margin-bottom: .5rem; }
+                color: var(--muted); margin-top: .5rem; }
   .stat-value { font-size: 2rem; font-weight: 700; }
   .stat-value.green { color: var(--green); }
   .stat-value.red { color: var(--red); }
@@ -31,7 +31,7 @@
        padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
   .chart-container { display: flex; align-items: center; gap: 2rem;
                      background: var(--card); border: 1px solid var(--border);
-                     border-radius: .75rem; padding: 1.5rem; margin-bottom: 2rem; }
+                     border-radius: .75rem; padding: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
   .chart-wrap { width: 200px; height: 200px; flex-shrink: 0; }
   .legend { display: flex; flex-direction: column; gap: .75rem; }
   .legend-item { display: flex; align-items: center; gap: .5rem; font-size: .875rem; }
@@ -58,6 +58,8 @@
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
   .empty-note { color: var(--muted); font-style: italic; padding: 1rem 0; }
+  .chart-divider { width: 1px; background: var(--border); height: 160px; flex-shrink: 0; }
+  .chart-section { display: flex; align-items: center; gap: 1.5rem; }
 </style>
 </head>
 <body>
@@ -67,41 +69,67 @@
 
 <div class="stat-grid">
   <div class="stat-card">
-    <div class="stat-label">PRs Merged</div>
     <div class="stat-value">29</div>
+    <div class="stat-label">PRs Merged</div>
   </div>
-  <div class="stat-card">
-    <div class="stat-label">Lines Added</div>
+  <div class="stat-card stat-card--green">
     <div class="stat-value green">+12,646</div>
+    <div class="stat-label">Lines Added</div>
   </div>
-  <div class="stat-card">
-    <div class="stat-label">Lines Removed</div>
+  <div class="stat-card stat-card--red">
     <div class="stat-value red">-1,288</div>
+    <div class="stat-label">Lines Removed</div>
   </div>
-  <div class="stat-card">
-    <div class="stat-label">Hotfixes</div>
+  <div class="stat-card stat-card--yellow">
     <div class="stat-value yellow">20</div>
+    <div class="stat-label">Hotfixes</div>
   </div>
 </div>
 
 <div class="section">
   <h2>Category Breakdown</h2>
   <div class="chart-container">
-    <div class="chart-wrap">
-      <canvas id="donutChart"></canvas>
+    <div class="chart-section">
+      <div class="chart-wrap">
+        <canvas id="categoryChart"></canvas>
+      </div>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#f87171"></div>
+          <span>Bug Fixes &mdash; 26</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#818cf8"></div>
+          <span>New Features &mdash; 1</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#34d399"></div>
+          <span>Enhancements &mdash; 2</span>
+        </div>
+      </div>
     </div>
-    <div class="legend">
-      <div class="legend-item">
-        <div class="legend-dot" style="background:#f87171"></div>
-        <span>Bug Fixes &mdash; 26</span>
+    <div class="chart-divider"></div>
+    <div class="chart-section">
+      <div class="chart-wrap">
+        <canvas id="priorityChart"></canvas>
       </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background:#818cf8"></div>
-        <span>New Features &mdash; 1</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background:#34d399"></div>
-        <span>Enhancements &mdash; 2</span>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#f59e0b"></div>
+          <span>Critical &mdash; 20</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#f87171"></div>
+          <span>High &mdash; 0</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#94a3b8"></div>
+          <span>Normal &mdash; 9</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#34d399"></div>
+          <span>Low &mdash; 0</span>
+        </div>
       </div>
     </div>
   </div>
@@ -413,12 +441,13 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 (function() {
-  var ctx = document.getElementById('donutChart').getContext('2d');
   var bugCount = 26;
   var featCount = 1;
   var enhCount = 2;
   var total = bugCount + featCount + enhCount;
-  new Chart(ctx, {
+
+  var catCtx = document.getElementById('categoryChart').getContext('2d');
+  new Chart(catCtx, {
     type: 'doughnut',
     data: {
       labels: ['Bug Fixes', 'New Features', 'Enhancements'],
@@ -442,6 +471,44 @@
               if (total === 0) return ctx.label + ': 0';
               return ctx.label + ': ' + ctx.raw +
                      ' (' + Math.round(ctx.raw / total * 100) + '%)';
+            }
+          }
+        }
+      }
+    }
+  });
+
+  var critCount = 20;
+  var highCount = 0;
+  var normCount = 9;
+  var lowCount = 0;
+  var priTotal = critCount + highCount + normCount + lowCount;
+
+  var priCtx = document.getElementById('priorityChart').getContext('2d');
+  new Chart(priCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Critical', 'High', 'Normal', 'Low'],
+      datasets: [{
+        data: priTotal > 0 ? [critCount, highCount, normCount, lowCount] : [1, 0, 0, 0],
+        backgroundColor: ['#f59e0b', '#f87171', '#94a3b8', '#34d399'],
+        borderColor: '#1a1d27',
+        borderWidth: 3,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      cutout: '65%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              if (priTotal === 0) return ctx.label + ': 0';
+              return ctx.label + ': ' + ctx.raw +
+                     ' (' + Math.round(ctx.raw / priTotal * 100) + '%)';
             }
           }
         }
