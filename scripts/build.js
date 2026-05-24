@@ -95,11 +95,18 @@ async function parseLatestAchievementHTML() {
   }
 
   const stats = {};
-  // stat-value comes before stat-label in the HTML
-  const statCardRe = /<div class="stat-value[^"]*">([^<]+)<\/div>\s*<div class="stat-label">([^<]+)<\/div>/g;
+  // Handle both spec order (value→label) and observed order (label→value)
+  const vBeforeL = /<div class="stat-value[^"]*">([^<]+)<\/div>\s*<div class="stat-label">([^<]+)<\/div>/g;
   let m;
-  while ((m = statCardRe.exec(content)) !== null) {
+  while ((m = vBeforeL.exec(content)) !== null) {
     stats[m[2].trim()] = m[1].trim();
+  }
+  const lBeforeV = /<div class="stat-label">([^<]+)<\/div>\s*<div class="stat-value[^"]*">([^<]+)<\/div>/g;
+  while ((m = lBeforeV.exec(content)) !== null) {
+    const label = m[1].trim();
+    if (!Object.prototype.hasOwnProperty.call(stats, label)) {
+      stats[label] = m[2].trim();
+    }
   }
 
   const bugM = content.match(/var bugCount = (\d+)/);
