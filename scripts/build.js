@@ -95,10 +95,11 @@ async function parseLatestAchievementHTML() {
   }
 
   const stats = {};
-  const statCardRe = /<div class="stat-label">([^<]+)<\/div>\s*<div class="stat-value[^"]*">([^<]+)<\/div>/g;
+  // stat-value comes before stat-label in the HTML
+  const statCardRe = /<div class="stat-value[^"]*">([^<]+)<\/div>\s*<div class="stat-label">([^<]+)<\/div>/g;
   let m;
   while ((m = statCardRe.exec(content)) !== null) {
-    stats[m[1].trim()] = m[2].trim();
+    stats[m[2].trim()] = m[1].trim();
   }
 
   const bugM = content.match(/var bugCount = (\d+)/);
@@ -182,8 +183,6 @@ function parseAchievementCategories(raw) {
   return categories;
 }
 
-const CATEGORY_BADGE_CLASS = { Features: 'badge--feature', 'Bug Fixes': 'badge--fix' };
-
 function renderAchievementStatGrid(stats) {
   if (!stats) return '';
   const cells = [
@@ -199,14 +198,6 @@ function renderAchievementStatGrid(stats) {
   ].filter(Boolean);
   if (cells.length === 0) return '';
   return `<div class="stat-grid" style="grid-template-columns:repeat(${cells.length},1fr)">${cells.join('')}</div>`;
-}
-
-function renderAchievementCategoryBadges(categories) {
-  if (!categories || categories.length === 0) return '';
-  return categories.map(c => {
-    const cls = CATEGORY_BADGE_CLASS[c.label] ?? 'badge--infra';
-    return `<span class="badge ${cls}">${esc(c.label)} ${c.count}</span>`;
-  }).join('');
 }
 
 // ─── Component renderers ──────────────────────────────────────────────────────
@@ -322,135 +313,138 @@ function renderPerformanceSection(reports) {
   return `${featured}${archived ? `<div class="archive">${archived}</div>` : ''}`;
 }
 
-const CAT_ICONS = {
-  'Features': `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1l1.2 2.4L11 4l-2 2 .5 2.8L7 7.5 4.5 8.8 5 6 3 4l2.8-.6L7 1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>`,
-  'Bug Fixes': `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M5 2a2 2 0 014 0M3 6h8M4 6V4l-2-2M10 6V4l2-2M4 10.5A3 3 0 007 13a3 3 0 003-2.5M3 6a4 4 0 008 0" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  'Enhancements': `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3.2 3.2l1.4 1.4M9.4 9.4l1.4 1.4M3.2 10.8l1.4-1.4M9.4 4.6l1.4-1.4M7 9.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,
-  'Infrastructure': `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3.2 3.2l1.4 1.4M9.4 9.4l1.4 1.4M3.2 10.8l1.4-1.4M9.4 4.6l1.4-1.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,
-};
-const CAT_TINT = {
-  'Features': 'green',
-  'Bug Fixes': 'orange',
-  'Enhancements': 'indigo',
-  'Infrastructure': 'slate',
-};
-
-function renderAchievementsShowcase(latestStats, categories) {
-  if (!latestStats && (!categories || categories.length === 0)) return '';
-  const { stats = {}, chart = { bugCount: 0, featCount: 0, enhCount: 0 } } = latestStats ?? {};
+function renderAchievementsPreview(latestStats) {
+  if (!latestStats) return '';
+  const { stats, chart } = latestStats;
 
   const prs = esc(stats['PRs Merged'] || '—');
   const added = esc(stats['Lines Added'] || '—');
   const removed = esc(stats['Lines Removed'] || '—');
   const hotfixes = esc(stats['Hotfixes'] || '—');
+  const prsNum = parseInt(prs.replace(/[^\d]/g, ''), 10) || 0;
+  const addedNum = parseInt(added.replace(/[^\d]/g, ''), 10) || 0;
+  const removedNum = parseInt(removed.replace(/[^\d]/g, ''), 10) || 0;
+  const hotfixesNum = parseInt(hotfixes.replace(/[^\d]/g, ''), 10) || 0;
 
   const { bugCount, featCount, enhCount } = chart;
   const total = bugCount + featCount + enhCount;
 
-  const statItems = [
-    { val: prs, lbl: 'PRs Merged', accent: 'indigo', raw: prs },
-    { val: added, lbl: 'Lines Added', accent: 'green', raw: added },
-    { val: removed, lbl: 'Lines Removed', accent: 'orange', raw: removed },
-    { val: hotfixes, lbl: 'Hotfixes', accent: 'yellow', raw: hotfixes },
-  ];
-
-  const statRibbon = `
+  const statGrid = `
 <div class="ach-showcase-stats">
-  ${statItems.map(s => {
-    const numVal = parseInt(String(s.raw).replace(/,/g, ''), 10);
-    const countupAttr = !isNaN(numVal) && numVal >= 0 ? ` data-countup="${numVal}"` : '';
-    return `<div class="ach-showcase-stat ach-showcase-stat--${s.accent}">
-    <span class="ach-showcase-val"${countupAttr}>${s.val}</span>
-    <span class="ach-showcase-lbl">${s.lbl}</span>
-  </div>`;
-  }).join('')}
+  <div class="ach-showcase-stat ach-showcase-stat--indigo">
+    <span class="ach-showcase-val"${prsNum ? ` data-count-up="${prsNum}" data-count-display="${prs}"` : ''}>${prs}</span>
+    <span class="ach-showcase-lbl">PRs Merged</span>
+  </div>
+  <div class="ach-showcase-stat ach-showcase-stat--green">
+    <span class="ach-showcase-val"${addedNum ? ` data-count-up="${addedNum}" data-count-display="${added}"` : ''}>${added}</span>
+    <span class="ach-showcase-lbl">Lines Added</span>
+  </div>
+  <div class="ach-showcase-stat ach-showcase-stat--orange">
+    <span class="ach-showcase-val"${removedNum ? ` data-count-up="${removedNum}" data-count-display="${removed}"` : ''}>${removed}</span>
+    <span class="ach-showcase-lbl">Lines Removed</span>
+  </div>
+  <div class="ach-showcase-stat ach-showcase-stat--yellow">
+    <span class="ach-showcase-val"${hotfixesNum ? ` data-count-up="${hotfixesNum}" data-count-display="${hotfixes}"` : ''}>${hotfixes}</span>
+    <span class="ach-showcase-lbl">Hotfixes</span>
+  </div>
 </div>`;
 
   const chartBlock = total > 0 ? `
-<div class="ach-showcase-chart-row">
-  <div class="ach-showcase-chart-wrap">
-    <canvas id="achShowcaseDonut" width="180" height="180"></canvas>
+<div class="ach-chart-row">
+  <div class="ach-chart-wrap">
+    <canvas id="achPrevDonut" width="180" height="180"></canvas>
   </div>
-  <div class="ach-showcase-legend">
-    <div class="ach-showcase-legend-item"><span class="ach-showcase-dot" style="background:#f87171"></span><span>Bug Fixes — ${bugCount}</span></div>
-    <div class="ach-showcase-legend-item"><span class="ach-showcase-dot" style="background:#818cf8"></span><span>New Features — ${featCount}</span></div>
-    <div class="ach-showcase-legend-item"><span class="ach-showcase-dot" style="background:#34d399"></span><span>Enhancements — ${enhCount}</span></div>
+  <div class="ach-chart-legend">
+    <div class="ach-chart-legend-item"><span class="ach-chart-dot" style="background:#f87171"></span><span>Bug Fixes — ${bugCount}</span></div>
+    <div class="ach-chart-legend-item"><span class="ach-chart-dot" style="background:#818cf8"></span><span>New Features — ${featCount}</span></div>
+    <div class="ach-chart-legend-item"><span class="ach-chart-dot" style="background:#34d399"></span><span>Enhancements — ${enhCount}</span></div>
   </div>
 </div>
 <script>
 (function(){
   if(typeof Chart==='undefined')return;
-  var ctx=document.getElementById('achShowcaseDonut');
+  var ctx=document.getElementById('achPrevDonut');
   if(!ctx)return;
-  var centerPlugin={id:'centerText',beforeDraw:function(chart){
-    var c=chart.ctx,w=chart.width,h=chart.height;
-    c.save();
-    c.font='700 20px Inter,system-ui,sans-serif';
-    c.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text').trim()||'#f1f5f9';
+  var centerPlugin={id:'achCenter',beforeDraw:function(chart){
+    var w=chart.width,h=chart.height,c=chart.ctx,root=document.documentElement;
+    c.restore();
+    c.font='700 18px Inter,system-ui,sans-serif';
+    c.fillStyle=getComputedStyle(root).getPropertyValue('--text').trim()||'#0f172a';
     c.textAlign='center';c.textBaseline='middle';
     c.fillText('${total}',w/2,h/2-9);
-    c.font='500 11px Inter,system-ui,sans-serif';
-    c.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text-3').trim()||'#64748b';
-    c.fillText('items',w/2,h/2+11);
-    c.restore();
+    c.font='500 10px Inter,system-ui,sans-serif';
+    c.fillStyle=getComputedStyle(root).getPropertyValue('--text-3').trim()||'#94a3b8';
+    c.fillText('TOTAL',w/2,h/2+9);
+    c.save();
   }};
-  new Chart(ctx.getContext('2d'),{
-    type:'doughnut',
-    data:{labels:['Bug Fixes','New Features','Enhancements'],datasets:[{data:[${bugCount},${featCount},${enhCount}],backgroundColor:['#f87171','#818cf8','#34d399'],borderColor:'var(--surface)',borderWidth:3,hoverOffset:8}]},
-    options:{responsive:false,cutout:'70%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+' ('+Math.round(c.raw/${total}*100)+'%)';}}}},centerText:true},
-    plugins:[centerPlugin]
-  });
+  new Chart(ctx.getContext('2d'),{type:'doughnut',data:{labels:['Bug Fixes','New Features','Enhancements'],datasets:[{data:[${bugCount},${featCount},${enhCount}],backgroundColor:['#f87171','#818cf8','#34d399'],borderColor:getComputedStyle(document.documentElement).getPropertyValue('--surface').trim()||'#fff',borderWidth:3,hoverOffset:6}]},options:{responsive:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+' ('+Math.round(c.raw/${total}*100)+'%)';}}}},animation:{animateRotate:true,duration:1000}},plugins:[centerPlugin]});
 })();
 </script>` : '';
 
-  const catPills = categories && categories.length > 0
-    ? `<div class="ach-showcase-cats">
-  ${categories.map(c => {
-    const tint = CAT_TINT[c.label] ?? 'slate';
-    const icon = CAT_ICONS[c.label] ?? CAT_ICONS['Infrastructure'];
-    return `<div class="ach-cat-pill ach-cat-pill--${tint}">
-    <span class="ach-cat-icon">${icon}</span>
-    <span class="ach-cat-label">${esc(c.label)}</span>
-    <span class="ach-cat-count">${c.count}</span>
-  </div>`;
-  }).join('\n  ')}
-</div>` : '';
+  const catPills = `
+<div class="ach-cat-pills">
+  <div class="ach-cat-pill ach-cat-pill--green">
+    <svg class="ach-cat-pill-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.5l1.1 2.9 3 .1-2.4 1.8.9 2.9L8 7.6l-2.6 1.6.9-2.9L4 4.5l3-.1L8 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+    <span>Features</span>
+    <span class="ach-cat-count">${featCount}</span>
+  </div>
+  <div class="ach-cat-pill ach-cat-pill--orange">
+    <svg class="ach-cat-pill-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2c-1 2-3 3-3 5.5A3 3 0 0 0 8 11a3 3 0 0 0 3-3.5C11 5 9 4 8 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M6.5 10.5c0 1 .7 2 1.5 2s1.5-1 1.5-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    <span>Bug Fixes</span>
+    <span class="ach-cat-count">${bugCount}</span>
+  </div>
+  <div class="ach-cat-pill ach-cat-pill--indigo">
+    <svg class="ach-cat-pill-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.5L9.5 6h4.5L10 9l1.5 4.5L8 11l-3.5 2.5L6 9 1.5 6H6L8 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+    <span>Enhancements</span>
+    <span class="ach-cat-count">${enhCount}</span>
+  </div>
+</div>`;
 
-  const cta = `<div class="ach-cta-row">
-  <a href="achievements/" class="ach-cta-btn" aria-label="View full achievements page">
-    <span>View Full Achievements</span>
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  const ctaBtn = `
+<div class="ach-cta-wrap">
+  <a href="achievements/" class="ach-cta-btn">
+    View All Achievements
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7h9M8.5 4l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </a>
 </div>`;
 
-  return `<div class="ach-showcase">${statRibbon}${chartBlock}${catPills}${cta}</div>`;
+  const countUpScript = `
+<script>
+(function(){
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  document.querySelectorAll('[data-count-up]').forEach(function(el){
+    var end=parseInt(el.getAttribute('data-count-up'),10)||0,disp=el.getAttribute('data-count-display');
+    if(!end)return;
+    var dur=800,s=performance.now();
+    function frame(now){
+      var p=Math.min((now-s)/dur,1),e=1-Math.pow(1-p,3);
+      el.textContent=Math.round(end*e).toLocaleString();
+      if(p<1)requestAnimationFrame(frame);else if(disp)el.textContent=disp;
+    }
+    requestAnimationFrame(frame);
+  });
+})();
+</script>`;
+
+  return `<div class="ach-showcase">${statGrid}${chartBlock}${catPills}${ctaBtn}${countUpScript}</div>`;
 }
 
 function renderAchievementsSection(reports, latestStats) {
+  const preview = renderAchievementsPreview(latestStats);
+  if (preview) {
+    const archived = reports.map(r => renderAccordion(r)).join('');
+    return `${preview}${archived ? `<div class="archive" style="margin-top:0.75rem">${archived}</div>` : ''}`;
+  }
+  // Fallback: no HTML stats, render markdown content
   const latest = reports[0];
-  const categories = parseAchievementCategories(latest.raw);
-  const showcase = renderAchievementsShowcase(latestStats, categories);
-
+  const stats = parseAchievementsStats(latest.raw);
+  const statGrid = renderAchievementStatGrid(stats);
   const cardBody = `
-    ${showcase}
+    ${statGrid}
     <div class="report-body">${latest.html}</div>
   `;
   const featured = renderFeaturedCard(latest, cardBody);
-
-  const archived = reports.slice(1).map(r => {
-    const archivedCats = parseAchievementCategories(r.raw);
-    const summaryBadges = archivedCats
-      .map(c => {
-        const cls = CATEGORY_BADGE_CLASS[c.label] ?? 'badge--infra';
-        return `<span class="badge ${cls}">${esc(c.label)} ${c.count}</span>`;
-      })
-      .join('');
-    return renderAccordion(
-      r,
-      summaryBadges ? `<div class="achievement-categories achievement-categories--archived">${summaryBadges}</div>` : '',
-    );
-  }).join('');
-
+  const archived = reports.slice(1).map(r => renderAccordion(r)).join('');
   return `${featured}${archived ? `<div class="archive">${archived}</div>` : ''}`;
 }
 
@@ -699,20 +693,6 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .tag--green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bd); }
 .tag--orange { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bd); }
 
-/* Achievement category badges */
-.badge--feature { color: var(--green);  background: var(--green-bg);  border: 1px solid var(--green-bd); }
-.badge--fix     { color: var(--orange); background: var(--orange-bg); border: 1px solid var(--orange-bd); }
-.badge--infra   { color: var(--text-2); background: var(--surface-2); border: 1px solid var(--border); }
-.achievement-categories {
-  display: flex; flex-wrap: wrap; gap: 0.375rem;
-  padding: 0.625rem 1.25rem;
-  border-bottom: 1px solid var(--border);
-}
-.achievement-categories--archived {
-  padding: 0.5rem 1rem 0;
-  border-bottom: none;
-}
-
 /* ── Featured card ──────────────────────────────────────────────────────── */
 .featured-card {
   background: var(--surface);
@@ -881,100 +861,81 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .report-body tr:hover td { background: var(--surface-2); }
 .report-body blockquote { border-left: 3px solid var(--border-2); padding-left: 0.875rem; color: var(--text-3); margin-bottom: 0.625rem; }
 
-/* ── Achievements showcase (homepage section) ───────────────────────────── */
+/* ── Achievements showcase (main page) ───────────────────────────────────── */
 .ach-showcase { border-bottom: 1px solid var(--border); }
-
 .ach-showcase-stats {
   display: grid; grid-template-columns: repeat(4, 1fr);
   gap: 1px; background: var(--border);
+  border-bottom: 1px solid var(--border);
 }
 .ach-showcase-stat {
   background: var(--surface);
-  padding: 1rem 0.75rem 0.875rem;
+  padding: 1rem 0.75rem;
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
-  border-top: 3px solid transparent;
-  transition: background var(--t);
-  cursor: default;
+  position: relative; overflow: hidden;
+  transition: background var(--t); cursor: default;
 }
+.ach-showcase-stat::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.ach-showcase-stat--indigo::before { background: #6366f1; }
+.ach-showcase-stat--green::before  { background: #22c55e; }
+.ach-showcase-stat--orange::before { background: #f97316; }
+.ach-showcase-stat--yellow::before { background: #f59e0b; }
 .ach-showcase-stat:hover { background: var(--surface-2); }
-.ach-showcase-stat--indigo { border-top-color: var(--accent); }
-.ach-showcase-stat--green  { border-top-color: var(--green); }
-.ach-showcase-stat--orange { border-top-color: var(--orange); }
-.ach-showcase-stat--yellow { border-top-color: #f59e0b; }
 .ach-showcase-val {
-  font-size: 1.75rem; font-weight: 700; line-height: 1; letter-spacing: -0.04em;
+  font-size: 2rem; font-weight: 700; line-height: 1; letter-spacing: -0.04em;
   color: var(--text); font-variant-numeric: tabular-nums;
 }
-.ach-showcase-stat--indigo .ach-showcase-val { color: var(--accent); }
-.ach-showcase-stat--green  .ach-showcase-val { color: var(--green); }
-.ach-showcase-stat--orange .ach-showcase-val { color: var(--orange); }
-.ach-showcase-stat--yellow .ach-showcase-val { color: #f59e0b; }
 .ach-showcase-lbl {
-  font-size: 0.6875rem; color: var(--text-3);
+  font-size: 0.625rem; color: var(--text-3);
   text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
 }
-
-.ach-showcase-chart-row {
-  display: flex; align-items: center; gap: 1.75rem;
-  padding: 1.5rem 1.5rem 0.5rem;
+.ach-chart-row {
+  display: flex; align-items: center; gap: 1.5rem;
+  padding: 1.5rem 1.25rem 0;
 }
-.ach-showcase-chart-wrap { width: 180px; height: 180px; flex-shrink: 0; }
-.ach-showcase-legend { display: flex; flex-direction: column; gap: 0.625rem; }
-.ach-showcase-legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--text-2); }
-.ach-showcase-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-
-.ach-showcase-cats {
+.ach-chart-wrap { width: 180px; height: 180px; flex-shrink: 0; }
+.ach-chart-legend { display: flex; flex-direction: column; gap: 0.5rem; }
+.ach-chart-legend-item { display: flex; align-items: center; gap: 0.375rem; font-size: 0.8125rem; color: var(--text-2); }
+.ach-chart-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.ach-cat-pills {
   display: flex; flex-wrap: wrap; gap: 0.5rem;
-  padding: 1rem 1.5rem 0.5rem;
+  padding: 1rem 1.25rem;
 }
 .ach-cat-pill {
-  display: inline-flex; align-items: center; gap: 0.4rem;
-  padding: 0.4375rem 0.875rem;
-  border-radius: 20px; border: 1px solid transparent;
-  font-size: 0.8125rem; font-weight: 500;
-  cursor: default;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 1rem; border-radius: 20px;
+  font-size: 0.8125rem; font-weight: 600;
+  border: 1px solid transparent;
   transition: box-shadow var(--t), transform var(--t);
+  cursor: default;
 }
 .ach-cat-pill:hover { transform: translateY(-1px); }
-.ach-cat-pill--green  { background: var(--green-bg);  border-color: var(--green-bd);  color: var(--green); }
-.ach-cat-pill--orange { background: var(--orange-bg); border-color: var(--orange-bd); color: var(--orange); }
-.ach-cat-pill--indigo { background: var(--accent-bg); border-color: var(--accent-bd); color: var(--accent); }
-.ach-cat-pill--slate  { background: var(--surface-2); border-color: var(--border-2);  color: var(--text-2); }
-.ach-cat-pill--green:hover  { box-shadow: 0 4px 14px rgba(22,163,74,.22); }
-.ach-cat-pill--orange:hover { box-shadow: 0 4px 14px rgba(234,88,12,.22); }
-.ach-cat-pill--indigo:hover { box-shadow: 0 4px 14px rgba(99,102,241,.22); }
-.ach-cat-pill--slate:hover  { box-shadow: 0 4px 14px rgba(71,85,105,.12); }
-.ach-cat-icon { display: flex; align-items: center; flex-shrink: 0; }
-.ach-cat-label { font-weight: 600; }
+.ach-cat-pill--green  { background: linear-gradient(135deg, rgba(34,197,94,.1), rgba(16,185,129,.05)); border-color: rgba(34,197,94,.3); color: #16a34a; }
+.ach-cat-pill--green:hover  { box-shadow: 0 4px 16px rgba(34,197,94,.2); }
+.ach-cat-pill--orange { background: linear-gradient(135deg, rgba(249,115,22,.1), rgba(234,88,12,.05)); border-color: rgba(249,115,22,.3); color: #ea580c; }
+.ach-cat-pill--orange:hover { box-shadow: 0 4px 16px rgba(249,115,22,.2); }
+.ach-cat-pill--indigo { background: linear-gradient(135deg, rgba(99,102,241,.1), rgba(129,140,248,.05)); border-color: rgba(99,102,241,.3); color: #6366f1; }
+.ach-cat-pill--indigo:hover { box-shadow: 0 4px 16px rgba(99,102,241,.2); }
+.ach-cat-pill-icon { width: 16px; height: 16px; flex-shrink: 0; }
 .ach-cat-count {
-  font-size: 0.75rem; padding: 0 5px; border-radius: 8px;
-  background: rgba(0,0,0,0.06);
+  font-size: 0.6875rem; font-weight: 700;
+  padding: 1px 6px; border-radius: 10px;
+  background: rgba(0,0,0,.08);
 }
-html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,0.1); }
-
-.ach-cta-row { padding: 1rem 1.5rem; }
+html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,.12); }
+.ach-cta-wrap { padding: 0.875rem 1.25rem; }
 .ach-cta-btn {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  padding: 0.5rem 1.125rem;
-  background: var(--accent); color: #fff;
-  border: none; border-radius: 8px;
-  font-size: 0.875rem; font-weight: 600;
-  text-decoration: none; cursor: pointer;
-  transition: background var(--t), transform var(--t), box-shadow var(--t);
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  padding: 0.5rem 1.25rem;
+  background: #6366f1; color: #fff;
+  border-radius: 6px; font-size: 0.875rem; font-weight: 600;
+  text-decoration: none;
+  transition: transform var(--t), box-shadow var(--t);
 }
-.ach-cta-btn:hover {
-  background: #4f46e5;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(99,102,241,.35);
-}
-.ach-cta-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-
-@media (max-width: 900px) {
-  .ach-showcase-stats { grid-template-columns: repeat(2, 1fr); }
-  .ach-showcase-chart-row { padding: 1.25rem 1rem 0.5rem; }
-  .ach-showcase-cats { padding: 0.875rem 1rem 0.375rem; }
-  .ach-cta-row { padding: 0.875rem 1rem; }
-}
+.ach-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,.4); }
+.ach-cta-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
 
 /* ── Empty state ────────────────────────────────────────────────────────── */
 .empty-state {
@@ -1019,6 +980,8 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,0.1); }
   .dev-stats { display: none; }
   .hdr-date { display: none; }
   .footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+  .ach-showcase-stats { grid-template-columns: repeat(2, 1fr); }
+  .ach-chart-row { flex-direction: column; align-items: flex-start; }
 }
 @media (max-width: 480px) {
   .hdr-org { display: none; }
@@ -1040,32 +1003,23 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,0.1); }
 function getJS() {
   return `
 (function () {
-  // Theme toggle
   var btn = document.getElementById('theme-toggle');
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
-    if (btn) {
-      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-    }
+    if (btn) btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
   }
-  // Enable transitions after initial paint to avoid flash
   requestAnimationFrame(function () {
-    requestAnimationFrame(function () {
-      document.documentElement.classList.add('theme-ready');
-    });
+    requestAnimationFrame(function () { document.documentElement.classList.add('theme-ready'); });
   });
   if (btn) {
     btn.addEventListener('click', function () {
       var current = document.documentElement.getAttribute('data-theme');
       applyTheme(current === 'dark' ? 'light' : 'dark');
     });
-    // Set initial aria-label
     var initial = document.documentElement.getAttribute('data-theme') || 'dark';
     btn.setAttribute('aria-label', initial === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
   }
-
-  // Active nav highlight
   var sections = document.querySelectorAll('.section');
   var links = document.querySelectorAll('.nav-link');
   function setActive(id) {
@@ -1084,61 +1038,51 @@ function getJS() {
 `;
 }
 
-// ─── Achievements page JS ─────────────────────────────────────────────────────
+// ─── Achievements page JS (pill-tab navigation) ───────────────────────────────
 
 function getAchievementsJS() {
   return `
 (function () {
-  var btns = document.querySelectorAll('.ach-tab-btn');
+  var tabs = document.querySelectorAll('.ach-tab-btn');
   var panels = document.querySelectorAll('.ach-report-panel');
 
   function show(slug) {
-    btns.forEach(function (b) {
-      var active = b.dataset.slug === slug;
-      b.classList.toggle('active', active);
-      b.setAttribute('aria-selected', active ? 'true' : 'false');
-      b.setAttribute('tabindex', active ? '0' : '-1');
+    tabs.forEach(function (t) {
+      var active = t.dataset.slug === slug;
+      t.classList.toggle('active', active);
+      t.setAttribute('aria-selected', active ? 'true' : 'false');
+      t.setAttribute('tabindex', active ? '0' : '-1');
     });
     panels.forEach(function (p) {
-      var visible = p.dataset.slug === slug;
-      if (visible) {
+      var active = p.dataset.slug === slug;
+      p.classList.remove('ach-report-panel--active');
+      p.style.display = 'none';
+      if (active) {
         p.style.display = 'block';
-        p.classList.add('ach-report-panel--active');
-      } else {
-        p.style.display = 'none';
-        p.classList.remove('ach-report-panel--active');
+        requestAnimationFrame(function () { p.classList.add('ach-report-panel--active'); });
       }
     });
     try { history.replaceState(null, '', '#' + slug); } catch (e) {}
   }
 
-  btns.forEach(function (b) {
-    b.addEventListener('click', function () { show(b.dataset.slug); });
-    b.addEventListener('keydown', function (e) {
-      var idx = Array.from(btns).indexOf(b);
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(b.dataset.slug); }
-      if (e.key === 'ArrowRight' && idx < btns.length - 1) { btns[idx + 1].focus(); show(btns[idx + 1].dataset.slug); }
-      if (e.key === 'ArrowLeft'  && idx > 0)               { btns[idx - 1].focus(); show(btns[idx - 1].dataset.slug); }
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () { show(t.dataset.slug); });
+    t.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        var list = Array.from(tabs);
+        var cur = list.indexOf(t);
+        var next = (cur + (e.key === 'ArrowRight' ? 1 : -1) + list.length) % list.length;
+        show(list[next].dataset.slug);
+        list[next].focus();
+      }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(t.dataset.slug); }
     });
   });
 
-  // Count-up animation for showcase stats
-  document.querySelectorAll('[data-countup]').forEach(function (el) {
-    var target = parseInt(el.dataset.countup, 10);
-    if (isNaN(target) || target <= 0) return;
-    var dur = 800, step = 16, n = Math.ceil(dur / step), count = 0;
-    var interval = setInterval(function () {
-      count++;
-      el.textContent = count >= n ? target : Math.round((target / n) * count);
-      if (count >= n) clearInterval(interval);
-    }, step);
-  });
-
-  // Honour URL hash on load
   var hash = location.hash.replace('#', '');
   var initial = (hash && document.querySelector('.ach-tab-btn[data-slug="' + hash + '"]'))
-    ? hash
-    : (btns[0] ? btns[0].dataset.slug : null);
+    ? hash : (tabs[0] ? tabs[0].dataset.slug : null);
   if (initial) show(initial);
 })();
 `;
@@ -1172,14 +1116,12 @@ function generateHTML(data, htmlAchievementCount, latestStats) {
   const buildDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
-
   const navItems = SECTIONS.map(s => `
 <a href="#section-${s.key}" class="nav-link" data-section="${s.key}" aria-label="${s.label}: ${data[s.key].length} reports">
   <span class="nav-icon">${s.icon}</span>
   <span class="nav-label">${s.label}</span>
   <span class="nav-count" aria-hidden="true">${data[s.key].length}</span>
 </a>`).join('\n');
-
   const releasesMeta = SECTIONS.find(s => s.key === 'releases');
   const achievementsMeta = SECTIONS.find(s => s.key === 'achievements');
   const sections = SECTIONS.map(s =>
@@ -1200,10 +1142,9 @@ function generateHTML(data, htmlAchievementCount, latestStats) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>${getCSS()}</style>
   ${chartJsCDN}
-  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();<\/script>
 </head>
 <body>
-
 <header class="hdr" role="banner">
   <a href="#" class="hdr-logo" aria-label="MediaJel Relations home">
     <div class="hdr-mark" aria-hidden="true">MJ</div>
@@ -1218,7 +1159,6 @@ function generateHTML(data, htmlAchievementCount, latestStats) {
     <svg class="theme-icon theme-icon--moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
   </button>
 </header>
-
 <div class="layout">
   <nav class="sidebar" aria-label="Page sections">
     <p class="sidebar-lbl" aria-hidden="true">Sections</p>
@@ -1238,7 +1178,7 @@ function generateHTML(data, htmlAchievementCount, latestStats) {
       ${sections}
     </main>
     <footer class="footer" role="contentinfo">
-      <span>MediaJel Relations &middot; Generated ${buildDate}</span>
+      <span>MediaJel Relations · Generated ${buildDate}</span>
       <nav class="footer-links" aria-label="External links">
         <a href="https://github.com/MediaJel/med-relations" target="_blank" rel="noopener noreferrer">GitHub</a>
         <a href="https://github.com/MediaJel/med-relations/actions" target="_blank" rel="noopener noreferrer">Actions</a>
@@ -1247,8 +1187,7 @@ function generateHTML(data, htmlAchievementCount, latestStats) {
     </footer>
   </div>
 </div>
-
-<script>${getJS()}</script>
+<script>${getJS()}<\/script>
 </body>
 </html>`;
 }
@@ -1259,7 +1198,6 @@ function generateReleasesHTML(releases) {
   });
   const releasesMeta = SECTIONS.find(s => s.key === 'releases');
   const releasesSection = renderSection(releasesMeta, releases);
-
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1272,7 +1210,6 @@ function generateReleasesHTML(releases) {
   <style>${getCSS()}</style>
 </head>
 <body>
-
 <header class="hdr" role="banner">
   <a href="../" class="hdr-logo" aria-label="MediaJel Relations home">
     <div class="hdr-mark" aria-hidden="true">MJ</div>
@@ -1283,18 +1220,16 @@ function generateReleasesHTML(releases) {
   <div class="hdr-space"></div>
   <time class="hdr-date" datetime="${new Date().toISOString()}">${buildDate}</time>
 </header>
-
 <main class="main" id="main-content">
   ${releasesSection}
 </main>
 <footer class="footer" role="contentinfo">
-  <span>MediaJel &middot; Release Notes &middot; Generated ${buildDate}</span>
+  <span>MediaJel · Release Notes · Generated ${buildDate}</span>
   <nav class="footer-links" aria-label="External links">
     <a href="https://github.com/MediaJel/med-relations" target="_blank" rel="noopener noreferrer">GitHub</a>
   </nav>
 </footer>
-
-<script>${getJS()}</script>
+<script>${getJS()}<\/script>
 </body>
 </html>`;
 }
@@ -1305,63 +1240,93 @@ async function generateAchievementsHTML(mdReports, htmlReports) {
   });
   const hasHtml = htmlReports.length > 0;
 
-  const tabNav = hasHtml
-    ? htmlReports.map((r, idx) => {
-        const dateRange = formatWeekDateRange(r.slug);
-        return `
-<button
-  class="ach-tab-btn${idx === 0 ? ' active' : ''}"
-  data-slug="${esc(r.slug)}"
-  aria-label="View ${esc(r.title)}${dateRange ? ' — ' + dateRange : ''}"
-  tabindex="${idx === 0 ? '0' : '-1'}"
-  role="tab"
-  aria-selected="${idx === 0 ? 'true' : 'false'}"
->
-  <span class="ach-tab-slug">${esc(r.slug)}</span>
-  ${idx === 0 ? '<span class="badge badge--accent" aria-hidden="true">Latest</span>' : ''}
-  ${dateRange ? `<span class="ach-tab-date">${esc(dateRange)}</span>` : ''}
-</button>`;
-      }).join('\n')
+  // Read and extract <body> content for inline injection (no iframes)
+  const panels = await Promise.all(
+    htmlReports.map(async (r, idx) => {
+      let bodyContent = '';
+      try {
+        const content = await readFile(join(REPORTS_DIR, 'achievements', r.file), 'utf-8');
+        bodyContent = content
+          .replace(/^[\s\S]*?<body[^>]*>/i, '')
+          .replace(/<\/body>[\s\S]*$/i, '');
+      } catch {
+        bodyContent = '<p style="color:var(--text-3);padding:2rem">Report could not be loaded.</p>';
+      }
+      const dateRange = formatWeekDateRange(r.slug);
+      return { r, idx, bodyContent, dateRange };
+    }),
+  );
+
+  // Horizontal pill-tab navigation bar (sticky below header)
+  const tabBar = hasHtml
+    ? `<nav class="ach-tabs-bar" role="tablist" aria-label="Achievement weekly reports">
+  ${panels.map(({ r, idx, dateRange }) =>
+    `<button class="ach-tab-btn${idx === 0 ? ' active' : ''}" role="tab" data-slug="${esc(r.slug)}" aria-selected="${idx === 0 ? 'true' : 'false'}" aria-controls="panel-${esc(r.slug)}" tabindex="${idx === 0 ? '0' : '-1'}">${esc(r.slug)}${dateRange ? `<span class="ach-tab-date">${esc(dateRange)}</span>` : ''}${idx === 0 ? '<span class="badge badge--accent" aria-hidden="true">Latest</span>' : ''}</button>`
+  ).join('\n  ')}
+</nav>`
     : '';
 
-  const panels = hasHtml
-    ? await Promise.all(htmlReports.map(async (r, idx) => {
-        let bodyContent = '';
-        try {
-          const content = await readFile(join(REPORTS_DIR, 'achievements', r.file), 'utf-8');
-          bodyContent = content
-            .replace(/^[\s\S]*?<body[^>]*>/i, '')
-            .replace(/<\/body>[\s\S]*$/i, '');
-        } catch {
-          bodyContent = '<p style="padding:2rem;color:#94a3b8">Unable to load report.</p>';
-        }
-        return `
-<div
-  class="ach-report-panel${idx === 0 ? ' ach-report-panel--active' : ''}"
-  data-slug="${esc(r.slug)}"
-  role="tabpanel"
-  aria-label="${esc(r.title)}"
-  style="${idx === 0 ? '' : 'display:none'}"
->
-  <div class="ach-report-content">${bodyContent}</div>
-</div>`;
-      }))
-    : [`<div class="ach-viewer-empty">
-  <div class="empty-state" role="status">
-    <p class="empty-heading">No HTML reports yet</p>
-    <p class="empty-sub">HTML achievement reports will appear here once the AchievementsAgent publishes them.</p>
-  </div>
-</div>`];
+  // Inline panels
+  const reportPanels = hasHtml
+    ? panels.map(({ r, idx, bodyContent }) =>
+        `<div class="ach-report-panel${idx === 0 ? ' ach-report-panel--active' : ''}" id="panel-${esc(r.slug)}" data-slug="${esc(r.slug)}" role="tabpanel" style="display:${idx === 0 ? 'block' : 'none'}"><div class="ach-report-content">${bodyContent}</div></div>`
+      ).join('\n')
+    : `<div class="ach-viewer-empty"><div class="empty-state" role="status"><p class="empty-heading">No HTML reports yet</p><p class="empty-sub">HTML achievement reports will appear here once the AchievementsAgent publishes them.</p></div></div>`;
 
   const mdSection = mdReports.length > 0
-    ? `
-<section class="ach-legacy" aria-label="Legacy markdown reports">
+    ? `<section class="ach-legacy" aria-label="Legacy markdown reports">
   <h2 class="ach-legacy-title">Legacy Reports (Markdown)</h2>
   <div class="archive">
     ${mdReports.map(r => renderAccordion(r)).join('\n')}
   </div>
 </section>`
     : '';
+
+  const achPageCSS = `
+/* ── Achievements tab bar ─────────────────────────────────────────────── */
+.ach-tabs-bar {
+  position: sticky; top: var(--hdr-h); z-index: 50;
+  display: flex; overflow-x: auto; gap: 0.375rem;
+  padding: 0.625rem 1rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: none;
+}
+.ach-tabs-bar::-webkit-scrollbar { display: none; }
+.ach-tab-btn {
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  padding: 0.375rem 0.875rem; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text-2); font-size: 0.8125rem; font-weight: 500;
+  font-family: inherit; cursor: pointer; white-space: nowrap;
+  transition: background var(--t), color var(--t), border-color var(--t);
+}
+.ach-tab-btn:hover { background: var(--bg); color: var(--text); border-color: var(--border-2); }
+.ach-tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.ach-tab-btn.active .badge--accent { background: rgba(255,255,255,.22); color: #fff; border-color: rgba(255,255,255,.3); }
+.ach-tab-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ach-tab-date {
+  font-size: 0.6875rem; color: var(--text-3);
+  border-left: 1px solid var(--border-2); padding-left: 0.375rem; margin-left: 0.125rem;
+}
+.ach-tab-btn.active .ach-tab-date { color: rgba(255,255,255,.75); border-color: rgba(255,255,255,.3); }
+/* ── Report panels ────────────────────────────────────────────────────── */
+.ach-report-panel { display: none; }
+.ach-report-panel--active { display: block; animation: ach-fade-in 200ms ease both; }
+@keyframes ach-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ach-report-content { min-height: calc(100vh - var(--hdr-h) - 52px); }
+/* ── Legacy section ───────────────────────────────────────────────────── */
+.ach-legacy { padding: 2rem 2.5rem; border-top: 1px solid var(--border); background: var(--bg); }
+.ach-legacy-title {
+  font-size: 0.875rem; font-weight: 600; color: var(--text-3);
+  letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 1rem;
+}
+.ach-viewer-empty { padding: 2.5rem; }
+@media (max-width: 900px) { .ach-legacy { padding: 1.25rem 1rem; } }
+`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -1374,95 +1339,11 @@ async function generateAchievementsHTML(mdReports, htmlReports) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>
 ${getCSS()}
-
-/* ── Achievements page layout ─────────────────────────────────────────── */
-.ach-layout {
-  display: flex;
-  flex-direction: column;
-  min-height: calc(100vh - var(--hdr-h));
-}
-
-/* ── Horizontal pill-tab nav bar ──────────────────────────────────────── */
-.ach-tabs-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.5rem;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: var(--hdr-h);
-  z-index: 90;
-  overflow-x: auto;
-  scrollbar-width: none;
-  flex-shrink: 0;
-}
-.ach-tabs-bar::-webkit-scrollbar { display: none; }
-
-.ach-tab-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.4375rem 0.875rem;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  font-family: inherit;
-  color: var(--text-2);
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: background var(--t), color var(--t), border-color var(--t), box-shadow var(--t);
-}
-.ach-tab-btn:hover { background: var(--border); color: var(--text); }
-.ach-tab-btn.active {
-  background: var(--accent-bg);
-  border-color: var(--accent-bd);
-  color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-bg);
-}
-.ach-tab-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.ach-tab-slug {
-  font-size: 0.75rem; font-weight: 600;
-  font-variant-numeric: tabular-nums; opacity: 0.75;
-}
-.ach-tab-date { font-size: 0.6875rem; color: var(--text-3); }
-.ach-tab-btn.active .ach-tab-date { color: var(--accent); opacity: 0.75; }
-
-/* ── Report panels ────────────────────────────────────────────────────── */
-.ach-panels { flex: 1; }
-@keyframes achPanelIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.ach-report-panel--active { animation: achPanelIn 200ms ease both; }
-.ach-report-content { max-width: 100%; overflow: hidden; }
-
-/* ── Legacy + empty ───────────────────────────────────────────────────── */
-.ach-viewer-empty { padding: 2.5rem; }
-.ach-legacy {
-  padding: 2rem 2.5rem;
-  border-top: 1px solid var(--border);
-  background: var(--bg);
-}
-.ach-legacy-title {
-  font-size: 0.875rem; font-weight: 600; color: var(--text-3);
-  letter-spacing: 0.04em; text-transform: uppercase;
-  margin-bottom: 1rem;
-}
-
-/* ── Responsive ───────────────────────────────────────────────────────── */
-@media (max-width: 900px) {
-  .ach-tabs-bar { padding: 0.625rem 1rem; }
-  .ach-legacy { padding: 1.25rem 1rem; }
-}
+${achPageCSS}
   </style>
-  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();<\/script>
 </head>
 <body>
-
 <header class="hdr" role="banner">
   <a href="../" class="hdr-logo" aria-label="MediaJel Relations home">
     <div class="hdr-mark" aria-hidden="true">MJ</div>
@@ -1477,21 +1358,15 @@ ${getCSS()}
     <svg class="theme-icon theme-icon--moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
   </button>
 </header>
-
-<div class="ach-layout">
-  <div class="ach-tabs-bar" role="tablist" aria-label="Achievement report weeks">
-    ${tabNav}
-  </div>
-  <div class="ach-panels">
-    ${panels.join('\n')}
-    ${mdSection}
-  </div>
-</div>
-
+${tabBar}
+<main id="main-content">
+  ${reportPanels}
+  ${mdSection}
+</main>
 <script>
 ${getJS()}
 ${getAchievementsJS()}
-</script>
+<\/script>
 </body>
 </html>`;
 }
@@ -1518,22 +1393,15 @@ async function build() {
   await writeFile(join(DIST_DIR, 'releases', 'index.html'), releasesHtml, 'utf-8');
   console.log(`✓  Built dist/releases/index.html (${releasesHtml.length.toLocaleString()} bytes)`);
 
-  // Build achievements page
+  // Build achievements page (inline body injection)
   const htmlReports = await readHtmlReports('achievements');
   console.log(`  Achievements (HTML): ${htmlReports.length} report(s)`);
-
-  await mkdir(join(DIST_DIR, 'achievements', 'reports'), { recursive: true });
-  for (const r of htmlReports) {
-    const src = join(REPORTS_DIR, 'achievements', r.file);
-    const dst = join(DIST_DIR, 'achievements', 'reports', r.file);
-    await copyFile(src, dst);
-  }
-
+  await mkdir(join(DIST_DIR, 'achievements'), { recursive: true });
   const achievementsHtml = await generateAchievementsHTML(data.achievements, htmlReports);
   await writeFile(join(DIST_DIR, 'achievements', 'index.html'), achievementsHtml, 'utf-8');
   console.log(`✓  Built dist/achievements/index.html (${achievementsHtml.length.toLocaleString()} bytes)`);
 
-  // Re-write index.html with correct HTML report count for the sidebar badge
+  // Re-write index.html with correct HTML report count for sidebar badge
   const htmlFinal = generateHTML(data, htmlReports.length, latestStats);
   await writeFile(`${DIST_DIR}/index.html`, htmlFinal, 'utf-8');
 }

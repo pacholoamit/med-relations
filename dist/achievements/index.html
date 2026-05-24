@@ -207,20 +207,6 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .tag--green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-bd); }
 .tag--orange { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bd); }
 
-/* Achievement category badges */
-.badge--feature { color: var(--green);  background: var(--green-bg);  border: 1px solid var(--green-bd); }
-.badge--fix     { color: var(--orange); background: var(--orange-bg); border: 1px solid var(--orange-bd); }
-.badge--infra   { color: var(--text-2); background: var(--surface-2); border: 1px solid var(--border); }
-.achievement-categories {
-  display: flex; flex-wrap: wrap; gap: 0.375rem;
-  padding: 0.625rem 1.25rem;
-  border-bottom: 1px solid var(--border);
-}
-.achievement-categories--archived {
-  padding: 0.5rem 1rem 0;
-  border-bottom: none;
-}
-
 /* ── Featured card ──────────────────────────────────────────────────────── */
 .featured-card {
   background: var(--surface);
@@ -389,100 +375,81 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .report-body tr:hover td { background: var(--surface-2); }
 .report-body blockquote { border-left: 3px solid var(--border-2); padding-left: 0.875rem; color: var(--text-3); margin-bottom: 0.625rem; }
 
-/* ── Achievements showcase (homepage section) ───────────────────────────── */
+/* ── Achievements showcase (main page) ───────────────────────────────────── */
 .ach-showcase { border-bottom: 1px solid var(--border); }
-
 .ach-showcase-stats {
   display: grid; grid-template-columns: repeat(4, 1fr);
   gap: 1px; background: var(--border);
+  border-bottom: 1px solid var(--border);
 }
 .ach-showcase-stat {
   background: var(--surface);
-  padding: 1rem 0.75rem 0.875rem;
+  padding: 1rem 0.75rem;
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
-  border-top: 3px solid transparent;
-  transition: background var(--t);
-  cursor: default;
+  position: relative; overflow: hidden;
+  transition: background var(--t); cursor: default;
 }
+.ach-showcase-stat::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.ach-showcase-stat--indigo::before { background: #6366f1; }
+.ach-showcase-stat--green::before  { background: #22c55e; }
+.ach-showcase-stat--orange::before { background: #f97316; }
+.ach-showcase-stat--yellow::before { background: #f59e0b; }
 .ach-showcase-stat:hover { background: var(--surface-2); }
-.ach-showcase-stat--indigo { border-top-color: var(--accent); }
-.ach-showcase-stat--green  { border-top-color: var(--green); }
-.ach-showcase-stat--orange { border-top-color: var(--orange); }
-.ach-showcase-stat--yellow { border-top-color: #f59e0b; }
 .ach-showcase-val {
-  font-size: 1.75rem; font-weight: 700; line-height: 1; letter-spacing: -0.04em;
+  font-size: 2rem; font-weight: 700; line-height: 1; letter-spacing: -0.04em;
   color: var(--text); font-variant-numeric: tabular-nums;
 }
-.ach-showcase-stat--indigo .ach-showcase-val { color: var(--accent); }
-.ach-showcase-stat--green  .ach-showcase-val { color: var(--green); }
-.ach-showcase-stat--orange .ach-showcase-val { color: var(--orange); }
-.ach-showcase-stat--yellow .ach-showcase-val { color: #f59e0b; }
 .ach-showcase-lbl {
-  font-size: 0.6875rem; color: var(--text-3);
+  font-size: 0.625rem; color: var(--text-3);
   text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
 }
-
-.ach-showcase-chart-row {
-  display: flex; align-items: center; gap: 1.75rem;
-  padding: 1.5rem 1.5rem 0.5rem;
+.ach-chart-row {
+  display: flex; align-items: center; gap: 1.5rem;
+  padding: 1.5rem 1.25rem 0;
 }
-.ach-showcase-chart-wrap { width: 180px; height: 180px; flex-shrink: 0; }
-.ach-showcase-legend { display: flex; flex-direction: column; gap: 0.625rem; }
-.ach-showcase-legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--text-2); }
-.ach-showcase-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-
-.ach-showcase-cats {
+.ach-chart-wrap { width: 180px; height: 180px; flex-shrink: 0; }
+.ach-chart-legend { display: flex; flex-direction: column; gap: 0.5rem; }
+.ach-chart-legend-item { display: flex; align-items: center; gap: 0.375rem; font-size: 0.8125rem; color: var(--text-2); }
+.ach-chart-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.ach-cat-pills {
   display: flex; flex-wrap: wrap; gap: 0.5rem;
-  padding: 1rem 1.5rem 0.5rem;
+  padding: 1rem 1.25rem;
 }
 .ach-cat-pill {
-  display: inline-flex; align-items: center; gap: 0.4rem;
-  padding: 0.4375rem 0.875rem;
-  border-radius: 20px; border: 1px solid transparent;
-  font-size: 0.8125rem; font-weight: 500;
-  cursor: default;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 1rem; border-radius: 20px;
+  font-size: 0.8125rem; font-weight: 600;
+  border: 1px solid transparent;
   transition: box-shadow var(--t), transform var(--t);
+  cursor: default;
 }
 .ach-cat-pill:hover { transform: translateY(-1px); }
-.ach-cat-pill--green  { background: var(--green-bg);  border-color: var(--green-bd);  color: var(--green); }
-.ach-cat-pill--orange { background: var(--orange-bg); border-color: var(--orange-bd); color: var(--orange); }
-.ach-cat-pill--indigo { background: var(--accent-bg); border-color: var(--accent-bd); color: var(--accent); }
-.ach-cat-pill--slate  { background: var(--surface-2); border-color: var(--border-2);  color: var(--text-2); }
-.ach-cat-pill--green:hover  { box-shadow: 0 4px 14px rgba(22,163,74,.22); }
-.ach-cat-pill--orange:hover { box-shadow: 0 4px 14px rgba(234,88,12,.22); }
-.ach-cat-pill--indigo:hover { box-shadow: 0 4px 14px rgba(99,102,241,.22); }
-.ach-cat-pill--slate:hover  { box-shadow: 0 4px 14px rgba(71,85,105,.12); }
-.ach-cat-icon { display: flex; align-items: center; flex-shrink: 0; }
-.ach-cat-label { font-weight: 600; }
+.ach-cat-pill--green  { background: linear-gradient(135deg, rgba(34,197,94,.1), rgba(16,185,129,.05)); border-color: rgba(34,197,94,.3); color: #16a34a; }
+.ach-cat-pill--green:hover  { box-shadow: 0 4px 16px rgba(34,197,94,.2); }
+.ach-cat-pill--orange { background: linear-gradient(135deg, rgba(249,115,22,.1), rgba(234,88,12,.05)); border-color: rgba(249,115,22,.3); color: #ea580c; }
+.ach-cat-pill--orange:hover { box-shadow: 0 4px 16px rgba(249,115,22,.2); }
+.ach-cat-pill--indigo { background: linear-gradient(135deg, rgba(99,102,241,.1), rgba(129,140,248,.05)); border-color: rgba(99,102,241,.3); color: #6366f1; }
+.ach-cat-pill--indigo:hover { box-shadow: 0 4px 16px rgba(99,102,241,.2); }
+.ach-cat-pill-icon { width: 16px; height: 16px; flex-shrink: 0; }
 .ach-cat-count {
-  font-size: 0.75rem; padding: 0 5px; border-radius: 8px;
-  background: rgba(0,0,0,0.06);
+  font-size: 0.6875rem; font-weight: 700;
+  padding: 1px 6px; border-radius: 10px;
+  background: rgba(0,0,0,.08);
 }
-html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,0.1); }
-
-.ach-cta-row { padding: 1rem 1.5rem; }
+html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,.12); }
+.ach-cta-wrap { padding: 0.875rem 1.25rem; }
 .ach-cta-btn {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  padding: 0.5rem 1.125rem;
-  background: var(--accent); color: #fff;
-  border: none; border-radius: 8px;
-  font-size: 0.875rem; font-weight: 600;
-  text-decoration: none; cursor: pointer;
-  transition: background var(--t), transform var(--t), box-shadow var(--t);
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  padding: 0.5rem 1.25rem;
+  background: #6366f1; color: #fff;
+  border-radius: 6px; font-size: 0.875rem; font-weight: 600;
+  text-decoration: none;
+  transition: transform var(--t), box-shadow var(--t);
 }
-.ach-cta-btn:hover {
-  background: #4f46e5;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(99,102,241,.35);
-}
-.ach-cta-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-
-@media (max-width: 900px) {
-  .ach-showcase-stats { grid-template-columns: repeat(2, 1fr); }
-  .ach-showcase-chart-row { padding: 1.25rem 1rem 0.5rem; }
-  .ach-showcase-cats { padding: 0.875rem 1rem 0.375rem; }
-  .ach-cta-row { padding: 0.875rem 1rem; }
-}
+.ach-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,.4); }
+.ach-cta-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
 
 /* ── Empty state ────────────────────────────────────────────────────────── */
 .empty-state {
@@ -527,6 +494,8 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,0.1); }
   .dev-stats { display: none; }
   .hdr-date { display: none; }
   .footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+  .ach-showcase-stats { grid-template-columns: repeat(2, 1fr); }
+  .ach-chart-row { flex-direction: column; align-items: flex-start; }
 }
 @media (max-width: 480px) {
   .hdr-org { display: none; }
@@ -542,94 +511,54 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,0.1); }
 }
 
 
-/* ── Achievements page layout ─────────────────────────────────────────── */
-.ach-layout {
-  display: flex;
-  flex-direction: column;
-  min-height: calc(100vh - var(--hdr-h));
-}
-
-/* ── Horizontal pill-tab nav bar ──────────────────────────────────────── */
+/* ── Achievements tab bar ─────────────────────────────────────────────── */
 .ach-tabs-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.5rem;
+  position: sticky; top: var(--hdr-h); z-index: 50;
+  display: flex; overflow-x: auto; gap: 0.375rem;
+  padding: 0.625rem 1rem;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: var(--hdr-h);
-  z-index: 90;
-  overflow-x: auto;
   scrollbar-width: none;
-  flex-shrink: 0;
 }
 .ach-tabs-bar::-webkit-scrollbar { display: none; }
-
 .ach-tab-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.4375rem 0.875rem;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  font-family: inherit;
-  color: var(--text-2);
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: background var(--t), color var(--t), border-color var(--t), box-shadow var(--t);
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  padding: 0.375rem 0.875rem; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text-2); font-size: 0.8125rem; font-weight: 500;
+  font-family: inherit; cursor: pointer; white-space: nowrap;
+  transition: background var(--t), color var(--t), border-color var(--t);
 }
-.ach-tab-btn:hover { background: var(--border); color: var(--text); }
-.ach-tab-btn.active {
-  background: var(--accent-bg);
-  border-color: var(--accent-bd);
-  color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-bg);
-}
+.ach-tab-btn:hover { background: var(--bg); color: var(--text); border-color: var(--border-2); }
+.ach-tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.ach-tab-btn.active .badge--accent { background: rgba(255,255,255,.22); color: #fff; border-color: rgba(255,255,255,.3); }
 .ach-tab-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.ach-tab-slug {
-  font-size: 0.75rem; font-weight: 600;
-  font-variant-numeric: tabular-nums; opacity: 0.75;
+.ach-tab-date {
+  font-size: 0.6875rem; color: var(--text-3);
+  border-left: 1px solid var(--border-2); padding-left: 0.375rem; margin-left: 0.125rem;
 }
-.ach-tab-date { font-size: 0.6875rem; color: var(--text-3); }
-.ach-tab-btn.active .ach-tab-date { color: var(--accent); opacity: 0.75; }
-
+.ach-tab-btn.active .ach-tab-date { color: rgba(255,255,255,.75); border-color: rgba(255,255,255,.3); }
 /* ── Report panels ────────────────────────────────────────────────────── */
-.ach-panels { flex: 1; }
-@keyframes achPanelIn {
+.ach-report-panel { display: none; }
+.ach-report-panel--active { display: block; animation: ach-fade-in 200ms ease both; }
+@keyframes ach-fade-in {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.ach-report-panel--active { animation: achPanelIn 200ms ease both; }
-.ach-report-content { max-width: 100%; overflow: hidden; }
-
-/* ── Legacy + empty ───────────────────────────────────────────────────── */
-.ach-viewer-empty { padding: 2.5rem; }
-.ach-legacy {
-  padding: 2rem 2.5rem;
-  border-top: 1px solid var(--border);
-  background: var(--bg);
-}
+.ach-report-content { min-height: calc(100vh - var(--hdr-h) - 52px); }
+/* ── Legacy section ───────────────────────────────────────────────────── */
+.ach-legacy { padding: 2rem 2.5rem; border-top: 1px solid var(--border); background: var(--bg); }
 .ach-legacy-title {
   font-size: 0.875rem; font-weight: 600; color: var(--text-3);
-  letter-spacing: 0.04em; text-transform: uppercase;
-  margin-bottom: 1rem;
+  letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 1rem;
 }
+.ach-viewer-empty { padding: 2.5rem; }
+@media (max-width: 900px) { .ach-legacy { padding: 1.25rem 1rem; } }
 
-/* ── Responsive ───────────────────────────────────────────────────────── */
-@media (max-width: 900px) {
-  .ach-tabs-bar { padding: 0.625rem 1rem; }
-  .ach-legacy { padding: 1.25rem 1rem; }
-}
   </style>
   <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
 </head>
 <body>
-
 <header class="hdr" role="banner">
   <a href="../" class="hdr-logo" aria-label="MediaJel Relations home">
     <div class="hdr-mark" aria-hidden="true">MJ</div>
@@ -638,52 +567,18 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,0.1); }
   <span class="hdr-sep" aria-hidden="true">/</span>
   <span class="hdr-org">Achievements</span>
   <div class="hdr-space"></div>
-  <time class="hdr-date" datetime="2026-05-24T08:47:52.597Z">May 24, 2026</time>
+  <time class="hdr-date" datetime="2026-05-24T08:55:35.718Z">May 24, 2026</time>
   <button class="theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Toggle light/dark mode">
     <svg class="theme-icon theme-icon--sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
     <svg class="theme-icon theme-icon--moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
   </button>
 </header>
-
-<div class="ach-layout">
-  <div class="ach-tabs-bar" role="tablist" aria-label="Achievement report weeks">
-    
-<button
-  class="ach-tab-btn active"
-  data-slug="2026-W21"
-  aria-label="View Week 2026-W21 — May 18 – May 24"
-  tabindex="0"
-  role="tab"
-  aria-selected="true"
->
-  <span class="ach-tab-slug">2026-W21</span>
-  <span class="badge badge--accent" aria-hidden="true">Latest</span>
-  <span class="ach-tab-date">May 18 – May 24</span>
-</button>
-
-<button
-  class="ach-tab-btn"
-  data-slug="2026-W20"
-  aria-label="View Week 2026-W20 — May 11 – May 17"
-  tabindex="-1"
-  role="tab"
-  aria-selected="false"
->
-  <span class="ach-tab-slug">2026-W20</span>
-  
-  <span class="ach-tab-date">May 11 – May 17</span>
-</button>
-  </div>
-  <div class="ach-panels">
-    
-<div
-  class="ach-report-panel ach-report-panel--active"
-  data-slug="2026-W21"
-  role="tabpanel"
-  aria-label="Week 2026-W21"
-  style=""
->
-  <div class="ach-report-content">
+<nav class="ach-tabs-bar" role="tablist" aria-label="Achievement weekly reports">
+  <button class="ach-tab-btn active" role="tab" data-slug="2026-W21" aria-selected="true" aria-controls="panel-2026-W21" tabindex="0">2026-W21<span class="ach-tab-date">May 18 – May 24</span><span class="badge badge--accent" aria-hidden="true">Latest</span></button>
+  <button class="ach-tab-btn" role="tab" data-slug="2026-W20" aria-selected="false" aria-controls="panel-2026-W20" tabindex="-1">2026-W20<span class="ach-tab-date">May 11 – May 17</span></button>
+</nav>
+<main id="main-content">
+  <div class="ach-report-panel ach-report-panel--active" id="panel-2026-W21" data-slug="2026-W21" role="tabpanel" style="display:block"><div class="ach-report-content">
 <div class="content">
 
 <div class="stat-grid">
@@ -1142,17 +1037,8 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,0.1); }
 })();
 </script>
 
-</div>
-</div>
-
-<div
-  class="ach-report-panel"
-  data-slug="2026-W20"
-  role="tabpanel"
-  aria-label="Week 2026-W20"
-  style="display:none"
->
-  <div class="ach-report-content">
+</div></div>
+<div class="ach-report-panel" id="panel-2026-W20" data-slug="2026-W20" role="tabpanel" style="display:none"><div class="ach-report-content">
 
 <h1>Achievements — 2026-W20</h1>
 <p class="period">Period: 2026-05-11 → 2026-05-17</p>
@@ -1506,10 +1392,8 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,0.1); }
 })();
 </script>
 
-</div>
-</div>
-    
-<section class="ach-legacy" aria-label="Legacy markdown reports">
+</div></div>
+  <section class="ach-legacy" aria-label="Legacy markdown reports">
   <h2 class="ach-legacy-title">Legacy Reports (Markdown)</h2>
   <div class="archive">
     
@@ -1549,38 +1433,27 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,0.1); }
 </details>
   </div>
 </section>
-  </div>
-</div>
-
+</main>
 <script>
 
 (function () {
-  // Theme toggle
   var btn = document.getElementById('theme-toggle');
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
-    if (btn) {
-      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-    }
+    if (btn) btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
   }
-  // Enable transitions after initial paint to avoid flash
   requestAnimationFrame(function () {
-    requestAnimationFrame(function () {
-      document.documentElement.classList.add('theme-ready');
-    });
+    requestAnimationFrame(function () { document.documentElement.classList.add('theme-ready'); });
   });
   if (btn) {
     btn.addEventListener('click', function () {
       var current = document.documentElement.getAttribute('data-theme');
       applyTheme(current === 'dark' ? 'light' : 'dark');
     });
-    // Set initial aria-label
     var initial = document.documentElement.getAttribute('data-theme') || 'dark';
     btn.setAttribute('aria-label', initial === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
   }
-
-  // Active nav highlight
   var sections = document.querySelectorAll('.section');
   var links = document.querySelectorAll('.nav-link');
   function setActive(id) {
@@ -1599,56 +1472,46 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,0.1); }
 
 
 (function () {
-  var btns = document.querySelectorAll('.ach-tab-btn');
+  var tabs = document.querySelectorAll('.ach-tab-btn');
   var panels = document.querySelectorAll('.ach-report-panel');
 
   function show(slug) {
-    btns.forEach(function (b) {
-      var active = b.dataset.slug === slug;
-      b.classList.toggle('active', active);
-      b.setAttribute('aria-selected', active ? 'true' : 'false');
-      b.setAttribute('tabindex', active ? '0' : '-1');
+    tabs.forEach(function (t) {
+      var active = t.dataset.slug === slug;
+      t.classList.toggle('active', active);
+      t.setAttribute('aria-selected', active ? 'true' : 'false');
+      t.setAttribute('tabindex', active ? '0' : '-1');
     });
     panels.forEach(function (p) {
-      var visible = p.dataset.slug === slug;
-      if (visible) {
+      var active = p.dataset.slug === slug;
+      p.classList.remove('ach-report-panel--active');
+      p.style.display = 'none';
+      if (active) {
         p.style.display = 'block';
-        p.classList.add('ach-report-panel--active');
-      } else {
-        p.style.display = 'none';
-        p.classList.remove('ach-report-panel--active');
+        requestAnimationFrame(function () { p.classList.add('ach-report-panel--active'); });
       }
     });
     try { history.replaceState(null, '', '#' + slug); } catch (e) {}
   }
 
-  btns.forEach(function (b) {
-    b.addEventListener('click', function () { show(b.dataset.slug); });
-    b.addEventListener('keydown', function (e) {
-      var idx = Array.from(btns).indexOf(b);
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(b.dataset.slug); }
-      if (e.key === 'ArrowRight' && idx < btns.length - 1) { btns[idx + 1].focus(); show(btns[idx + 1].dataset.slug); }
-      if (e.key === 'ArrowLeft'  && idx > 0)               { btns[idx - 1].focus(); show(btns[idx - 1].dataset.slug); }
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () { show(t.dataset.slug); });
+    t.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        var list = Array.from(tabs);
+        var cur = list.indexOf(t);
+        var next = (cur + (e.key === 'ArrowRight' ? 1 : -1) + list.length) % list.length;
+        show(list[next].dataset.slug);
+        list[next].focus();
+      }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(t.dataset.slug); }
     });
   });
 
-  // Count-up animation for showcase stats
-  document.querySelectorAll('[data-countup]').forEach(function (el) {
-    var target = parseInt(el.dataset.countup, 10);
-    if (isNaN(target) || target <= 0) return;
-    var dur = 800, step = 16, n = Math.ceil(dur / step), count = 0;
-    var interval = setInterval(function () {
-      count++;
-      el.textContent = count >= n ? target : Math.round((target / n) * count);
-      if (count >= n) clearInterval(interval);
-    }, step);
-  });
-
-  // Honour URL hash on load
   var hash = location.hash.replace('#', '');
   var initial = (hash && document.querySelector('.ach-tab-btn[data-slug="' + hash + '"]'))
-    ? hash
-    : (btns[0] ? btns[0].dataset.slug : null);
+    ? hash : (tabs[0] ? tabs[0].dataset.slug : null);
   if (initial) show(initial);
 })();
 
