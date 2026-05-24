@@ -54,6 +54,28 @@ async function readReports(category) {
   );
 }
 
+async function readJsonReports(category) {
+  const dir = join(REPORTS_DIR, category);
+  let files;
+  try {
+    files = await readdir(dir);
+  } catch {
+    return [];
+  }
+  const jsonFiles = files
+    .filter(f => extname(f) === '.json' && f !== '.gitkeep')
+    .sort()
+    .reverse();
+  return Promise.all(
+    jsonFiles.map(async file => {
+      const raw = await readFile(join(dir, file), 'utf-8');
+      const data = JSON.parse(raw);
+      const slug = basename(file, '.json');
+      return { slug, title: `Week ${slug}`, file, data };
+    }),
+  );
+}
+
 async function readHtmlReports(category) {
   const dir = join(REPORTS_DIR, category);
   let files;
@@ -71,6 +93,33 @@ async function readHtmlReports(category) {
       const title = `Week ${slug}`;
       return { slug, title, file };
     });
+}
+
+async function parseLatestAchievementData() {
+  const jsonReports = await readJsonReports('achievements');
+  if (jsonReports.length > 0) {
+    const { data } = jsonReports[0];
+    return {
+      stats: {
+        'PRs Merged': String(data.stats.prs),
+        'Lines Added': `+${data.stats.linesAdded}`,
+        'Lines Removed': `-${data.stats.linesRemoved}`,
+        'Hotfixes': String(data.stats.hotfixes),
+      },
+      chart: {
+        bugCount: data.chart.bugCount,
+        featCount: data.chart.featCount,
+        enhCount: data.chart.enhCount,
+      },
+      priorityChart: {
+        critCount: data.priorityChart.critCount,
+        highCount: data.priorityChart.highCount,
+        normCount: data.priorityChart.normCount,
+        lowCount: data.priorityChart.lowCount,
+      },
+    };
+  }
+  return parseLatestAchievementHTML();
 }
 
 async function parseLatestAchievementHTML() {
@@ -501,9 +550,10 @@ function renderSection(s, reports, extra) {
     achievements: (rpts) => renderAchievementsSection(rpts, extra),
     releases: renderReleasesSection,
   };
-  const content = reports.length === 0
-    ? renderEmptyState(s.label)
-    : renderers[s.key](reports);
+  const hasContent = reports.length > 0 || (s.key === 'achievements' && extra);
+  const content = hasContent
+    ? renderers[s.key](reports)
+    : renderEmptyState(s.label);
   return `
 <section class="section" id="section-${s.key}" aria-labelledby="section-title-${s.key}">
   <header class="section-hd">
@@ -1285,87 +1335,198 @@ function scopeReportCSS(css, slug) {
   return tokenizeScopeCSS(stripped, scope);
 }
 
+// ─── Template hydration helpers ───────────────────────────────────────────────
+
+function buildStatGrid(stats) {
+  return `
+<div class="ach-rep-stat-card">
+  <div class="ach-rep-stat-label">PRs Merged</div>
+  <div class="ach-rep-stat-value">${esc(String(stats.prs))}</div>
+</div>
+<div class="ach-rep-stat-card">
+  <div class="ach-rep-stat-label">Lines Added</div>
+  <div class="ach-rep-stat-value green">+${esc(String(stats.linesAdded))}</div>
+</div>
+<div class="ach-rep-stat-card">
+  <div class="ach-rep-stat-label">Lines Removed</div>
+  <div class="ach-rep-stat-value red">-${esc(String(stats.linesRemoved))}</div>
+</div>
+<div class="ach-rep-stat-card">
+  <div class="ach-rep-stat-label">Hotfixes</div>
+  <div class="ach-rep-stat-value yellow">${esc(String(stats.hotfixes))}</div>
+</div>`.trim();
+}
+
+function buildChartsRow(chart, priorityChart, slug) {
+  const { bugCount, featCount, enhCount } = chart;
+  const { critCount, highCount, normCount, lowCount } = priorityChart;
+  const total = bugCount + featCount + enhCount;
+  const priTotal = critCount + highCount + normCount + lowCount;
+  return `
+<div class="chart-wrap">
+  <canvas id="categoryChart-${esc(slug)}" width="200" height="200"></canvas>
+</div>
+<div class="chart-legend">
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#f87171"></span><span>Bug Fixes — ${bugCount}</span></div>
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#818cf8"></span><span>New Features — ${featCount}</span></div>
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#34d399"></span><span>Enhancements — ${enhCount}</span></div>
+</div>
+<div class="chart-wrap" style="margin-left:1rem">
+  <canvas id="priorityChart-${esc(slug)}" width="200" height="200"></canvas>
+</div>
+<div class="chart-legend">
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#f59e0b"></span><span>Critical — ${critCount}</span></div>
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#f87171"></span><span>High — ${highCount}</span></div>
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#94a3b8"></span><span>Normal — ${normCount}</span></div>
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#34d399"></span><span>Low — ${lowCount}</span></div>
+</div>`.trim();
+}
+
+function buildChartScript(chart, priorityChart, slug) {
+  const { bugCount, featCount, enhCount } = chart;
+  const { critCount, highCount, normCount, lowCount } = priorityChart;
+  const total = bugCount + featCount + enhCount;
+  const priTotal = critCount + highCount + normCount + lowCount;
+  return `
+  var catCtx = document.getElementById('categoryChart-${slug}');
+  if (catCtx) {
+    var bugCount = ${bugCount}; var featCount = ${featCount}; var enhCount = ${enhCount};
+    var catTotal = bugCount + featCount + enhCount;
+    new Chart(catCtx.getContext('2d'), {
+      type: 'doughnut',
+      data: { labels: ['Bug Fixes', 'New Features', 'Enhancements'],
+        datasets: [{ data: catTotal > 0 ? [bugCount, featCount, enhCount] : [1,0,0],
+          backgroundColor: ['#f87171','#818cf8','#34d399'],
+          borderColor: '#1a1d27', borderWidth: 3, hoverOffset: 8 }] },
+      options: { responsive: true, maintainAspectRatio: true, cutout: '65%',
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) {
+          if (catTotal === 0) return ctx.label + ': 0';
+          return ctx.label + ': ' + ctx.raw + ' (' + Math.round(ctx.raw/catTotal*100) + '%)';
+        }}}}}
+    });
+  }
+  var priCtx = document.getElementById('priorityChart-${slug}');
+  if (priCtx) {
+    var critCount = ${critCount}; var highCount = ${highCount}; var normCount = ${normCount}; var lowCount = ${lowCount};
+    var priTotal = critCount + highCount + normCount + lowCount;
+    new Chart(priCtx.getContext('2d'), {
+      type: 'doughnut',
+      data: { labels: ['Critical', 'High', 'Normal', 'Low'],
+        datasets: [{ data: priTotal > 0 ? [critCount, highCount, normCount, lowCount] : [1,0,0,0],
+          backgroundColor: ['#f59e0b','#f87171','#94a3b8','#34d399'],
+          borderColor: '#1a1d27', borderWidth: 3, hoverOffset: 8 }] },
+      options: { responsive: true, maintainAspectRatio: true, cutout: '65%',
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) {
+          if (priTotal === 0) return ctx.label + ': 0';
+          return ctx.label + ': ' + ctx.raw + ' (' + Math.round(ctx.raw/priTotal*100) + '%)';
+        }}}}}
+    });
+  }`.trim();
+}
+
+function categoryBadgeClass(cat) {
+  if (cat === 'bug') return 'badge-bug';
+  if (cat === 'feature') return 'badge-feature';
+  return 'badge-enhancement';
+}
+
+function categoryLabel(cat) {
+  if (cat === 'bug') return 'Bug Fix';
+  if (cat === 'feature') return 'New Feature';
+  return 'Enhancement';
+}
+
+function priorityBadgeClass(pri) {
+  if (pri === 'critical') return 'badge-critical';
+  if (pri === 'high') return 'badge-high';
+  if (pri === 'low') return 'badge-low';
+  return 'badge-normal';
+}
+
+function priorityLabel(pri) {
+  if (pri === 'critical') return 'Critical';
+  if (pri === 'high') return 'High';
+  if (pri === 'low') return 'Low';
+  return 'Normal';
+}
+
+function buildPrTableRows(prs) {
+  return prs.map(pr => `<tr>
+  <td><a href="${esc(pr.url)}" target="_blank" rel="noopener noreferrer">${esc(pr.title)}</a></td>
+  <td><span class="ach-rep-badge ${categoryBadgeClass(pr.category)}">${categoryLabel(pr.category)}</span></td>
+  <td><span class="ach-rep-badge ${priorityBadgeClass(pr.priority)}">${priorityLabel(pr.priority)}</span></td>
+  <td><span class="lines-added">+${pr.linesAdded}</span> / <span class="lines-removed">-${pr.linesRemoved}</span></td>
+</tr>`).join('\n');
+}
+
+function buildContributorRows(contributors) {
+  return contributors.map(c => {
+    const badges = ['critical', 'high', 'normal', 'low']
+      .filter(p => c[p] > 0)
+      .map(p => `<span class="ach-rep-badge ${priorityBadgeClass(p)}">${c[p]} ${priorityLabel(p)}</span>`)
+      .join('<span class="priority-sep">·</span>');
+    return `<tr>
+  <td><a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.name)}</a></td>
+  <td>${c.prs}</td>
+  <td><div class="priority-breakdown">${badges}</div></td>
+  <td class="lines-added">+${c.linesAdded}</td>
+  <td class="lines-removed">-${c.linesRemoved}</td>
+</tr>`;
+  }).join('\n');
+}
+
+function buildMetricsGrid(metrics) {
+  const items = [
+    { label: 'Most Active Repo', value: metrics.mostActiveRepo },
+    { label: 'Avg PR Size (lines)', value: metrics.avgPrSize },
+    { label: 'Revert Count', value: metrics.revertCount },
+    { label: 'PR Velocity (per day)', value: metrics.prVelocity },
+  ];
+  return items.map(item => `<div class="ach-rep-metric-item">
+  <div class="ach-rep-metric-label">${esc(item.label)}</div>
+  <div class="ach-rep-metric-value">${esc(String(item.value))}</div>
+</div>`).join('\n');
+}
+
+async function hydrateReportTemplate(jsonReport, templateSrc) {
+  const { slug, data } = jsonReport;
+  return templateSrc
+    .replace(/\{\{WEEK\}\}/g, esc(data.week))
+    .replace(/\{\{PERIOD\}\}/g, esc(data.period))
+    .replace(/\{\{STAT_GRID\}\}/g, buildStatGrid(data.stats))
+    .replace(/\{\{CHARTS_ROW\}\}/g, buildChartsRow(data.chart, data.priorityChart, slug))
+    .replace(/\{\{CHART_SCRIPT\}\}/g, buildChartScript(data.chart, data.priorityChart, slug))
+    .replace(/\{\{PR_TABLE_ROWS\}\}/g, buildPrTableRows(data.prs || []))
+    .replace(/\{\{CONTRIBUTORS_TABLE_ROWS\}\}/g, buildContributorRows(data.contributors || []))
+    .replace(/\{\{METRICS_GRID\}\}/g, buildMetricsGrid(data.metrics || {}))
+    .replace(/\{\{SLUG\}\}/g, esc(slug));
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function generateAchievementsHTML(mdReports, htmlReports) {
+async function generateAchievementsHTML(mdReports, _htmlReportsLegacy) {
   const buildDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
+
+  const jsonReports = await readJsonReports('achievements');
+
+  // Load the stable template once
+  const templatePath = join(ROOT, 'scripts', 'achievements-report-template.html');
+  let templateSrc = '';
+  try {
+    templateSrc = await readFile(templatePath, 'utf-8');
+  } catch {
+    console.warn('  ⚠  achievements-report-template.html not found; falling back to HTML injection');
+  }
+
+  // JSON-first path: hydrate template for each JSON report
+  const hasJson = jsonReports.length > 0 && templateSrc;
+
+  // Legacy HTML fallback: inline raw HTML reports when no JSON + template available
+  // (kept for backward compat during transition)
+  const htmlReports = hasJson ? [] : _htmlReportsLegacy;
   const hasHtml = htmlReports.length > 0;
-
-  // Read and extract <body> content + scoped <style> for inline injection (no iframes)
-  const panels = await Promise.all(
-    htmlReports.map(async (r, idx) => {
-      let bodyContent = '';
-      let scopedCSS = '';
-      try {
-        const content = await readFile(join(REPORTS_DIR, 'achievements', r.file), 'utf-8');
-        // Extract all <style> blocks from <head>
-        const headMatch = content.match(/^[\s\S]*?<body[^>]*>/i);
-        if (headMatch) {
-          const headSection = headMatch[0];
-          const styleMatches = [...headSection.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)];
-          const rawCSS = styleMatches.map(m => m[1]).join('\n');
-          if (rawCSS.trim()) {
-            scopedCSS = scopeReportCSS(rawCSS, r.slug);
-          }
-        }
-        bodyContent = content
-          .replace(/^[\s\S]*?<body[^>]*>/i, '')
-          .replace(/<\/body>[\s\S]*$/i, '');
-        // Scope canvas IDs to prevent conflicts across inlined panels
-        bodyContent = bodyContent
-          .replace(/id="categoryChart"/g, `id="categoryChart-${r.slug}"`)
-          .replace(/id="priorityChart"/g, `id="priorityChart-${r.slug}"`)
-          .replace(/getElementById\('categoryChart'\)/g, `getElementById('categoryChart-${r.slug}')`)
-          .replace(/getElementById\("categoryChart"\)/g, `getElementById('categoryChart-${r.slug}')`)
-          .replace(/getElementById\('priorityChart'\)/g, `getElementById('priorityChart-${r.slug}')`)
-          .replace(/getElementById\("priorityChart"\)/g, `getElementById('priorityChart-${r.slug}')`);
-        // Strip any chart.js CDN script tags from body — the achievements page head loads it unconditionally
-        bodyContent = bodyContent.replace(/<script[^>]+chart\.js[^>]*><\/script>/gi, '');
-        // Validate that scoped canvas IDs are present after transformation
-        const scopedCatId = `categoryChart-${r.slug}`;
-        const scopedPriId = `priorityChart-${r.slug}`;
-        if (!bodyContent.includes(`id="${scopedCatId}"`) || !bodyContent.includes(`id="${scopedPriId}"`)) {
-          console.warn(`  ⚠  Report ${r.slug}: canvas IDs not found after scoping (original IDs may be non-spec). Charts will be missing for this panel.`);
-        }
-      } catch {
-        bodyContent = '<p style="color:var(--text-3);padding:2rem">Report could not be loaded.</p>';
-      }
-      const dateRange = formatWeekDateRange(r.slug);
-      return { r, idx, bodyContent, scopedCSS, dateRange };
-    }),
-  );
-
-  // Aggregate all scoped report CSS for injection into <head>
-  const scopedReportCSS = panels.map(({ r, scopedCSS }) =>
-    scopedCSS ? `/* report: ${r.slug} */\n${scopedCSS}` : ''
-  ).filter(Boolean).join('\n');
-
-  // Horizontal pill-tab navigation bar (sticky below header)
-  const tabBar = hasHtml
-    ? `<nav class="ach-tabs-bar" role="tablist" aria-label="Achievement weekly reports">
-  ${panels.map(({ r, idx, dateRange }) =>
-    `<button class="ach-tab-btn${idx === 0 ? ' active' : ''}" role="tab" data-slug="${esc(r.slug)}" aria-selected="${idx === 0 ? 'true' : 'false'}" aria-controls="panel-${esc(r.slug)}" tabindex="${idx === 0 ? '0' : '-1'}">${esc(r.slug)}${dateRange ? `<span class="ach-tab-date">${esc(dateRange)}</span>` : ''}${idx === 0 ? '<span class="badge badge--accent" aria-hidden="true">Latest</span>' : ''}</button>`
-  ).join('\n  ')}
-</nav>`
-    : '';
-
-  // Inline panels — wrap body content in scoped container to isolate report CSS
-  const reportPanels = hasHtml
-    ? panels.map(({ r, idx, bodyContent }) =>
-        `<div class="ach-report-panel${idx === 0 ? ' ach-report-panel--active' : ''}" id="panel-${esc(r.slug)}" data-slug="${esc(r.slug)}" role="tabpanel" style="display:${idx === 0 ? 'block' : 'none'}"><div class="ach-report-content"><div data-report-scope="${esc(r.slug)}">${bodyContent}</div></div></div>`
-      ).join('\n')
-    : `<div class="ach-viewer-empty"><div class="empty-state" role="status"><p class="empty-heading">No HTML reports yet</p><p class="empty-sub">HTML achievement reports will appear here once the AchievementsAgent publishes them.</p></div></div>`;
-
-  const mdSection = mdReports.length > 0
-    ? `<section class="ach-legacy" aria-label="Legacy markdown reports">
-  <h2 class="ach-legacy-title">Legacy Reports (Markdown)</h2>
-  <div class="archive">
-    ${mdReports.map(r => renderAccordion(r)).join('\n')}
-  </div>
-</section>`
-    : '';
 
   const achPageCSS = `
 /* ── Achievements tab bar ─────────────────────────────────────────────── */
@@ -1403,11 +1564,8 @@ async function generateAchievementsHTML(mdReports, htmlReports) {
   to   { opacity: 1; transform: translateY(0); }
 }
 .ach-report-content { min-height: calc(100vh - var(--hdr-h) - 52px); }
-/* Transparent report scope wrapper so scoped report body bg does not bleed through */
 [data-report-scope] { background: transparent !important; }
-/* ── Main content area gradient ───────────────────────────────────────── */
 #main-content { background: linear-gradient(180deg, var(--accent-bg) 0%, transparent 120px); }
-/* ── Legacy section ───────────────────────────────────────────────────── */
 .ach-legacy { padding: 2rem 2.5rem; border-top: 1px solid var(--border); background: var(--bg); }
 .ach-legacy-title {
   font-size: 0.875rem; font-weight: 600; color: var(--text-3);
@@ -1416,6 +1574,77 @@ async function generateAchievementsHTML(mdReports, htmlReports) {
 .ach-viewer-empty { padding: 2.5rem; }
 @media (max-width: 900px) { .ach-legacy { padding: 1.25rem 1rem; } }
 `;
+
+  let tabBar = '';
+  let reportPanels = '';
+
+  if (hasJson) {
+    // JSON + template path
+    const hydratedPanels = await Promise.all(
+      jsonReports.map((jr, idx) => hydrateReportTemplate(jr, templateSrc).then(content => ({ jr, idx, content }))),
+    );
+    const dateRange = (slug) => formatWeekDateRange(slug);
+    tabBar = `<nav class="ach-tabs-bar" role="tablist" aria-label="Achievement weekly reports">
+  ${hydratedPanels.map(({ jr, idx }) =>
+    `<button class="ach-tab-btn${idx === 0 ? ' active' : ''}" role="tab" data-slug="${esc(jr.slug)}" aria-selected="${idx === 0 ? 'true' : 'false'}" aria-controls="panel-${esc(jr.slug)}" tabindex="${idx === 0 ? '0' : '-1'}">${esc(jr.slug)}${dateRange(jr.slug) ? `<span class="ach-tab-date">${esc(dateRange(jr.slug))}</span>` : ''}${idx === 0 ? '<span class="badge badge--accent" aria-hidden="true">Latest</span>' : ''}</button>`
+  ).join('\n  ')}
+</nav>`;
+    reportPanels = hydratedPanels.map(({ jr, idx, content }) =>
+      `<div class="ach-report-panel${idx === 0 ? ' ach-report-panel--active' : ''}" id="panel-${esc(jr.slug)}" data-slug="${esc(jr.slug)}" role="tabpanel" style="display:${idx === 0 ? 'block' : 'none'}"><div class="ach-report-content">${content}</div></div>`
+    ).join('\n');
+  } else if (hasHtml) {
+    // Legacy HTML inline path (backward compat)
+    const panels = await Promise.all(
+      htmlReports.map(async (r, idx) => {
+        let bodyContent = '';
+        let scopedCSS = '';
+        try {
+          const content = await readFile(join(REPORTS_DIR, 'achievements', r.file), 'utf-8');
+          const headMatch = content.match(/^[\s\S]*?<body[^>]*>/i);
+          if (headMatch) {
+            const styleMatches = [...headMatch[0].matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)];
+            const rawCSS = styleMatches.map(m => m[1]).join('\n');
+            if (rawCSS.trim()) scopedCSS = scopeReportCSS(rawCSS, r.slug);
+          }
+          bodyContent = content
+            .replace(/^[\s\S]*?<body[^>]*>/i, '')
+            .replace(/<\/body>[\s\S]*$/i, '')
+            .replace(/id="categoryChart"/g, `id="categoryChart-${r.slug}"`)
+            .replace(/id="priorityChart"/g, `id="priorityChart-${r.slug}"`)
+            .replace(/getElementById\(['"]categoryChart['"]\)/g, `getElementById('categoryChart-${r.slug}')`)
+            .replace(/getElementById\(['"]priorityChart['"]\)/g, `getElementById('priorityChart-${r.slug}')`)
+            .replace(/<script[^>]+chart\.js[^>]*><\/script>/gi, '');
+        } catch {
+          bodyContent = '<p style="color:var(--text-3);padding:2rem">Report could not be loaded.</p>';
+        }
+        return { r, idx, bodyContent, scopedCSS };
+      }),
+    );
+    const scopedCSS = panels.map(({ r, scopedCSS }) =>
+      scopedCSS ? `/* report: ${r.slug} */\n${scopedCSS}` : ''
+    ).filter(Boolean).join('\n');
+    tabBar = `<nav class="ach-tabs-bar" role="tablist" aria-label="Achievement weekly reports">
+  ${panels.map(({ r, idx }) => {
+    const dr = formatWeekDateRange(r.slug);
+    return `<button class="ach-tab-btn${idx === 0 ? ' active' : ''}" role="tab" data-slug="${esc(r.slug)}" aria-selected="${idx === 0 ? 'true' : 'false'}" aria-controls="panel-${esc(r.slug)}" tabindex="${idx === 0 ? '0' : '-1'}">${esc(r.slug)}${dr ? `<span class="ach-tab-date">${esc(dr)}</span>` : ''}${idx === 0 ? '<span class="badge badge--accent" aria-hidden="true">Latest</span>' : ''}</button>`;
+  }).join('\n  ')}
+</nav>`;
+    reportPanels = panels.map(({ r, idx, bodyContent }) =>
+      `<div class="ach-report-panel${idx === 0 ? ' ach-report-panel--active' : ''}" id="panel-${esc(r.slug)}" data-slug="${esc(r.slug)}" role="tabpanel" style="display:${idx === 0 ? 'block' : 'none'}"><div class="ach-report-content"><div data-report-scope="${esc(r.slug)}">${bodyContent}</div></div></div>`
+    ).join('\n');
+    // inject scoped CSS into achPageCSS below if needed — handled via scopedCSS variable
+  } else {
+    reportPanels = `<div class="ach-viewer-empty"><div class="empty-state" role="status"><p class="empty-heading">No reports yet</p><p class="empty-sub">Achievement reports will appear here once the AchievementsAgent publishes them.</p></div></div>`;
+  }
+
+  const mdSection = mdReports.length > 0
+    ? `<section class="ach-legacy" aria-label="Legacy markdown reports">
+  <h2 class="ach-legacy-title">Legacy Reports (Markdown)</h2>
+  <div class="archive">
+    ${mdReports.map(r => renderAccordion(r)).join('\n')}
+  </div>
+</section>`
+    : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -1429,7 +1658,6 @@ async function generateAchievementsHTML(mdReports, htmlReports) {
   <style>
 ${getCSS()}
 ${achPageCSS}
-${scopedReportCSS ? `/* ── Scoped report styles ─────────────────────────────────────────────── */\n${scopedReportCSS}` : ''}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"><\/script>
   <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();<\/script>
@@ -1471,9 +1699,9 @@ async function build() {
   for (const s of SECTIONS) {
     console.log(`  ${s.label}: ${data[s.key].length} report(s)`);
   }
-  const latestStats = await parseLatestAchievementHTML();
+  const latestStats = await parseLatestAchievementData();
   if (latestStats) {
-    console.log('  Achievements preview stats parsed from latest HTML report');
+    console.log('  Achievements preview stats parsed from latest report');
   }
   const html = generateHTML(data, 0, latestStats);
   await writeFile(`${DIST_DIR}/index.html`, html, 'utf-8');
@@ -1484,35 +1712,59 @@ async function build() {
   await writeFile(join(DIST_DIR, 'releases', 'index.html'), releasesHtml, 'utf-8');
   console.log(`✓  Built dist/releases/index.html (${releasesHtml.length.toLocaleString()} bytes)`);
 
-  // Build achievements page (inline body injection)
+  // Build achievements page (JSON-first; HTML legacy fallback)
+  const jsonReports = await readJsonReports('achievements');
   const htmlReports = await readHtmlReports('achievements');
-  console.log(`  Achievements (HTML): ${htmlReports.length} report(s)`);
+  const reportCount = jsonReports.length || htmlReports.length;
+  console.log(`  Achievements (JSON): ${jsonReports.length} report(s), (HTML legacy): ${htmlReports.length} report(s)`);
   await mkdir(join(DIST_DIR, 'achievements'), { recursive: true });
   const achievementsHtml = await generateAchievementsHTML(data.achievements, htmlReports);
   await writeFile(join(DIST_DIR, 'achievements', 'index.html'), achievementsHtml, 'utf-8');
   console.log(`✓  Built dist/achievements/index.html (${achievementsHtml.length.toLocaleString()} bytes)`);
 
-  // Re-write index.html with correct HTML report count for sidebar badge
-  const htmlFinal = generateHTML(data, htmlReports.length, latestStats);
+  // Re-write index.html with correct report count for sidebar badge
+  const htmlFinal = generateHTML(data, reportCount, latestStats);
   await writeFile(`${DIST_DIR}/index.html`, htmlFinal, 'utf-8');
 
-  // Post-build chart canvas guard
-  if (htmlReports.length > 0) {
-    const distAch = await readFile(join(DIST_DIR, 'achievements', 'index.html'), 'utf-8');
-    const missingCanvas = [];
-    for (const r of htmlReports) {
-      if (!distAch.includes(`id="categoryChart-${r.slug}"`)) missingCanvas.push(`categoryChart-${r.slug}`);
-      if (!distAch.includes(`id="priorityChart-${r.slug}"`)) missingCanvas.push(`priorityChart-${r.slug}`);
-    }
-    if (missingCanvas.length > 0) {
-      console.error(`\n✗  BUILD GUARD FAILED: missing canvas IDs in dist/achievements/index.html:`);
-      missingCanvas.forEach(id => console.error(`     - ${id}`));
-      console.error(`  The AchievementsAgent likely generated a report with non-spec canvas IDs.`);
-      console.error(`  Fix the report HTML to use id="categoryChart" and id="priorityChart" in the chart section.`);
-      process.exit(1);
-    }
-    console.log(`\n✓  Build guard: all chart canvas IDs present in dist/achievements/index.html`);
+  // ── Build guards ──────────────────────────────────────────────────────────
+  const [distIndex, distAch] = await Promise.all([
+    readFile(join(DIST_DIR, 'index.html'), 'utf-8'),
+    readFile(join(DIST_DIR, 'achievements', 'index.html'), 'utf-8'),
+  ]);
+
+  // Guard 1: #section-achievements must contain a .stat-val with numeric content
+  const achSection = distIndex.match(/<section[^>]+id="section-achievements"[^>]*>([\s\S]*?)<\/section>/)?.[1] ?? '';
+  const statValMatch = achSection.match(/class="stat-val[^"]*"[^>]*>(\d)/);
+  if (!statValMatch) {
+    console.error('\n✗  BUILD GUARD FAILED: #section-achievements does not contain a numeric .stat-val — section is showing empty state.');
+    process.exit(1);
   }
+  console.log('\n✓  Build guard 1: #section-achievements contains numeric stat values');
+
+  // Guard 2: dist/achievements/index.html must contain .charts-row with display:flex in its style block
+  //          OR both canvas IDs co-located in a single container
+  const hasChartsRowFlex = /\.charts-row\s*\{[^}]*display\s*:\s*flex/.test(distAch);
+  const allReports = jsonReports.length > 0 ? jsonReports : htmlReports;
+  const missingCanvas = [];
+  for (const r of allReports) {
+    if (!distAch.includes(`id="categoryChart-${r.slug}"`)) missingCanvas.push(`categoryChart-${r.slug}`);
+    if (!distAch.includes(`id="priorityChart-${r.slug}"`)) missingCanvas.push(`priorityChart-${r.slug}`);
+  }
+  if (!hasChartsRowFlex && missingCanvas.length > 0) {
+    console.error('\n✗  BUILD GUARD FAILED: dist/achievements/index.html missing .charts-row display:flex AND canvas IDs:');
+    missingCanvas.forEach(id => console.error(`     - ${id}`));
+    process.exit(1);
+  }
+  if (missingCanvas.length > 0) {
+    console.error('\n✗  BUILD GUARD FAILED: missing canvas IDs in dist/achievements/index.html:');
+    missingCanvas.forEach(id => console.error(`     - ${id}`));
+    process.exit(1);
+  }
+  if (!hasChartsRowFlex && allReports.length > 0) {
+    console.error('\n✗  BUILD GUARD FAILED: dist/achievements/index.html is missing .charts-row { display: flex }');
+    process.exit(1);
+  }
+  console.log('✓  Build guard 2: .charts-row flex layout and canvas IDs verified in dist/achievements/index.html');
 }
 
 build().catch(err => {
