@@ -861,7 +861,19 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .report-body blockquote { border-left: 3px solid var(--border-2); padding-left: 0.875rem; color: var(--text-3); margin-bottom: 0.625rem; }
 
 /* ── Achievements showcase (main page) ───────────────────────────────────── */
-.ach-showcase { border-bottom: 1px solid var(--border); }
+.ach-showcase {
+  background: var(--surface);
+  border: 1px solid var(--accent-bd);
+  border-top: 2px solid var(--accent);
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+  transition: box-shadow var(--t), border-color var(--t);
+}
+.ach-showcase:hover {
+  box-shadow: 0 8px 28px rgba(99,102,241,.16);
+  border-color: rgba(99,102,241,.45);
+}
 .ach-showcase-stats {
   display: grid; grid-template-columns: repeat(4, 1fr);
   gap: 1px; background: var(--border);
@@ -877,10 +889,14 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .ach-showcase-stat::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
 }
-.ach-showcase-stat--indigo::before { background: #6366f1; }
-.ach-showcase-stat--green::before  { background: #22c55e; }
-.ach-showcase-stat--orange::before { background: #f97316; }
-.ach-showcase-stat--yellow::before { background: #f59e0b; }
+.ach-showcase-stat--indigo::before { background: linear-gradient(90deg, #6366f1, #818cf8); }
+.ach-showcase-stat--green::before  { background: linear-gradient(90deg, #22c55e, #34d399); }
+.ach-showcase-stat--orange::before { background: linear-gradient(90deg, #f97316, #fb923c); }
+.ach-showcase-stat--yellow::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.ach-showcase-stat--indigo { background: linear-gradient(180deg, rgba(99,102,241,.08) 0%, var(--surface) 100%); }
+.ach-showcase-stat--green  { background: linear-gradient(180deg, rgba(34,197,94,.07) 0%, var(--surface) 100%); }
+.ach-showcase-stat--orange { background: linear-gradient(180deg, rgba(249,115,22,.07) 0%, var(--surface) 100%); }
+.ach-showcase-stat--yellow { background: linear-gradient(180deg, rgba(245,158,11,.07) 0%, var(--surface) 100%); }
 .ach-showcase-stat:hover { background: var(--surface-2); }
 .ach-showcase-val {
   font-size: 2rem; font-weight: 700; line-height: 1; letter-spacing: -0.04em;
@@ -928,12 +944,12 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,.12); }
 .ach-cta-btn {
   display: inline-flex; align-items: center; gap: 0.375rem;
   padding: 0.5rem 1.25rem;
-  background: #6366f1; color: #fff;
+  background: linear-gradient(135deg, #6366f1, #818cf8); color: #fff;
   border-radius: 6px; font-size: 0.875rem; font-weight: 600;
   text-decoration: none;
-  transition: transform var(--t), box-shadow var(--t);
+  transition: transform var(--t), box-shadow var(--t), filter var(--t);
 }
-.ach-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,.4); }
+.ach-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,.45); filter: brightness(1.1); }
 .ach-cta-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
 
 /* ── Empty state ────────────────────────────────────────────────────────── */
@@ -1388,6 +1404,14 @@ async function generateAchievementsHTML(mdReports, htmlReports) {
   to   { opacity: 1; transform: translateY(0); }
 }
 .ach-report-content { min-height: calc(100vh - var(--hdr-h) - 52px); }
+/* Make injected report scopes blend with page background */
+.ach-report-content [data-report-scope] { background: transparent; }
+/* Top stat cards: transparent base so they blend with the page */
+.ach-report-panel .ach-report-content .stat-card { background: transparent; }
+.ach-report-panel .ach-report-content .stat-card--accent { background: linear-gradient(145deg, rgba(99,102,241,.13), transparent); }
+.ach-report-panel .ach-report-content .stat-card--green  { background: linear-gradient(145deg, rgba(16,185,129,.13), transparent); }
+.ach-report-panel .ach-report-content .stat-card--red    { background: linear-gradient(145deg, rgba(239,68,68,.13), transparent); }
+.ach-report-panel .ach-report-content .stat-card--yellow { background: linear-gradient(145deg, rgba(245,158,11,.13), transparent); }
 /* ── Legacy section ───────────────────────────────────────────────────── */
 .ach-legacy { padding: 2rem 2.5rem; border-top: 1px solid var(--border); background: var(--bg); }
 .ach-legacy-title {
