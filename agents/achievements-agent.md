@@ -145,6 +145,93 @@ A `.metrics-grid` with `.metric-item` cards for supplemental stats (most active 
 }
 ```
 
+## Typography
+
+Import Inter from Google Fonts at the top of `<style>`:
+
+```css
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+```
+
+Set on `body`:
+```css
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; ... }
+```
+
+Also add `<link rel="preconnect">` tags for `fonts.googleapis.com` and `fonts.gstatic.com` in `<head>`.
+
+## Hero section
+
+Add a hero section **before** the stat grid:
+
+```html
+<div class="hero">
+  <span class="hero-badge">YYYY-WXX</span>
+  <h1 class="hero-title">This Week in Engineering</h1>
+  <p class="hero-period">Mon DD – Mon DD, YYYY</p>
+</div>
+```
+
+Hero CSS:
+```css
+.hero {
+  background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 2.5rem 2rem;
+  margin-bottom: 2rem;
+}
+.hero-badge {
+  display: inline-block; padding: .25rem .75rem;
+  background: rgba(99,102,241,.15); color: #818cf8;
+  border: 1px solid rgba(99,102,241,.3); border-radius: .375rem;
+  font-size: .75rem; font-weight: 600; letter-spacing: .06em; margin-bottom: .75rem;
+}
+.hero-title { font-size: 1.75rem; font-weight: 700; margin-bottom: .25rem; }
+.hero-period { color: var(--muted); font-size: .875rem; }
+```
+
+Wrap all content below the hero in `<div class="content">` with `padding: 0 2rem 2rem`.
+
+## Stat card animations
+
+```css
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.stat-card { animation: fadeSlideIn 0.4s ease both; }
+.stat-card:nth-child(1) { animation-delay: 0ms; }
+.stat-card:nth-child(2) { animation-delay: 60ms; }
+.stat-card:nth-child(3) { animation-delay: 120ms; }
+.stat-card:nth-child(4) { animation-delay: 180ms; }
+```
+
+Set `.stat-value` font-size to `2.5rem` (up from `2rem`).
+
+## Section headings
+
+Use left accent border instead of bottom border:
+```css
+h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;
+     padding-left: 0.75rem; border-left: 3px solid var(--accent); }
+```
+
+## Tables — striped + hover + sticky headers
+
+```css
+th { position: sticky; top: 0; background: var(--bg); z-index: 1; }
+tbody tr:nth-child(even) td { background: rgba(255,255,255,0.025); }
+tbody tr:hover td { background: rgba(99,102,241,0.08); transition: background 0.15s; }
+```
+
+## Chart containers
+
+```css
+.chart-container { box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.chart-container:nth-child(1) { border-left: 3px solid var(--accent); }
+.chart-container:nth-child(2) { border-left: 3px solid #f59e0b; }
+```
+
 ---
 
 ## Chart.js script tag

@@ -960,17 +960,45 @@ function getAchievementsJS() {
   var btns = document.querySelectorAll('.ach-week-btn');
   var frames = document.querySelectorAll('.ach-frame');
   var titleEl = document.getElementById('ach-viewer-title');
+  var loader = document.querySelector('.ach-loader');
+
+  function showLoader() {
+    if (loader) loader.classList.remove('ach-loader--hidden');
+  }
+  function hideLoader() {
+    if (loader) loader.classList.add('ach-loader--hidden');
+  }
 
   function show(slug) {
     btns.forEach(function (b) { b.classList.toggle('active', b.dataset.slug === slug); });
+    var activeFrame = null;
     frames.forEach(function (f) {
       var visible = f.dataset.slug === slug;
       f.style.display = visible ? 'block' : 'none';
       f.setAttribute('aria-hidden', visible ? 'false' : 'true');
+      if (visible) activeFrame = f;
     });
     if (titleEl) {
       var btn = document.querySelector('.ach-week-btn[data-slug="' + slug + '"]');
-      titleEl.textContent = btn ? btn.textContent.trim() : slug;
+      var labelEl = btn && btn.querySelector('.ach-week-label');
+      titleEl.textContent = labelEl ? labelEl.textContent.trim() : (btn ? slug : slug);
+    }
+    if (activeFrame) {
+      showLoader();
+      var onLoad = function () {
+        hideLoader();
+        activeFrame.removeEventListener('load', onLoad);
+      };
+      try {
+        var doc = activeFrame.contentDocument || activeFrame.contentWindow.document;
+        if (doc && doc.readyState === 'complete') {
+          hideLoader();
+        } else {
+          activeFrame.addEventListener('load', onLoad);
+        }
+      } catch (e) {
+        activeFrame.addEventListener('load', onLoad);
+      }
     }
     try { history.replaceState(null, '', '#' + slug); } catch (e) {}
   }
@@ -990,6 +1018,28 @@ function getAchievementsJS() {
   if (initial) show(initial);
 })();
 `;
+}
+
+// ─── ISO week date helper ─────────────────────────────────────────────────────
+
+function getDateOfISOWeek(year, week) {
+  const jan4 = new Date(Date.UTC(year, 0, 4));
+  const dayOfWeek = jan4.getUTCDay() || 7;
+  const weekStart = new Date(jan4);
+  weekStart.setUTCDate(jan4.getUTCDate() - (dayOfWeek - 1) + (week - 1) * 7);
+  return weekStart;
+}
+
+function formatWeekDateRange(slug) {
+  const m = slug.match(/^(\d{4})-W(\d{2})$/);
+  if (!m) return '';
+  const year = parseInt(m[1], 10);
+  const week = parseInt(m[2], 10);
+  const start = getDateOfISOWeek(year, week);
+  const end = new Date(start);
+  end.setUTCDate(start.getUTCDate() + 6);
+  const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  return `${fmt(start)} – ${fmt(end)}`;
 }
 
 // ─── HTML assembly ────────────────────────────────────────────────────────────
@@ -1131,7 +1181,9 @@ function generateAchievementsHTML(mdReports, htmlReports) {
   const hasHtml = htmlReports.length > 0;
 
   const weekList = hasHtml
-    ? htmlReports.map((r, idx) => `
+    ? htmlReports.map((r, idx) => {
+        const dateRange = formatWeekDateRange(r.slug);
+        return `
 <button
   class="ach-week-btn${idx === 0 ? ' active' : ''}"
   data-slug="${esc(r.slug)}"
@@ -1141,7 +1193,9 @@ function generateAchievementsHTML(mdReports, htmlReports) {
   <span class="ach-week-slug">${esc(r.slug)}</span>
   <span class="ach-week-label">${esc(r.title)}</span>
   ${idx === 0 ? '<span class="badge badge--accent" aria-hidden="true">Latest</span>' : ''}
-</button>`).join('\n')
+  ${dateRange ? `<span class="ach-week-dates">${esc(dateRange)}</span>` : ''}
+</button>`;
+      }).join('\n')
     : '<p class="ach-empty-list">No HTML reports yet.</p>';
 
   const iframes = hasHtml
@@ -1236,6 +1290,7 @@ ${getCSS()}
 .ach-viewer-wrap {
   flex: 1; display: flex; flex-direction: column;
   min-height: calc(100vh - var(--hdr-h));
+  position: relative;
 }
 .ach-viewer-hd {
   padding: 1rem 1.5rem 0.875rem;
@@ -1268,6 +1323,31 @@ ${getCSS()}
   margin-bottom: 1rem;
 }
 
+/* ── Loading spinner ───────────────────────────────────────────────────── */
+.ach-loader {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg); z-index: 5;
+  transition: opacity 0.25s;
+  top: 57px; /* below the viewer header */
+}
+.ach-loader--hidden { opacity: 0; pointer-events: none; }
+.ach-spinner {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid var(--border); border-top-color: var(--accent);
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Sidebar week date range ───────────────────────────────────────────── */
+.ach-week-dates {
+  width: 100%;
+  font-size: 0.6875rem;
+  color: var(--text-3);
+  padding-left: 0.125rem;
+  margin-top: -0.125rem;
+}
+
 /* ── Responsive (achievements) ─────────────────────────────────────────── */
 @media (max-width: 900px) {
   .ach-layout { flex-direction: column; }
@@ -1285,6 +1365,7 @@ ${getCSS()}
     white-space: nowrap; flex-shrink: 0; flex-wrap: nowrap;
   }
   .ach-week-btn.active { border-bottom-color: var(--accent); border-left-color: transparent; background: transparent; color: var(--accent); }
+  .ach-week-dates { display: none; }
   .ach-legacy { padding: 1.25rem 1rem; }
 }
   </style>
@@ -1316,6 +1397,9 @@ ${getCSS()}
     <div class="ach-viewer-hd">
       <div class="ach-viewer-icon" aria-hidden="true">${achievementsMeta.icon}</div>
       <span class="ach-viewer-title" id="ach-viewer-title">${hasHtml ? esc(htmlReports[0].title) : 'Achievements'}</span>
+    </div>
+    <div class="ach-loader" role="status" aria-label="Loading report">
+      <div class="ach-spinner" aria-hidden="true"></div>
     </div>
     ${iframes}
     ${mdSection}
