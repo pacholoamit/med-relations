@@ -432,8 +432,7 @@ function renderAchievementsPreview(latestStats) {
 function renderAchievementsSection(reports, latestStats) {
   const preview = renderAchievementsPreview(latestStats);
   if (preview) {
-    const archived = reports.map(r => renderAccordion(r)).join('');
-    return `${preview}${archived ? `<div class="archive" style="margin-top:0.75rem">${archived}</div>` : ''}`;
+    return preview; // HTML-sourced showcase is authoritative; MD accordions suppressed
   }
   // Fallback: no HTML stats, render markdown content
   const latest = reports[0];
@@ -1240,12 +1239,31 @@ async function generateAchievementsHTML(mdReports, htmlReports) {
   });
   const hasHtml = htmlReports.length > 0;
 
-  // Read and extract <body> content for inline injection (no iframes)
+  // Scope :root and body selectors to the report container to prevent CSS variable collision
+  function scopeReportCSS(css, slug) {
+    const scope = `[data-report-scope="${slug}"]`;
+    return css
+      .replace(/:root(\s*\{)/g, `${scope}$1`)
+      .replace(/(?<![a-zA-Z0-9_-])body(\s*\{)/g, `${scope}$1`);
+  }
+
+  // Read and extract <body> content + scoped <style> for inline injection (no iframes)
   const panels = await Promise.all(
     htmlReports.map(async (r, idx) => {
       let bodyContent = '';
+      let scopedCSS = '';
       try {
         const content = await readFile(join(REPORTS_DIR, 'achievements', r.file), 'utf-8');
+        // Extract all <style> blocks from <head>
+        const headMatch = content.match(/^[\s\S]*?<body[^>]*>/i);
+        if (headMatch) {
+          const headSection = headMatch[0];
+          const styleMatches = [...headSection.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)];
+          const rawCSS = styleMatches.map(m => m[1]).join('\n');
+          if (rawCSS.trim()) {
+            scopedCSS = scopeReportCSS(rawCSS, r.slug);
+          }
+        }
         bodyContent = content
           .replace(/^[\s\S]*?<body[^>]*>/i, '')
           .replace(/<\/body>[\s\S]*$/i, '');
@@ -1253,9 +1271,14 @@ async function generateAchievementsHTML(mdReports, htmlReports) {
         bodyContent = '<p style="color:var(--text-3);padding:2rem">Report could not be loaded.</p>';
       }
       const dateRange = formatWeekDateRange(r.slug);
-      return { r, idx, bodyContent, dateRange };
+      return { r, idx, bodyContent, scopedCSS, dateRange };
     }),
   );
+
+  // Aggregate all scoped report CSS for injection into <head>
+  const scopedReportCSS = panels.map(({ r, scopedCSS }) =>
+    scopedCSS ? `/* report: ${r.slug} */\n${scopedCSS}` : ''
+  ).filter(Boolean).join('\n');
 
   // Horizontal pill-tab navigation bar (sticky below header)
   const tabBar = hasHtml
@@ -1266,10 +1289,10 @@ async function generateAchievementsHTML(mdReports, htmlReports) {
 </nav>`
     : '';
 
-  // Inline panels
+  // Inline panels — wrap body content in scoped container to isolate report CSS
   const reportPanels = hasHtml
     ? panels.map(({ r, idx, bodyContent }) =>
-        `<div class="ach-report-panel${idx === 0 ? ' ach-report-panel--active' : ''}" id="panel-${esc(r.slug)}" data-slug="${esc(r.slug)}" role="tabpanel" style="display:${idx === 0 ? 'block' : 'none'}"><div class="ach-report-content">${bodyContent}</div></div>`
+        `<div class="ach-report-panel${idx === 0 ? ' ach-report-panel--active' : ''}" id="panel-${esc(r.slug)}" data-slug="${esc(r.slug)}" role="tabpanel" style="display:${idx === 0 ? 'block' : 'none'}"><div class="ach-report-content"><div data-report-scope="${esc(r.slug)}">${bodyContent}</div></div></div>`
       ).join('\n')
     : `<div class="ach-viewer-empty"><div class="empty-state" role="status"><p class="empty-heading">No HTML reports yet</p><p class="empty-sub">HTML achievement reports will appear here once the AchievementsAgent publishes them.</p></div></div>`;
 
@@ -1340,6 +1363,7 @@ async function generateAchievementsHTML(mdReports, htmlReports) {
   <style>
 ${getCSS()}
 ${achPageCSS}
+${scopedReportCSS ? `/* ── Scoped report styles ─────────────────────────────────────────────── */\n${scopedReportCSS}` : ''}
   </style>
   <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();<\/script>
 </head>
