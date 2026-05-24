@@ -322,9 +322,22 @@ function renderPerformanceSection(reports) {
   return `${featured}${archived ? `<div class="archive">${archived}</div>` : ''}`;
 }
 
-function renderAchievementsPreview(latestStats) {
-  if (!latestStats) return '';
-  const { stats, chart } = latestStats;
+const CAT_ICONS = {
+  'Features': `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1l1.2 2.4L11 4l-2 2 .5 2.8L7 7.5 4.5 8.8 5 6 3 4l2.8-.6L7 1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>`,
+  'Bug Fixes': `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M5 2a2 2 0 014 0M3 6h8M4 6V4l-2-2M10 6V4l2-2M4 10.5A3 3 0 007 13a3 3 0 003-2.5M3 6a4 4 0 008 0" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  'Enhancements': `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3.2 3.2l1.4 1.4M9.4 9.4l1.4 1.4M3.2 10.8l1.4-1.4M9.4 4.6l1.4-1.4M7 9.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,
+  'Infrastructure': `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3.2 3.2l1.4 1.4M9.4 9.4l1.4 1.4M3.2 10.8l1.4-1.4M9.4 4.6l1.4-1.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,
+};
+const CAT_TINT = {
+  'Features': 'green',
+  'Bug Fixes': 'orange',
+  'Enhancements': 'indigo',
+  'Infrastructure': 'slate',
+};
+
+function renderAchievementsShowcase(latestStats, categories) {
+  if (!latestStats && (!categories || categories.length === 0)) return '';
+  const { stats = {}, chart = { bugCount: 0, featCount: 0, enhCount: 0 } } = latestStats ?? {};
 
   const prs = esc(stats['PRs Merged'] || '—');
   const added = esc(stats['Lines Added'] || '—');
@@ -334,51 +347,92 @@ function renderAchievementsPreview(latestStats) {
   const { bugCount, featCount, enhCount } = chart;
   const total = bugCount + featCount + enhCount;
 
-  const statGrid = `
-<div class="ach-prev-stats">
-  <div class="ach-prev-stat"><span class="ach-prev-val">${prs}</span><span class="ach-prev-lbl">PRs Merged</span></div>
-  <div class="ach-prev-stat"><span class="ach-prev-val" style="color:var(--green)">${added}</span><span class="ach-prev-lbl">Lines Added</span></div>
-  <div class="ach-prev-stat"><span class="ach-prev-val" style="color:var(--orange)">${removed}</span><span class="ach-prev-lbl">Lines Removed</span></div>
-  <div class="ach-prev-stat"><span class="ach-prev-val" style="color:#f59e0b">${hotfixes}</span><span class="ach-prev-lbl">Hotfixes</span></div>
+  const statItems = [
+    { val: prs, lbl: 'PRs Merged', accent: 'indigo', raw: prs },
+    { val: added, lbl: 'Lines Added', accent: 'green', raw: added },
+    { val: removed, lbl: 'Lines Removed', accent: 'orange', raw: removed },
+    { val: hotfixes, lbl: 'Hotfixes', accent: 'yellow', raw: hotfixes },
+  ];
+
+  const statRibbon = `
+<div class="ach-showcase-stats">
+  ${statItems.map(s => {
+    const numVal = parseInt(String(s.raw).replace(/,/g, ''), 10);
+    const countupAttr = !isNaN(numVal) && numVal >= 0 ? ` data-countup="${numVal}"` : '';
+    return `<div class="ach-showcase-stat ach-showcase-stat--${s.accent}">
+    <span class="ach-showcase-val"${countupAttr}>${s.val}</span>
+    <span class="ach-showcase-lbl">${s.lbl}</span>
+  </div>`;
+  }).join('')}
 </div>`;
 
   const chartBlock = total > 0 ? `
-<div class="ach-prev-chart-row">
-  <div class="ach-prev-chart-wrap">
-    <canvas id="achPrevDonut" width="140" height="140"></canvas>
+<div class="ach-showcase-chart-row">
+  <div class="ach-showcase-chart-wrap">
+    <canvas id="achShowcaseDonut" width="180" height="180"></canvas>
   </div>
-  <div class="ach-prev-legend">
-    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#f87171"></span><span>Bug Fixes — ${bugCount}</span></div>
-    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#818cf8"></span><span>New Features — ${featCount}</span></div>
-    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#34d399"></span><span>Enhancements — ${enhCount}</span></div>
+  <div class="ach-showcase-legend">
+    <div class="ach-showcase-legend-item"><span class="ach-showcase-dot" style="background:#f87171"></span><span>Bug Fixes — ${bugCount}</span></div>
+    <div class="ach-showcase-legend-item"><span class="ach-showcase-dot" style="background:#818cf8"></span><span>New Features — ${featCount}</span></div>
+    <div class="ach-showcase-legend-item"><span class="ach-showcase-dot" style="background:#34d399"></span><span>Enhancements — ${enhCount}</span></div>
   </div>
 </div>
 <script>
 (function(){
   if(typeof Chart==='undefined')return;
-  var ctx=document.getElementById('achPrevDonut');
+  var ctx=document.getElementById('achShowcaseDonut');
   if(!ctx)return;
-  new Chart(ctx.getContext('2d'),{type:'doughnut',data:{labels:['Bug Fixes','New Features','Enhancements'],datasets:[{data:[${bugCount},${featCount},${enhCount}],backgroundColor:['#f87171','#818cf8','#34d399'],borderColor:'var(--surface)',borderWidth:3,hoverOffset:6}]},options:{responsive:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+' ('+Math.round(c.raw/${total}*100)+'%)';}}}}}});
+  var centerPlugin={id:'centerText',beforeDraw:function(chart){
+    var c=chart.ctx,w=chart.width,h=chart.height;
+    c.save();
+    c.font='700 20px Inter,system-ui,sans-serif';
+    c.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text').trim()||'#f1f5f9';
+    c.textAlign='center';c.textBaseline='middle';
+    c.fillText('${total}',w/2,h/2-9);
+    c.font='500 11px Inter,system-ui,sans-serif';
+    c.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text-3').trim()||'#64748b';
+    c.fillText('items',w/2,h/2+11);
+    c.restore();
+  }};
+  new Chart(ctx.getContext('2d'),{
+    type:'doughnut',
+    data:{labels:['Bug Fixes','New Features','Enhancements'],datasets:[{data:[${bugCount},${featCount},${enhCount}],backgroundColor:['#f87171','#818cf8','#34d399'],borderColor:'var(--surface)',borderWidth:3,hoverOffset:8}]},
+    options:{responsive:false,cutout:'70%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+' ('+Math.round(c.raw/${total}*100)+'%)';}}}},centerText:true},
+    plugins:[centerPlugin]
+  });
 })();
 </script>` : '';
 
-  const viewLink = `<div class="ach-prev-link"><a href="achievements/">View full achievements →</a></div>`;
+  const catPills = categories && categories.length > 0
+    ? `<div class="ach-showcase-cats">
+  ${categories.map(c => {
+    const tint = CAT_TINT[c.label] ?? 'slate';
+    const icon = CAT_ICONS[c.label] ?? CAT_ICONS['Infrastructure'];
+    return `<div class="ach-cat-pill ach-cat-pill--${tint}">
+    <span class="ach-cat-icon">${icon}</span>
+    <span class="ach-cat-label">${esc(c.label)}</span>
+    <span class="ach-cat-count">${c.count}</span>
+  </div>`;
+  }).join('\n  ')}
+</div>` : '';
 
-  return `<div class="ach-prev">${statGrid}${chartBlock}${viewLink}</div>`;
+  const cta = `<div class="ach-cta-row">
+  <a href="achievements/" class="ach-cta-btn" aria-label="View full achievements page">
+    <span>View Full Achievements</span>
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
+</div>`;
+
+  return `<div class="ach-showcase">${statRibbon}${chartBlock}${catPills}${cta}</div>`;
 }
 
 function renderAchievementsSection(reports, latestStats) {
   const latest = reports[0];
-  const preview = renderAchievementsPreview(latestStats);
-  const stats = parseAchievementsStats(latest.raw);
   const categories = parseAchievementCategories(latest.raw);
-  const statGrid = renderAchievementStatGrid(stats);
-  const categoryBadges = renderAchievementCategoryBadges(categories);
+  const showcase = renderAchievementsShowcase(latestStats, categories);
 
   const cardBody = `
-    ${preview}
-    ${statGrid}
-    ${categoryBadges ? `<div class="achievement-categories">${categoryBadges}</div>` : ''}
+    ${showcase}
     <div class="report-body">${latest.html}</div>
   `;
   const featured = renderFeaturedCard(latest, cardBody);
@@ -827,45 +881,99 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .report-body tr:hover td { background: var(--surface-2); }
 .report-body blockquote { border-left: 3px solid var(--border-2); padding-left: 0.875rem; color: var(--text-3); margin-bottom: 0.625rem; }
 
-/* ── Achievements preview (main page) ───────────────────────────────────── */
-.ach-prev { border-bottom: 1px solid var(--border); }
-.ach-prev-stats {
+/* ── Achievements showcase (homepage section) ───────────────────────────── */
+.ach-showcase { border-bottom: 1px solid var(--border); }
+
+.ach-showcase-stats {
   display: grid; grid-template-columns: repeat(4, 1fr);
   gap: 1px; background: var(--border);
-  border-bottom: 1px solid var(--border);
 }
-.ach-prev-stat {
+.ach-showcase-stat {
   background: var(--surface);
-  padding: 0.875rem 0.75rem;
-  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px;
+  padding: 1rem 0.75rem 0.875rem;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
+  border-top: 3px solid transparent;
   transition: background var(--t);
   cursor: default;
 }
-.ach-prev-stat:hover { background: var(--surface-2); }
-.ach-prev-val {
-  font-size: 1.5rem; font-weight: 700; line-height: 1; letter-spacing: -0.03em;
+.ach-showcase-stat:hover { background: var(--surface-2); }
+.ach-showcase-stat--indigo { border-top-color: var(--accent); }
+.ach-showcase-stat--green  { border-top-color: var(--green); }
+.ach-showcase-stat--orange { border-top-color: var(--orange); }
+.ach-showcase-stat--yellow { border-top-color: #f59e0b; }
+.ach-showcase-val {
+  font-size: 1.75rem; font-weight: 700; line-height: 1; letter-spacing: -0.04em;
   color: var(--text); font-variant-numeric: tabular-nums;
 }
-.ach-prev-lbl {
+.ach-showcase-stat--indigo .ach-showcase-val { color: var(--accent); }
+.ach-showcase-stat--green  .ach-showcase-val { color: var(--green); }
+.ach-showcase-stat--orange .ach-showcase-val { color: var(--orange); }
+.ach-showcase-stat--yellow .ach-showcase-val { color: #f59e0b; }
+.ach-showcase-lbl {
   font-size: 0.6875rem; color: var(--text-3);
-  text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
 }
-.ach-prev-chart-row {
-  display: flex; align-items: center; gap: 1.5rem;
-  padding: 1.25rem 1.25rem 0;
+
+.ach-showcase-chart-row {
+  display: flex; align-items: center; gap: 1.75rem;
+  padding: 1.5rem 1.5rem 0.5rem;
 }
-.ach-prev-chart-wrap { width: 140px; height: 140px; flex-shrink: 0; }
-.ach-prev-legend { display: flex; flex-direction: column; gap: 0.5rem; }
-.ach-prev-legend-item { display: flex; align-items: center; gap: 0.375rem; font-size: 0.8125rem; color: var(--text-2); }
-.ach-prev-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.ach-prev-link {
-  padding: 0.75rem 1.25rem;
-  font-size: 0.8125rem;
+.ach-showcase-chart-wrap { width: 180px; height: 180px; flex-shrink: 0; }
+.ach-showcase-legend { display: flex; flex-direction: column; gap: 0.625rem; }
+.ach-showcase-legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--text-2); }
+.ach-showcase-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+.ach-showcase-cats {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+  padding: 1rem 1.5rem 0.5rem;
 }
-.ach-prev-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
-.ach-prev-link a:hover { text-decoration: underline; }
+.ach-cat-pill {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.4375rem 0.875rem;
+  border-radius: 20px; border: 1px solid transparent;
+  font-size: 0.8125rem; font-weight: 500;
+  cursor: default;
+  transition: box-shadow var(--t), transform var(--t);
+}
+.ach-cat-pill:hover { transform: translateY(-1px); }
+.ach-cat-pill--green  { background: var(--green-bg);  border-color: var(--green-bd);  color: var(--green); }
+.ach-cat-pill--orange { background: var(--orange-bg); border-color: var(--orange-bd); color: var(--orange); }
+.ach-cat-pill--indigo { background: var(--accent-bg); border-color: var(--accent-bd); color: var(--accent); }
+.ach-cat-pill--slate  { background: var(--surface-2); border-color: var(--border-2);  color: var(--text-2); }
+.ach-cat-pill--green:hover  { box-shadow: 0 4px 14px rgba(22,163,74,.22); }
+.ach-cat-pill--orange:hover { box-shadow: 0 4px 14px rgba(234,88,12,.22); }
+.ach-cat-pill--indigo:hover { box-shadow: 0 4px 14px rgba(99,102,241,.22); }
+.ach-cat-pill--slate:hover  { box-shadow: 0 4px 14px rgba(71,85,105,.12); }
+.ach-cat-icon { display: flex; align-items: center; flex-shrink: 0; }
+.ach-cat-label { font-weight: 600; }
+.ach-cat-count {
+  font-size: 0.75rem; padding: 0 5px; border-radius: 8px;
+  background: rgba(0,0,0,0.06);
+}
+html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,0.1); }
+
+.ach-cta-row { padding: 1rem 1.5rem; }
+.ach-cta-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 1.125rem;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 8px;
+  font-size: 0.875rem; font-weight: 600;
+  text-decoration: none; cursor: pointer;
+  transition: background var(--t), transform var(--t), box-shadow var(--t);
+}
+.ach-cta-btn:hover {
+  background: #4f46e5;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(99,102,241,.35);
+}
+.ach-cta-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
 @media (max-width: 900px) {
-  .ach-prev-stats { grid-template-columns: repeat(2, 1fr); }
+  .ach-showcase-stats { grid-template-columns: repeat(2, 1fr); }
+  .ach-showcase-chart-row { padding: 1.25rem 1rem 0.5rem; }
+  .ach-showcase-cats { padding: 0.875rem 1rem 0.375rem; }
+  .ach-cta-row { padding: 0.875rem 1rem; }
 }
 
 /* ── Empty state ────────────────────────────────────────────────────────── */
@@ -981,56 +1089,54 @@ function getJS() {
 function getAchievementsJS() {
   return `
 (function () {
-  var btns = document.querySelectorAll('.ach-week-btn');
-  var frames = document.querySelectorAll('.ach-frame');
-  var loader = document.querySelector('.ach-loader');
-
-  function showLoader() {
-    if (loader) loader.classList.remove('ach-loader--hidden');
-  }
-  function hideLoader() {
-    if (loader) loader.classList.add('ach-loader--hidden');
-  }
+  var btns = document.querySelectorAll('.ach-tab-btn');
+  var panels = document.querySelectorAll('.ach-report-panel');
 
   function show(slug) {
-    btns.forEach(function (b) { b.classList.toggle('active', b.dataset.slug === slug); });
-    var activeFrame = null;
-    frames.forEach(function (f) {
-      var visible = f.dataset.slug === slug;
-      f.style.display = visible ? 'block' : 'none';
-      f.setAttribute('aria-hidden', visible ? 'false' : 'true');
-      if (visible) activeFrame = f;
+    btns.forEach(function (b) {
+      var active = b.dataset.slug === slug;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-selected', active ? 'true' : 'false');
+      b.setAttribute('tabindex', active ? '0' : '-1');
     });
-    if (activeFrame) {
-      showLoader();
-      var onLoad = function () {
-        hideLoader();
-        activeFrame.removeEventListener('load', onLoad);
-      };
-      try {
-        var doc = activeFrame.contentDocument || activeFrame.contentWindow.document;
-        if (doc && doc.readyState === 'complete') {
-          hideLoader();
-        } else {
-          activeFrame.addEventListener('load', onLoad);
-        }
-      } catch (e) {
-        activeFrame.addEventListener('load', onLoad);
+    panels.forEach(function (p) {
+      var visible = p.dataset.slug === slug;
+      if (visible) {
+        p.style.display = 'block';
+        p.classList.add('ach-report-panel--active');
+      } else {
+        p.style.display = 'none';
+        p.classList.remove('ach-report-panel--active');
       }
-    }
+    });
     try { history.replaceState(null, '', '#' + slug); } catch (e) {}
   }
 
   btns.forEach(function (b) {
     b.addEventListener('click', function () { show(b.dataset.slug); });
     b.addEventListener('keydown', function (e) {
+      var idx = Array.from(btns).indexOf(b);
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(b.dataset.slug); }
+      if (e.key === 'ArrowRight' && idx < btns.length - 1) { btns[idx + 1].focus(); show(btns[idx + 1].dataset.slug); }
+      if (e.key === 'ArrowLeft'  && idx > 0)               { btns[idx - 1].focus(); show(btns[idx - 1].dataset.slug); }
     });
+  });
+
+  // Count-up animation for showcase stats
+  document.querySelectorAll('[data-countup]').forEach(function (el) {
+    var target = parseInt(el.dataset.countup, 10);
+    if (isNaN(target) || target <= 0) return;
+    var dur = 800, step = 16, n = Math.ceil(dur / step), count = 0;
+    var interval = setInterval(function () {
+      count++;
+      el.textContent = count >= n ? target : Math.round((target / n) * count);
+      if (count >= n) clearInterval(interval);
+    }, step);
   });
 
   // Honour URL hash on load
   var hash = location.hash.replace('#', '');
-  var initial = (hash && document.querySelector('.ach-week-btn[data-slug="' + hash + '"]'))
+  var initial = (hash && document.querySelector('.ach-tab-btn[data-slug="' + hash + '"]'))
     ? hash
     : (btns[0] ? btns[0].dataset.slug : null);
   if (initial) show(initial);
@@ -1193,48 +1299,59 @@ function generateReleasesHTML(releases) {
 </html>`;
 }
 
-function generateAchievementsHTML(mdReports, htmlReports) {
+async function generateAchievementsHTML(mdReports, htmlReports) {
   const buildDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
-  const achievementsMeta = SECTIONS.find(s => s.key === 'achievements');
   const hasHtml = htmlReports.length > 0;
 
-  const weekList = hasHtml
+  const tabNav = hasHtml
     ? htmlReports.map((r, idx) => {
         const dateRange = formatWeekDateRange(r.slug);
         return `
 <button
-  class="ach-week-btn${idx === 0 ? ' active' : ''}"
+  class="ach-tab-btn${idx === 0 ? ' active' : ''}"
   data-slug="${esc(r.slug)}"
-  aria-label="View ${esc(r.title)}"
-  tabindex="0"
+  aria-label="View ${esc(r.title)}${dateRange ? ' — ' + dateRange : ''}"
+  tabindex="${idx === 0 ? '0' : '-1'}"
+  role="tab"
+  aria-selected="${idx === 0 ? 'true' : 'false'}"
 >
-  <span class="ach-week-slug">${esc(r.slug)}</span>
-  <span class="ach-week-label">${esc(r.title)}</span>
+  <span class="ach-tab-slug">${esc(r.slug)}</span>
   ${idx === 0 ? '<span class="badge badge--accent" aria-hidden="true">Latest</span>' : ''}
-  ${dateRange ? `<span class="ach-week-dates">${esc(dateRange)}</span>` : ''}
+  ${dateRange ? `<span class="ach-tab-date">${esc(dateRange)}</span>` : ''}
 </button>`;
       }).join('\n')
-    : '<p class="ach-empty-list">No HTML reports yet.</p>';
+    : '';
 
-  const iframes = hasHtml
-    ? htmlReports.map((r, idx) => `
-<iframe
-  class="ach-frame"
+  const panels = hasHtml
+    ? await Promise.all(htmlReports.map(async (r, idx) => {
+        let bodyContent = '';
+        try {
+          const content = await readFile(join(REPORTS_DIR, 'achievements', r.file), 'utf-8');
+          bodyContent = content
+            .replace(/^[\s\S]*?<body[^>]*>/i, '')
+            .replace(/<\/body>[\s\S]*$/i, '');
+        } catch {
+          bodyContent = '<p style="padding:2rem;color:#94a3b8">Unable to load report.</p>';
+        }
+        return `
+<div
+  class="ach-report-panel${idx === 0 ? ' ach-report-panel--active' : ''}"
   data-slug="${esc(r.slug)}"
-  src="./reports/${esc(r.file)}"
-  title="${esc(r.title)}"
-  loading="lazy"
-  style="display:${idx === 0 ? 'block' : 'none'}"
-  aria-hidden="${idx === 0 ? 'false' : 'true'}"
-></iframe>`).join('\n')
-    : `<div class="ach-viewer-empty">
+  role="tabpanel"
+  aria-label="${esc(r.title)}"
+  style="${idx === 0 ? '' : 'display:none'}"
+>
+  <div class="ach-report-content">${bodyContent}</div>
+</div>`;
+      }))
+    : [`<div class="ach-viewer-empty">
   <div class="empty-state" role="status">
     <p class="empty-heading">No HTML reports yet</p>
     <p class="empty-sub">HTML achievement reports will appear here once the AchievementsAgent publishes them.</p>
   </div>
-</div>`;
+</div>`];
 
   const mdSection = mdReports.length > 0
     ? `
@@ -1261,62 +1378,69 @@ ${getCSS()}
 /* ── Achievements page layout ─────────────────────────────────────────── */
 .ach-layout {
   display: flex;
+  flex-direction: column;
   min-height: calc(100vh - var(--hdr-h));
 }
-.ach-panel {
-  width: var(--side-w);
-  flex-shrink: 0;
+
+/* ── Horizontal pill-tab nav bar ──────────────────────────────────────── */
+.ach-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
   background: var(--surface);
-  border-right: 1px solid var(--border);
-  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--border);
   position: sticky;
   top: var(--hdr-h);
-  height: calc(100vh - var(--hdr-h));
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+  z-index: 90;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
 }
-.ach-panel-lbl {
-  font-size: 0.6875rem; font-weight: 600;
-  letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--text-3); padding: 0 1rem 0.625rem;
-}
-.ach-week-btn {
-  display: flex; align-items: center; flex-wrap: wrap; gap: 0.375rem;
-  width: 100%; padding: 0.625rem 1rem;
-  background: none; border: none; border-left: 2px solid transparent;
-  text-align: left; cursor: pointer; color: var(--text-2);
-  font-size: 0.875rem; font-family: inherit;
-  transition: background var(--t), color var(--t), border-color var(--t);
-}
-.ach-week-btn:hover { background: var(--bg); color: var(--text); }
-.ach-week-btn.active {
-  color: var(--accent); background: var(--accent-bg);
-  border-left-color: var(--accent);
-}
-.ach-week-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.ach-week-slug {
-  font-size: 0.6875rem; font-weight: 500; font-variant-numeric: tabular-nums;
-  padding: 1px 7px; border-radius: 4px;
-  background: var(--surface-2); border: 1px solid var(--border);
-  color: var(--text-2);
-}
-.ach-week-btn.active .ach-week-slug {
-  background: var(--accent-bg); border-color: var(--accent-bd); color: var(--accent);
-}
-.ach-week-label { flex: 1; font-weight: 500; }
-.ach-empty-list { padding: 0.75rem 1rem; font-size: 0.8125rem; color: var(--text-3); }
+.ach-tabs-bar::-webkit-scrollbar { display: none; }
 
-.ach-viewer-wrap {
-  flex: 1; display: flex; flex-direction: column;
-  min-height: calc(100vh - var(--hdr-h));
-  position: relative;
+.ach-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4375rem 0.875rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--text-2);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background var(--t), color var(--t), border-color var(--t), box-shadow var(--t);
 }
-.ach-frame {
-  width: 100%; flex: 1;
-  border: none;
-  min-height: calc(100vh - var(--hdr-h));
+.ach-tab-btn:hover { background: var(--border); color: var(--text); }
+.ach-tab-btn.active {
+  background: var(--accent-bg);
+  border-color: var(--accent-bd);
+  color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
 }
+.ach-tab-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ach-tab-slug {
+  font-size: 0.75rem; font-weight: 600;
+  font-variant-numeric: tabular-nums; opacity: 0.75;
+}
+.ach-tab-date { font-size: 0.6875rem; color: var(--text-3); }
+.ach-tab-btn.active .ach-tab-date { color: var(--accent); opacity: 0.75; }
+
+/* ── Report panels ────────────────────────────────────────────────────── */
+.ach-panels { flex: 1; }
+@keyframes achPanelIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ach-report-panel--active { animation: achPanelIn 200ms ease both; }
+.ach-report-content { max-width: 100%; overflow: hidden; }
+
+/* ── Legacy + empty ───────────────────────────────────────────────────── */
 .ach-viewer-empty { padding: 2.5rem; }
 .ach-legacy {
   padding: 2rem 2.5rem;
@@ -1329,49 +1453,9 @@ ${getCSS()}
   margin-bottom: 1rem;
 }
 
-/* ── Loading spinner ───────────────────────────────────────────────────── */
-.ach-loader {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--bg); z-index: 5;
-  transition: opacity 0.25s;
-  top: 0;
-}
-.ach-loader--hidden { opacity: 0; pointer-events: none; }
-.ach-spinner {
-  width: 28px; height: 28px; border-radius: 50%;
-  border: 2px solid var(--border); border-top-color: var(--accent);
-  animation: spin 0.7s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── Sidebar week date range ───────────────────────────────────────────── */
-.ach-week-dates {
-  width: 100%;
-  font-size: 0.6875rem;
-  color: var(--text-3);
-  padding-left: 0.125rem;
-  margin-top: -0.125rem;
-}
-
-/* ── Responsive (achievements) ─────────────────────────────────────────── */
+/* ── Responsive ───────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .ach-layout { flex-direction: column; }
-  .ach-panel {
-    position: static; height: auto; border-right: none;
-    border-bottom: 1px solid var(--border);
-    padding: 0; display: flex; overflow-x: auto; scrollbar-width: none;
-    width: 100%;
-  }
-  .ach-panel::-webkit-scrollbar { display: none; }
-  .ach-panel-lbl { display: none; }
-  .ach-week-btn {
-    padding: 0.75rem 0.875rem; border-left: none;
-    border-bottom: 2px solid transparent;
-    white-space: nowrap; flex-shrink: 0; flex-wrap: nowrap;
-  }
-  .ach-week-btn.active { border-bottom-color: var(--accent); border-left-color: transparent; background: transparent; color: var(--accent); }
-  .ach-week-dates { display: none; }
+  .ach-tabs-bar { padding: 0.625rem 1rem; }
   .ach-legacy { padding: 1.25rem 1rem; }
 }
   </style>
@@ -1395,15 +1479,11 @@ ${getCSS()}
 </header>
 
 <div class="ach-layout">
-  <nav class="ach-panel" aria-label="Achievement reports">
-    <p class="ach-panel-lbl" aria-hidden="true">Weekly Reports</p>
-    ${weekList}
-  </nav>
-  <div class="ach-viewer-wrap">
-    <div class="ach-loader" role="status" aria-label="Loading report">
-      <div class="ach-spinner" aria-hidden="true"></div>
-    </div>
-    ${iframes}
+  <div class="ach-tabs-bar" role="tablist" aria-label="Achievement report weeks">
+    ${tabNav}
+  </div>
+  <div class="ach-panels">
+    ${panels.join('\n')}
     ${mdSection}
   </div>
 </div>
@@ -1449,7 +1529,7 @@ async function build() {
     await copyFile(src, dst);
   }
 
-  const achievementsHtml = generateAchievementsHTML(data.achievements, htmlReports);
+  const achievementsHtml = await generateAchievementsHTML(data.achievements, htmlReports);
   await writeFile(join(DIST_DIR, 'achievements', 'index.html'), achievementsHtml, 'utf-8');
   console.log(`✓  Built dist/achievements/index.html (${achievementsHtml.length.toLocaleString()} bytes)`);
 

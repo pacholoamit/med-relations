@@ -388,45 +388,99 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
 .report-body tr:hover td { background: var(--surface-2); }
 .report-body blockquote { border-left: 3px solid var(--border-2); padding-left: 0.875rem; color: var(--text-3); margin-bottom: 0.625rem; }
 
-/* ── Achievements preview (main page) ───────────────────────────────────── */
-.ach-prev { border-bottom: 1px solid var(--border); }
-.ach-prev-stats {
+/* ── Achievements showcase (homepage section) ───────────────────────────── */
+.ach-showcase { border-bottom: 1px solid var(--border); }
+
+.ach-showcase-stats {
   display: grid; grid-template-columns: repeat(4, 1fr);
   gap: 1px; background: var(--border);
-  border-bottom: 1px solid var(--border);
 }
-.ach-prev-stat {
+.ach-showcase-stat {
   background: var(--surface);
-  padding: 0.875rem 0.75rem;
-  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px;
+  padding: 1rem 0.75rem 0.875rem;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
+  border-top: 3px solid transparent;
   transition: background var(--t);
   cursor: default;
 }
-.ach-prev-stat:hover { background: var(--surface-2); }
-.ach-prev-val {
-  font-size: 1.5rem; font-weight: 700; line-height: 1; letter-spacing: -0.03em;
+.ach-showcase-stat:hover { background: var(--surface-2); }
+.ach-showcase-stat--indigo { border-top-color: var(--accent); }
+.ach-showcase-stat--green  { border-top-color: var(--green); }
+.ach-showcase-stat--orange { border-top-color: var(--orange); }
+.ach-showcase-stat--yellow { border-top-color: #f59e0b; }
+.ach-showcase-val {
+  font-size: 1.75rem; font-weight: 700; line-height: 1; letter-spacing: -0.04em;
   color: var(--text); font-variant-numeric: tabular-nums;
 }
-.ach-prev-lbl {
+.ach-showcase-stat--indigo .ach-showcase-val { color: var(--accent); }
+.ach-showcase-stat--green  .ach-showcase-val { color: var(--green); }
+.ach-showcase-stat--orange .ach-showcase-val { color: var(--orange); }
+.ach-showcase-stat--yellow .ach-showcase-val { color: #f59e0b; }
+.ach-showcase-lbl {
   font-size: 0.6875rem; color: var(--text-3);
-  text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
 }
-.ach-prev-chart-row {
-  display: flex; align-items: center; gap: 1.5rem;
-  padding: 1.25rem 1.25rem 0;
+
+.ach-showcase-chart-row {
+  display: flex; align-items: center; gap: 1.75rem;
+  padding: 1.5rem 1.5rem 0.5rem;
 }
-.ach-prev-chart-wrap { width: 140px; height: 140px; flex-shrink: 0; }
-.ach-prev-legend { display: flex; flex-direction: column; gap: 0.5rem; }
-.ach-prev-legend-item { display: flex; align-items: center; gap: 0.375rem; font-size: 0.8125rem; color: var(--text-2); }
-.ach-prev-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.ach-prev-link {
-  padding: 0.75rem 1.25rem;
-  font-size: 0.8125rem;
+.ach-showcase-chart-wrap { width: 180px; height: 180px; flex-shrink: 0; }
+.ach-showcase-legend { display: flex; flex-direction: column; gap: 0.625rem; }
+.ach-showcase-legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--text-2); }
+.ach-showcase-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+.ach-showcase-cats {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+  padding: 1rem 1.5rem 0.5rem;
 }
-.ach-prev-link a { color: var(--accent); text-decoration: none; font-weight: 500; }
-.ach-prev-link a:hover { text-decoration: underline; }
+.ach-cat-pill {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.4375rem 0.875rem;
+  border-radius: 20px; border: 1px solid transparent;
+  font-size: 0.8125rem; font-weight: 500;
+  cursor: default;
+  transition: box-shadow var(--t), transform var(--t);
+}
+.ach-cat-pill:hover { transform: translateY(-1px); }
+.ach-cat-pill--green  { background: var(--green-bg);  border-color: var(--green-bd);  color: var(--green); }
+.ach-cat-pill--orange { background: var(--orange-bg); border-color: var(--orange-bd); color: var(--orange); }
+.ach-cat-pill--indigo { background: var(--accent-bg); border-color: var(--accent-bd); color: var(--accent); }
+.ach-cat-pill--slate  { background: var(--surface-2); border-color: var(--border-2);  color: var(--text-2); }
+.ach-cat-pill--green:hover  { box-shadow: 0 4px 14px rgba(22,163,74,.22); }
+.ach-cat-pill--orange:hover { box-shadow: 0 4px 14px rgba(234,88,12,.22); }
+.ach-cat-pill--indigo:hover { box-shadow: 0 4px 14px rgba(99,102,241,.22); }
+.ach-cat-pill--slate:hover  { box-shadow: 0 4px 14px rgba(71,85,105,.12); }
+.ach-cat-icon { display: flex; align-items: center; flex-shrink: 0; }
+.ach-cat-label { font-weight: 600; }
+.ach-cat-count {
+  font-size: 0.75rem; padding: 0 5px; border-radius: 8px;
+  background: rgba(0,0,0,0.06);
+}
+html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,0.1); }
+
+.ach-cta-row { padding: 1rem 1.5rem; }
+.ach-cta-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 1.125rem;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 8px;
+  font-size: 0.875rem; font-weight: 600;
+  text-decoration: none; cursor: pointer;
+  transition: background var(--t), transform var(--t), box-shadow var(--t);
+}
+.ach-cta-btn:hover {
+  background: #4f46e5;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(99,102,241,.35);
+}
+.ach-cta-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
 @media (max-width: 900px) {
-  .ach-prev-stats { grid-template-columns: repeat(2, 1fr); }
+  .ach-showcase-stats { grid-template-columns: repeat(2, 1fr); }
+  .ach-showcase-chart-row { padding: 1.25rem 1rem 0.5rem; }
+  .ach-showcase-cats { padding: 0.875rem 1rem 0.375rem; }
+  .ach-cta-row { padding: 0.875rem 1rem; }
 }
 
 /* ── Empty state ────────────────────────────────────────────────────────── */
@@ -499,7 +553,7 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
   <span class="hdr-sep" aria-hidden="true">/</span>
   <span class="hdr-org">Engineering Team</span>
   <div class="hdr-space"></div>
-  <time class="hdr-date" datetime="2026-05-24T07:41:06.224Z">May 24, 2026</time>
+  <time class="hdr-date" datetime="2026-05-24T08:46:52.073Z">May 24, 2026</time>
   <button class="theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Toggle light/dark mode">
     <svg class="theme-icon theme-icon--sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
     <svg class="theme-icon theme-icon--moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -1204,33 +1258,78 @@ html:not([data-theme="dark"]) .theme-icon--sun { display: none; }
     <h3 class="card-title">Achievements — 2026-W21</h3>
   </div>
   
-    <div class="ach-prev">
-<div class="ach-prev-stats">
-  <div class="ach-prev-stat"><span class="ach-prev-val">—</span><span class="ach-prev-lbl">PRs Merged</span></div>
-  <div class="ach-prev-stat"><span class="ach-prev-val" style="color:var(--green)">—</span><span class="ach-prev-lbl">Lines Added</span></div>
-  <div class="ach-prev-stat"><span class="ach-prev-val" style="color:var(--orange)">—</span><span class="ach-prev-lbl">Lines Removed</span></div>
-  <div class="ach-prev-stat"><span class="ach-prev-val" style="color:#f59e0b">—</span><span class="ach-prev-lbl">Hotfixes</span></div>
-</div>
-<div class="ach-prev-chart-row">
-  <div class="ach-prev-chart-wrap">
-    <canvas id="achPrevDonut" width="140" height="140"></canvas>
+    <div class="ach-showcase">
+<div class="ach-showcase-stats">
+  <div class="ach-showcase-stat ach-showcase-stat--indigo">
+    <span class="ach-showcase-val">—</span>
+    <span class="ach-showcase-lbl">PRs Merged</span>
+  </div><div class="ach-showcase-stat ach-showcase-stat--green">
+    <span class="ach-showcase-val">—</span>
+    <span class="ach-showcase-lbl">Lines Added</span>
+  </div><div class="ach-showcase-stat ach-showcase-stat--orange">
+    <span class="ach-showcase-val">—</span>
+    <span class="ach-showcase-lbl">Lines Removed</span>
+  </div><div class="ach-showcase-stat ach-showcase-stat--yellow">
+    <span class="ach-showcase-val">—</span>
+    <span class="ach-showcase-lbl">Hotfixes</span>
   </div>
-  <div class="ach-prev-legend">
-    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#f87171"></span><span>Bug Fixes — 24</span></div>
-    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#818cf8"></span><span>New Features — 2</span></div>
-    <div class="ach-prev-legend-item"><span class="ach-prev-dot" style="background:#34d399"></span><span>Enhancements — 3</span></div>
+</div>
+<div class="ach-showcase-chart-row">
+  <div class="ach-showcase-chart-wrap">
+    <canvas id="achShowcaseDonut" width="180" height="180"></canvas>
+  </div>
+  <div class="ach-showcase-legend">
+    <div class="ach-showcase-legend-item"><span class="ach-showcase-dot" style="background:#f87171"></span><span>Bug Fixes — 24</span></div>
+    <div class="ach-showcase-legend-item"><span class="ach-showcase-dot" style="background:#818cf8"></span><span>New Features — 2</span></div>
+    <div class="ach-showcase-legend-item"><span class="ach-showcase-dot" style="background:#34d399"></span><span>Enhancements — 3</span></div>
   </div>
 </div>
 <script>
 (function(){
   if(typeof Chart==='undefined')return;
-  var ctx=document.getElementById('achPrevDonut');
+  var ctx=document.getElementById('achShowcaseDonut');
   if(!ctx)return;
-  new Chart(ctx.getContext('2d'),{type:'doughnut',data:{labels:['Bug Fixes','New Features','Enhancements'],datasets:[{data:[24,2,3],backgroundColor:['#f87171','#818cf8','#34d399'],borderColor:'var(--surface)',borderWidth:3,hoverOffset:6}]},options:{responsive:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+' ('+Math.round(c.raw/29*100)+'%)';}}}}}});
+  var centerPlugin={id:'centerText',beforeDraw:function(chart){
+    var c=chart.ctx,w=chart.width,h=chart.height;
+    c.save();
+    c.font='700 20px Inter,system-ui,sans-serif';
+    c.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text').trim()||'#f1f5f9';
+    c.textAlign='center';c.textBaseline='middle';
+    c.fillText('29',w/2,h/2-9);
+    c.font='500 11px Inter,system-ui,sans-serif';
+    c.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text-3').trim()||'#64748b';
+    c.fillText('items',w/2,h/2+11);
+    c.restore();
+  }};
+  new Chart(ctx.getContext('2d'),{
+    type:'doughnut',
+    data:{labels:['Bug Fixes','New Features','Enhancements'],datasets:[{data:[24,2,3],backgroundColor:['#f87171','#818cf8','#34d399'],borderColor:'var(--surface)',borderWidth:3,hoverOffset:8}]},
+    options:{responsive:false,cutout:'70%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+' ('+Math.round(c.raw/29*100)+'%)';}}}},centerText:true},
+    plugins:[centerPlugin]
+  });
 })();
-</script><div class="ach-prev-link"><a href="achievements/">View full achievements →</a></div></div>
-    <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)"><div class="stat-card"><span class="stat-val stat-val--green">123</span><span class="stat-lbl">Tickets closed</span></div><div class="stat-card"><span class="stat-val">99</span><span class="stat-lbl">PRs merged</span></div><div class="stat-card"><span class="stat-val">11</span><span class="stat-lbl">Contributors</span></div></div>
-    <div class="achievement-categories"><span class="badge badge--feature">Features 3</span><span class="badge badge--fix">Bug Fixes 1</span><span class="badge badge--infra">Infrastructure &amp; Automation 3</span></div>
+</script><div class="ach-showcase-cats">
+  <div class="ach-cat-pill ach-cat-pill--green">
+    <span class="ach-cat-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1l1.2 2.4L11 4l-2 2 .5 2.8L7 7.5 4.5 8.8 5 6 3 4l2.8-.6L7 1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></span>
+    <span class="ach-cat-label">Features</span>
+    <span class="ach-cat-count">3</span>
+  </div>
+  <div class="ach-cat-pill ach-cat-pill--orange">
+    <span class="ach-cat-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M5 2a2 2 0 014 0M3 6h8M4 6V4l-2-2M10 6V4l2-2M4 10.5A3 3 0 007 13a3 3 0 003-2.5M3 6a4 4 0 008 0" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <span class="ach-cat-label">Bug Fixes</span>
+    <span class="ach-cat-count">1</span>
+  </div>
+  <div class="ach-cat-pill ach-cat-pill--slate">
+    <span class="ach-cat-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3.2 3.2l1.4 1.4M9.4 9.4l1.4 1.4M3.2 10.8l1.4-1.4M9.4 4.6l1.4-1.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+    <span class="ach-cat-label">Infrastructure &amp; Automation</span>
+    <span class="ach-cat-count">3</span>
+  </div>
+</div><div class="ach-cta-row">
+  <a href="achievements/" class="ach-cta-btn" aria-label="View full achievements page">
+    <span>View Full Achievements</span>
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
+</div></div>
     <div class="report-body"><h1>Achievements — 2026-W21</h1>
 <p>Period: 2026-05-18 → 2026-05-24</p>
 <h2>This week we shipped</h2>
