@@ -85,58 +85,183 @@
   .stat-value.yellow { color: var(--yellow); }
   .stat-period { font-size: .6875rem; color: rgba(113,128,150,.55);
                  margin-top: .25rem; letter-spacing: .04em; }
-  .section { margin-bottom: 2rem; }
 
-  /* ── Section headings — left accent border ── */
-  h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;
-       padding-left: 0.75rem; border-left: 3px solid var(--accent); }
+  /* ── Page hero ── */
+  .page-hero {
+    display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap;
+    gap: 1rem; margin-bottom: 2rem; padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-week {
+    display: inline-flex; align-items: center; gap: .375rem;
+    font-size: .6875rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.25);
+    border-radius: 1rem; padding: .2rem .625rem; width: fit-content; margin-bottom: .5rem;
+  }
+  .hero-title { font-size: 1.625rem; font-weight: 800; color: var(--text);
+                letter-spacing: -.03em; line-height: 1.15; margin-bottom: .375rem; }
+  .hero-date  { font-size: .8125rem; color: var(--muted); }
+  .hero-summary {
+    display: flex; flex-direction: column; align-items: flex-end; gap: .3rem;
+    padding-top: .25rem;
+  }
+  .hero-kpi {
+    display: flex; align-items: center; gap: .375rem;
+    font-size: .8125rem; color: var(--muted);
+  }
+  .hero-kpi strong { color: var(--text); font-weight: 600; }
+  .hero-kpi-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
-  .charts-row { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
-  .chart-container { flex: 1; min-width: 280px; display: flex; align-items: center; gap: 1.5rem;
-                     background: var(--card); border: 1px solid var(--border);
-                     border-radius: .75rem; padding: 1.5rem;
-                     box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-  .chart-container:nth-child(1) { border-left: 3px solid var(--accent); }
-  .chart-container:nth-child(2) { border-left: 3px solid #f59e0b; }
-  .chart-wrap { width: 160px; height: 160px; flex-shrink: 0; }
-  .chart-title { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em;
-                  color: var(--muted); margin-bottom: .75rem; }
-  .legend { display: flex; flex-direction: column; gap: .6rem; }
+  /* ── Section ── */
+  .section { margin-bottom: 2.5rem; }
+
+  /* ── Section heading with icon + count ── */
+  .section-hd { display: flex; align-items: center; gap: .625rem; margin-bottom: 1.25rem; }
+  .section-hd-icon {
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: .4rem;
+    background: rgba(99,102,241,.12); color: var(--accent); flex-shrink: 0;
+  }
+  .section-hd h2 {
+    font-size: 1rem; font-weight: 600; color: var(--text);
+    border-left: none; padding-left: 0; margin-bottom: 0;
+    letter-spacing: -.01em; flex: 1;
+  }
+  .section-count {
+    font-size: .6875rem; font-weight: 600;
+    background: rgba(113,128,150,.1); color: var(--muted);
+    border: 1px solid rgba(113,128,150,.18); border-radius: 1rem; padding: .15rem .55rem;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+
+  /* ── Charts ── */
+  .charts-row { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+  .chart-container {
+    flex: 1; min-width: 280px; display: flex; align-items: flex-start; gap: 1.5rem;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: .75rem; padding: 1.375rem 1.5rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,.35);
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .chart-container:hover { border-color: rgba(99,102,241,.3); box-shadow: 0 6px 20px rgba(0,0,0,.45); }
+  .chart-container:nth-child(1) { border-top: 2px solid var(--accent); }
+  .chart-container:nth-child(2) { border-top: 2px solid #f59e0b; }
+  .chart-wrap { width: 150px; height: 150px; flex-shrink: 0; }
+  .chart-meta { display: flex; flex-direction: column; padding-top: .125rem; flex: 1; }
+  .chart-title { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em;
+                 color: var(--muted); margin-bottom: .875rem; font-weight: 600; }
+  .legend { display: flex; flex-direction: column; gap: .55rem; }
   .legend-item { display: flex; align-items: center; gap: .5rem; font-size: .825rem; }
-  .legend-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .legend-pct { font-size: .7rem; color: var(--muted); margin-left: auto; font-variant-numeric: tabular-nums; }
 
-  /* ── Tables — striped + hover + sticky headers ── */
+  /* ── Table card wrapper ── */
+  .table-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: .75rem; overflow: hidden;
+  }
   table { width: 100%; border-collapse: collapse; font-size: .85rem; }
-  th { text-align: left; padding: .6rem .75rem; color: var(--muted);
-       font-weight: 500; border-bottom: 1px solid var(--border);
-       position: sticky; top: 0; background: var(--bg); z-index: 1; }
-  td { padding: .6rem .75rem; border-bottom: 1px solid var(--border); }
+  th {
+    text-align: left; padding: .625rem .875rem;
+    color: var(--muted); font-size: .7rem; font-weight: 600;
+    letter-spacing: .05em; text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,.025);
+  }
+  td { padding: .7rem .875rem; border-bottom: 1px solid rgba(255,255,255,.04); }
   tr:last-child td { border-bottom: none; }
-  tbody tr:nth-child(even) td { background: rgba(255,255,255,0.025); }
-  tbody tr:hover td { background: rgba(99,102,241,0.08); transition: background 0.15s; }
+  tbody tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  tbody tr:hover td { background: rgba(99,102,241,.07); transition: background 0.15s; }
 
+  /* ── Contributor avatar ── */
+  .contrib-cell { display: flex; align-items: center; gap: .625rem; }
+  .contrib-avatar {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .6875rem; font-weight: 700; letter-spacing: .01em; color: #fff;
+  }
+  .pr-pill {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 26px; padding: .1rem .45rem; border-radius: .375rem;
+    background: rgba(99,102,241,.12); color: var(--accent);
+    font-size: .75rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Badges ── */
   .badge { display: inline-block; padding: .15rem .5rem; border-radius: .375rem;
            font-size: .75rem; font-weight: 500; }
   .badge-bug { background: rgba(239,68,68,.15); color: #f87171; }
   .badge-feature { background: rgba(99,102,241,.15); color: #818cf8; }
   .badge-enhancement { background: rgba(16,185,129,.15); color: #34d399; }
   .badge-critical { background: rgba(245,158,11,.15); color: var(--yellow); }
+  .badge-high { background: rgba(239,68,68,.12); color: #f87171; }
   .badge-normal { background: rgba(113,128,150,.1); color: var(--muted); }
-  .lines-added { color: var(--green); }
-  .lines-removed { color: var(--red); }
+  .badge-low { background: rgba(52,211,153,.1); color: #34d399; }
+  .lines-added { color: var(--green); font-variant-numeric: tabular-nums; }
+  .lines-removed { color: var(--red); font-variant-numeric: tabular-nums; }
+
+  /* ── Improved metric cards ── */
   .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
-  .metric-item { background: var(--card); border: 1px solid var(--border);
-                 border-radius: .5rem; padding: 1rem; }
-  .metric-label { font-size: .75rem; color: var(--muted); margin-bottom: .25rem; }
-  .metric-value { font-size: 1.1rem; font-weight: 600; }
+  .metric-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: .75rem; padding: 1.125rem 1.25rem;
+    position: relative; overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    cursor: default;
+  }
+  .metric-item:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.4); border-color: rgba(99,102,241,.3); }
+  .metric-icon {
+    display: flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: .4rem;
+    background: rgba(99,102,241,.12); color: var(--accent);
+    margin-bottom: .75rem;
+  }
+  .metric-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .07em;
+                  color: var(--muted); margin-bottom: .3rem; }
+  .metric-value { font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
   .priority-badges { display: flex; gap: .35rem; flex-wrap: wrap; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stat-card, .metric-item, .chart-container { animation: none !important; transition: none !important; }
+    .stat-card:hover, .metric-item:hover { transform: none; }
+  }
 </style>
 </head>
 <body>
 
 <div class="content">
+
+<div class="page-hero">
+  <div>
+    <div class="hero-week">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      2026-W21
+    </div>
+    <h1 class="hero-title">Week in Review</h1>
+    <p class="hero-date">May 18 – May 24, 2026</p>
+  </div>
+  <div class="hero-summary" aria-label="Week summary">
+    <div class="hero-kpi">
+      <span class="hero-kpi-dot" style="background:var(--accent)"></span>
+      <strong>29</strong> pull requests merged
+    </div>
+    <div class="hero-kpi">
+      <span class="hero-kpi-dot" style="background:var(--green)"></span>
+      <strong>+12,646</strong> lines added
+    </div>
+    <div class="hero-kpi">
+      <span class="hero-kpi-dot" style="background:var(--yellow)"></span>
+      <strong>20</strong> hotfixes shipped
+    </div>
+    <div class="hero-kpi">
+      <span class="hero-kpi-dot" style="background:var(--muted)"></span>
+      <strong>9</strong> contributors active
+    </div>
+  </div>
+</div>
 
 <div class="stat-grid">
   <div class="stat-card stat-card--accent">
@@ -178,45 +303,56 @@
 </div>
 
 <div class="section">
-  <h2>Category &amp; Priority Breakdown</h2>
+  <div class="section-hd">
+    <div class="section-hd-icon" aria-hidden="true">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+    </div>
+    <h2>Category &amp; Priority Breakdown</h2>
+    <span class="section-count">29 total</span>
+  </div>
   <div class="charts-row">
     <div class="chart-container">
-      <div>
-        <div class="chart-title">Category Distribution</div>
-        <div class="chart-wrap">
-          <canvas id="categoryChart"></canvas>
-        </div>
+      <div class="chart-wrap">
+        <canvas id="categoryChart"></canvas>
       </div>
-      <div class="legend">
-        <div class="legend-item">
-          <div class="legend-dot" style="background:#f87171"></div>
-          <span>Bug Fixes — 15</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background:#818cf8"></div>
-          <span>New Features — 6</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background:#34d399"></div>
-          <span>Enhancements — 8</span>
+      <div class="chart-meta">
+        <div class="chart-title">Category Distribution</div>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#f87171"></div>
+            <span>Bug Fixes</span>
+            <span class="legend-pct">15 · 52%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#818cf8"></div>
+            <span>New Features</span>
+            <span class="legend-pct">6 · 21%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#34d399"></div>
+            <span>Enhancements</span>
+            <span class="legend-pct">8 · 28%</span>
+          </div>
         </div>
       </div>
     </div>
     <div class="chart-container">
-      <div>
-        <div class="chart-title">Priority Breakdown</div>
-        <div class="chart-wrap">
-          <canvas id="priorityChart"></canvas>
-        </div>
+      <div class="chart-wrap">
+        <canvas id="priorityChart"></canvas>
       </div>
-      <div class="legend">
-        <div class="legend-item">
-          <div class="legend-dot" style="background:#f59e0b"></div>
-          <span>Critical (Hotfix) — 20</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot" style="background:#718096"></div>
-          <span>Normal — 9</span>
+      <div class="chart-meta">
+        <div class="chart-title">Priority Breakdown</div>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#f59e0b"></div>
+            <span>Critical</span>
+            <span class="legend-pct">20 · 69%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#718096"></div>
+            <span>Normal</span>
+            <span class="legend-pct">9 · 31%</span>
+          </div>
         </div>
       </div>
     </div>
@@ -224,7 +360,14 @@
 </div>
 
 <div class="section">
-  <h2>Pull Requests</h2>
+  <div class="section-hd">
+    <div class="section-hd-icon" aria-hidden="true">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 7v1"/><line x1="6" y1="9" x2="6" y2="21"/></svg>
+    </div>
+    <h2>Pull Requests</h2>
+    <span class="section-count">29 merged</span>
+  </div>
+  <div class="table-card">
   <table>
     <thead>
       <tr>
@@ -408,100 +551,130 @@
       </tr>
     </tbody>
   </table>
+  </div><!-- /.table-card -->
 </div>
 
 <div class="section">
-  <h2>Contributors</h2>
+  <div class="section-hd">
+    <div class="section-hd-icon" aria-hidden="true">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <h2>Contributors</h2>
+    <span class="section-count">9 engineers</span>
+  </div>
+  <div class="table-card">
   <table>
     <thead>
       <tr><th>Contributor</th><th>PRs</th><th>Priority Breakdown</th><th>Lines Added</th><th>Lines Removed</th></tr>
     </thead>
     <tbody>
       <tr>
-        <td><a href="https://github.com/JC-DMZ22" target="_blank">JC-DMZ22</a></td>
-        <td>6</td>
+        <td><div class="contrib-cell"><div class="contrib-avatar" style="background:#6366f1" aria-hidden="true">JC</div><a href="https://github.com/JC-DMZ22" target="_blank" rel="noopener">JC-DMZ22</a></div></td>
+        <td><span class="pr-pill">6</span></td>
         <td><span class="badge badge-critical">6 Critical</span></td>
         <td class="lines-added">+243</td>
         <td class="lines-removed">-58</td>
       </tr>
       <tr>
-        <td><a href="https://github.com/verdelmediajel" target="_blank">verdelmediajel</a></td>
-        <td>6</td>
+        <td><div class="contrib-cell"><div class="contrib-avatar" style="background:#8b5cf6" aria-hidden="true">VE</div><a href="https://github.com/verdelmediajel" target="_blank" rel="noopener">verdelmediajel</a></div></td>
+        <td><span class="pr-pill">6</span></td>
         <td><span class="badge badge-critical">4 Critical</span> <span class="badge badge-normal">2 Normal</span></td>
-        <td class="lines-added">+9643</td>
+        <td class="lines-added">+9,643</td>
         <td class="lines-removed">-427</td>
       </tr>
       <tr>
-        <td><a href="https://github.com/johnjoseph28" target="_blank">johnjoseph28</a></td>
-        <td>5</td>
+        <td><div class="contrib-cell"><div class="contrib-avatar" style="background:#3b82f6" aria-hidden="true">JJ</div><a href="https://github.com/johnjoseph28" target="_blank" rel="noopener">johnjoseph28</a></div></td>
+        <td><span class="pr-pill">5</span></td>
         <td><span class="badge badge-critical">5 Critical</span></td>
         <td class="lines-added">+47</td>
         <td class="lines-removed">-213</td>
       </tr>
       <tr>
-        <td><a href="https://github.com/icarlofer" target="_blank">icarlofer</a></td>
-        <td>4</td>
+        <td><div class="contrib-cell"><div class="contrib-avatar" style="background:#0ea5e9" aria-hidden="true">IC</div><a href="https://github.com/icarlofer" target="_blank" rel="noopener">icarlofer</a></div></td>
+        <td><span class="pr-pill">4</span></td>
         <td><span class="badge badge-normal">4 Normal</span></td>
         <td class="lines-added">+222</td>
         <td class="lines-removed">-49</td>
       </tr>
       <tr>
-        <td><a href="https://github.com/bertwin-mediajel" target="_blank">bertwin-mediajel</a></td>
-        <td>2</td>
+        <td><div class="contrib-cell"><div class="contrib-avatar" style="background:#10b981" aria-hidden="true">BE</div><a href="https://github.com/bertwin-mediajel" target="_blank" rel="noopener">bertwin-mediajel</a></div></td>
+        <td><span class="pr-pill">2</span></td>
         <td><span class="badge badge-normal">2 Normal</span></td>
-        <td class="lines-added">+2012</td>
+        <td class="lines-added">+2,012</td>
         <td class="lines-removed">-457</td>
       </tr>
       <tr>
-        <td><a href="https://github.com/ramzell" target="_blank">ramzell</a></td>
-        <td>2</td>
+        <td><div class="contrib-cell"><div class="contrib-avatar" style="background:#f59e0b" aria-hidden="true">RA</div><a href="https://github.com/ramzell" target="_blank" rel="noopener">ramzell</a></div></td>
+        <td><span class="pr-pill">2</span></td>
         <td><span class="badge badge-critical">2 Critical</span></td>
         <td class="lines-added">+443</td>
         <td class="lines-removed">-38</td>
       </tr>
       <tr>
-        <td><a href="https://github.com/rmm03" target="_blank">rmm03</a></td>
-        <td>2</td>
+        <td><div class="contrib-cell"><div class="contrib-avatar" style="background:#ea580c" aria-hidden="true">RM</div><a href="https://github.com/rmm03" target="_blank" rel="noopener">rmm03</a></div></td>
+        <td><span class="pr-pill">2</span></td>
         <td><span class="badge badge-critical">2 Critical</span></td>
         <td class="lines-added">+12</td>
         <td class="lines-removed">-4</td>
       </tr>
       <tr>
-        <td><a href="https://github.com/Russell0813" target="_blank">Russell0813</a></td>
-        <td>1</td>
+        <td><div class="contrib-cell"><div class="contrib-avatar" style="background:#ef4444" aria-hidden="true">RU</div><a href="https://github.com/Russell0813" target="_blank" rel="noopener">Russell0813</a></div></td>
+        <td><span class="pr-pill">1</span></td>
         <td><span class="badge badge-critical">1 Critical</span></td>
         <td class="lines-added">+1</td>
         <td class="lines-removed">-1</td>
       </tr>
       <tr>
-        <td><a href="https://github.com/ZeeLiger" target="_blank">ZeeLiger</a></td>
-        <td>1</td>
+        <td><div class="contrib-cell"><div class="contrib-avatar" style="background:#ec4899" aria-hidden="true">ZL</div><a href="https://github.com/ZeeLiger" target="_blank" rel="noopener">ZeeLiger</a></div></td>
+        <td><span class="pr-pill">1</span></td>
         <td><span class="badge badge-normal">1 Normal</span></td>
         <td class="lines-added">+23</td>
         <td class="lines-removed">-41</td>
       </tr>
     </tbody>
   </table>
+  </div><!-- /.table-card -->
 </div>
 
 <div class="section">
-  <h2>Additional Metrics</h2>
+  <div class="section-hd">
+    <div class="section-hd-icon" aria-hidden="true">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    </div>
+    <h2>Additional Metrics</h2>
+  </div>
   <div class="metrics-grid">
     <div class="metric-item">
+      <div class="metric-icon" aria-hidden="true">
+        <!-- folder / repo -->
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      </div>
       <div class="metric-label">Most Active Repo</div>
-      <div class="metric-value">mediajel-dashboard</div>
+      <div class="metric-value" style="font-size:1rem">mediajel-dashboard</div>
     </div>
     <div class="metric-item">
+      <div class="metric-icon" aria-hidden="true">
+        <!-- maximize-2 / pr size -->
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      </div>
       <div class="metric-label">Avg PR Size (lines)</div>
       <div class="metric-value">480</div>
     </div>
     <div class="metric-item">
+      <div class="metric-icon" aria-hidden="true" style="background:rgba(239,68,68,.12);color:var(--red)">
+        <!-- rotate-ccw / revert -->
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+      </div>
       <div class="metric-label">Revert Count</div>
-      <div class="metric-value">1</div>
+      <div class="metric-value" style="color:var(--red)">1</div>
     </div>
     <div class="metric-item">
+      <div class="metric-icon" aria-hidden="true" style="background:rgba(16,185,129,.12);color:var(--green)">
+        <!-- activity / velocity -->
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
       <div class="metric-label">PR Velocity (per day)</div>
-      <div class="metric-value">4.14</div>
+      <div class="metric-value" style="color:var(--green)">4.14</div>
     </div>
   </div>
 </div>
