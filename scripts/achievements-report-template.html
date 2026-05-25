@@ -66,6 +66,8 @@
     position: sticky; top: 0; background: var(--bg); z-index: 1;
   }
   .ach-rep-table td { padding: .6rem .75rem; border-bottom: 1px solid var(--border); color: var(--text); }
+  .ach-rep-table td a { color: inherit; text-decoration: none; }
+  .ach-rep-table td a:hover { text-decoration: underline; }
   .ach-rep-table tr:last-child td { border-bottom: none; }
   .ach-rep-table tbody tr:nth-child(even) td {
     background: color-mix(in srgb, var(--border) 40%, transparent);
@@ -93,8 +95,8 @@
   }
   .ach-rep-metric-label { font-size: .75rem; color: var(--text-3); margin-bottom: .25rem; }
   .ach-rep-metric-value { font-size: 1.1rem; font-weight: 600; color: var(--text); }
-  .ach-rep-wrap a { color: var(--accent); text-decoration: none; }
-  .ach-rep-wrap a:hover { text-decoration: underline; }
+  .ach-report-wrap a { color: var(--accent); text-decoration: none; }
+  .ach-report-wrap a:hover { text-decoration: underline; }
   .priority-breakdown { display: flex; align-items: center; gap: .25rem; flex-wrap: wrap; }
   .priority-sep { color: var(--text-3); }
 </style>
