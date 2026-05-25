@@ -541,17 +541,792 @@ html[data-theme="dark"] .ach-cat-count { background: rgba(255,255,255,.12); }
   <span class="hdr-sep" aria-hidden="true">/</span>
   <span class="hdr-org">Achievements</span>
   <div class="hdr-space"></div>
-  <time class="hdr-date" datetime="2026-05-25T13:07:11.024Z">May 25, 2026</time>
+  <time class="hdr-date" datetime="2026-05-25T13:12:39.558Z">May 25, 2026</time>
   <button class="theme-toggle" id="theme-toggle" aria-label="Switch to light mode" title="Toggle light/dark mode">
     <svg class="theme-icon theme-icon--sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
     <svg class="theme-icon theme-icon--moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
   </button>
 </header>
 <nav class="ach-tabs-bar" role="tablist" aria-label="Achievement weekly reports">
-  <button class="ach-tab-btn active" role="tab" data-slug="2026-W20" aria-selected="true" aria-controls="panel-2026-W20" tabindex="0">2026-W20<span class="ach-tab-date">May 11 – May 17</span><span class="badge badge--accent" aria-hidden="true">Latest</span></button>
+  <button class="ach-tab-btn active" role="tab" data-slug="2026-W21" aria-selected="true" aria-controls="panel-2026-W21" tabindex="0">2026-W21<span class="ach-tab-date">May 18 – May 24</span><span class="badge badge--accent" aria-hidden="true">Latest</span></button>
+  <button class="ach-tab-btn" role="tab" data-slug="2026-W20" aria-selected="false" aria-controls="panel-2026-W20" tabindex="-1">2026-W20<span class="ach-tab-date">May 11 – May 17</span></button>
 </nav>
 <main id="main-content">
-  <div class="ach-report-panel ach-report-panel--active" id="panel-2026-W20" data-slug="2026-W20" role="tabpanel" style="display:block"><div class="ach-report-content"><!--
+  <div class="ach-report-panel ach-report-panel--active" id="panel-2026-W21" data-slug="2026-W21" role="tabpanel" style="display:block"><div class="ach-report-content"><!--
+  Achievements report panel template — hydrated by scripts/build.js for each JSON report.
+  Never written by agents. All {{TOKEN}} placeholders are replaced at build time.
+
+  Tokens:
+    2026-W21                  — week slug, e.g. "2026-W20"
+    2026-05-18 → 2026-05-24                — date range string, e.g. "2026-05-11 → 2026-05-17"
+    <div class="ach-rep-stat-card">
+  <div class="ach-rep-stat-label">PRs Merged</div>
+  <div class="ach-rep-stat-value">28</div>
+</div>
+<div class="ach-rep-stat-card">
+  <div class="ach-rep-stat-label">Lines Added</div>
+  <div class="ach-rep-stat-value green">+12645</div>
+</div>
+<div class="ach-rep-stat-card">
+  <div class="ach-rep-stat-label">Lines Removed</div>
+  <div class="ach-rep-stat-value red">-1287</div>
+</div>
+<div class="ach-rep-stat-card">
+  <div class="ach-rep-stat-label">Hotfixes</div>
+  <div class="ach-rep-stat-value yellow">19</div>
+</div>             — rendered stat card HTML
+    <div class="chart-wrap">
+  <canvas id="categoryChart-2026-W21" width="200" height="200"></canvas>
+</div>
+<div class="chart-legend">
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#f87171"></span><span>Bug Fixes — 18</span></div>
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#818cf8"></span><span>New Features — 5</span></div>
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#34d399"></span><span>Enhancements — 5</span></div>
+</div>
+<div class="chart-wrap" style="margin-left:1rem">
+  <canvas id="priorityChart-2026-W21" width="200" height="200"></canvas>
+</div>
+<div class="chart-legend">
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#f59e0b"></span><span>Critical — 19</span></div>
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#f87171"></span><span>High — 0</span></div>
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#94a3b8"></span><span>Normal — 9</span></div>
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#34d399"></span><span>Low — 0</span></div>
+</div>            — two canvases + legends in a flex container
+    var catCtx = document.getElementById('categoryChart-2026-W21');
+  if (catCtx) {
+    var bugCount = 18; var featCount = 5; var enhCount = 5;
+    var catTotal = bugCount + featCount + enhCount;
+    new Chart(catCtx.getContext('2d'), {
+      type: 'doughnut',
+      data: { labels: ['Bug Fixes', 'New Features', 'Enhancements'],
+        datasets: [{ data: catTotal > 0 ? [bugCount, featCount, enhCount] : [1,0,0],
+          backgroundColor: ['#f87171','#818cf8','#34d399'],
+          borderColor: '#1a1d27', borderWidth: 3, hoverOffset: 8 }] },
+      options: { responsive: true, maintainAspectRatio: true, cutout: '65%',
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) {
+          if (catTotal === 0) return ctx.label + ': 0';
+          return ctx.label + ': ' + ctx.raw + ' (' + Math.round(ctx.raw/catTotal*100) + '%)';
+        }}}}}
+    });
+  }
+  var priCtx = document.getElementById('priorityChart-2026-W21');
+  if (priCtx) {
+    var critCount = 19; var highCount = 0; var normCount = 9; var lowCount = 0;
+    var priTotal = critCount + highCount + normCount + lowCount;
+    new Chart(priCtx.getContext('2d'), {
+      type: 'doughnut',
+      data: { labels: ['Critical', 'High', 'Normal', 'Low'],
+        datasets: [{ data: priTotal > 0 ? [critCount, highCount, normCount, lowCount] : [1,0,0,0],
+          backgroundColor: ['#f59e0b','#f87171','#94a3b8','#34d399'],
+          borderColor: '#1a1d27', borderWidth: 3, hoverOffset: 8 }] },
+      options: { responsive: true, maintainAspectRatio: true, cutout: '65%',
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) {
+          if (priTotal === 0) return ctx.label + ': 0';
+          return ctx.label + ': ' + ctx.raw + ' (' + Math.round(ctx.raw/priTotal*100) + '%)';
+        }}}}}
+    });
+  }          — Chart.js init script block (no <script> wrapper)
+    <tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2076" target="_blank" rel="noopener noreferrer">Add sync modes across data-factory v1 + v2 UIs with adapter-managed defaults</a></td>
+  <td><span class="ach-rep-badge badge-feature">New Feature</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+2309</span> / <span class="lines-removed">-132</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2203" target="_blank" rel="noopener noreferrer">Remove Statara Partitions job</a></td>
+  <td><span class="ach-rep-badge badge-enhancement">Enhancement</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+0</span> / <span class="lines-removed">-102</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2204" target="_blank" rel="noopener noreferrer">Add new internal service env to production</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+11</span> / <span class="lines-removed">-1</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11352" target="_blank" rel="noopener noreferrer">Campaign Requestor Enhancements and Line Item Management</a></td>
+  <td><span class="ach-rep-badge badge-feature">New Feature</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+2005</span> / <span class="lines-removed">-370</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11340" target="_blank" rel="noopener noreferrer">Add type field to all campaign order report queries for Demo Campaign</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+8</span> / <span class="lines-removed">-0</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7481" target="_blank" rel="noopener noreferrer">Demo Campaign</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+4</span> / <span class="lines-removed">-4</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2211" target="_blank" rel="noopener noreferrer">Nexxen Integration Fixes and Data Factory Cleanup</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+7</span> / <span class="lines-removed">-87</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11322" target="_blank" rel="noopener noreferrer">Remove Audience Type dropdown from Demograph reach panel</a></td>
+  <td><span class="ach-rep-badge badge-enhancement">Enhancement</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+10</span> / <span class="lines-removed">-48</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7485" target="_blank" rel="noopener noreferrer">Removed Salesforce Rate-Limit</a></td>
+  <td><span class="ach-rep-badge badge-enhancement">Enhancement</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+7</span> / <span class="lines-removed">-7</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2218" target="_blank" rel="noopener noreferrer">NexxenCredentialForwardFix</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+23</span> / <span class="lines-removed">-41</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7489" target="_blank" rel="noopener noreferrer">Salesforce Additional Fields in PCL</a></td>
+  <td><span class="ach-rep-badge badge-feature">New Feature</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+8</span> / <span class="lines-removed">-0</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7493" target="_blank" rel="noopener noreferrer">Revert &quot;[HOTFIX] Salesforce Additional Fields in PCL&quot;</a></td>
+  <td><span class="ach-rep-badge badge-enhancement">Enhancement</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+0</span> / <span class="lines-removed">-8</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7494" target="_blank" rel="noopener noreferrer">Reprocess button not process on cluster</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+17</span> / <span class="lines-removed">-2</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7495" target="_blank" rel="noopener noreferrer">For reprocess button remove the prisma1 query</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+19</span> / <span class="lines-removed">-100</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11353" target="_blank" rel="noopener noreferrer">Added Salesforce Fields and CPM</a></td>
+  <td><span class="ach-rep-badge badge-feature">New Feature</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+218</span> / <span class="lines-removed">-48</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7500" target="_blank" rel="noopener noreferrer">Salesforce Additional Fields in PCL (re-apply + new fields)</a></td>
+  <td><span class="ach-rep-badge badge-feature">New Feature</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+9</span> / <span class="lines-removed">-0</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11359" target="_blank" rel="noopener noreferrer">Removed Console Log</a></td>
+  <td><span class="ach-rep-badge badge-enhancement">Enhancement</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+0</span> / <span class="lines-removed">-2</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11358" target="_blank" rel="noopener noreferrer">Multiple Transactions Fix</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+16</span> / <span class="lines-removed">-7</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11332" target="_blank" rel="noopener noreferrer">Page flickers after clicking task link</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+426</span> / <span class="lines-removed">-29</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11362" target="_blank" rel="noopener noreferrer">Guard xAxis access when Google data is empty</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+127</span> / <span class="lines-removed">-12</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7504" target="_blank" rel="noopener noreferrer">Fix Paid Search Missing Dates</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+44</span> / <span class="lines-removed">-19</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2199" target="_blank" rel="noopener noreferrer">Prevent 401 on first load of Widget Dev page</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+570</span> / <span class="lines-removed">-5</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2229" target="_blank" rel="noopener noreferrer">Unblock Ingest button for fixed-template adapters</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+635</span> / <span class="lines-removed">-22</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11378" target="_blank" rel="noopener noreferrer">Pin Google Maps API to v3.64 to restore HeatmapLayer</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+1</span> / <span class="lines-removed">-1</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2232" target="_blank" rel="noopener noreferrer">Stop ingestion scheduler infinite loop</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+666</span> / <span class="lines-removed">-51</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2189" target="_blank" rel="noopener noreferrer">Publish pipeline - address out-of-memory, resume from remaining chunk to be upload</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+5453</span> / <span class="lines-removed">-169</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11395" target="_blank" rel="noopener noreferrer">Restructure task management route to avoid flickering</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+17</span> / <span class="lines-removed">-9</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7516" target="_blank" rel="noopener noreferrer">Paid-search-prisma6 crashes: empty campaigns and Decimal aggregation</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+35</span> / <span class="lines-removed">-11</span></td>
+</tr>         — <tr> rows for the PR table
+    <tr>
+  <td><a href="https://github.com/verdelmediajel" target="_blank" rel="noopener noreferrer">verdelmediajel</a></td>
+  <td>6</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-critical">4 Critical</span><span class="priority-sep">·</span><span class="ach-rep-badge badge-normal">2 Normal</span></div></td>
+  <td class="lines-added">+9643</td>
+  <td class="lines-removed">-427</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/JC-DMZ22" target="_blank" rel="noopener noreferrer">JC-DMZ22</a></td>
+  <td>5</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-critical">5 Critical</span></div></td>
+  <td class="lines-added">+242</td>
+  <td class="lines-removed">-57</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/johnjoseph28" target="_blank" rel="noopener noreferrer">johnjoseph28</a></td>
+  <td>5</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-critical">5 Critical</span></div></td>
+  <td class="lines-added">+47</td>
+  <td class="lines-removed">-213</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/icarlofer" target="_blank" rel="noopener noreferrer">icarlofer</a></td>
+  <td>4</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-normal">4 Normal</span></div></td>
+  <td class="lines-added">+222</td>
+  <td class="lines-removed">-49</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/bertwin-mediajel" target="_blank" rel="noopener noreferrer">bertwin-mediajel</a></td>
+  <td>2</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-normal">2 Normal</span></div></td>
+  <td class="lines-added">+2012</td>
+  <td class="lines-removed">-457</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/ramzell" target="_blank" rel="noopener noreferrer">ramzell</a></td>
+  <td>2</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-critical">2 Critical</span></div></td>
+  <td class="lines-added">+443</td>
+  <td class="lines-removed">-38</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/rmm03" target="_blank" rel="noopener noreferrer">rmm03</a></td>
+  <td>2</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-critical">2 Critical</span></div></td>
+  <td class="lines-added">+12</td>
+  <td class="lines-removed">-4</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/Russell0813" target="_blank" rel="noopener noreferrer">Russell0813</a></td>
+  <td>1</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-critical">1 Critical</span></div></td>
+  <td class="lines-added">+1</td>
+  <td class="lines-removed">-1</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/ZeeLiger" target="_blank" rel="noopener noreferrer">ZeeLiger</a></td>
+  <td>1</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-normal">1 Normal</span></div></td>
+  <td class="lines-added">+23</td>
+  <td class="lines-removed">-41</td>
+</tr> — <tr> rows for contributors
+    <div class="ach-rep-metric-item">
+  <div class="ach-rep-metric-label">Most Active Repo</div>
+  <div class="ach-rep-metric-value">mediajel-dashboard</div>
+</div>
+<div class="ach-rep-metric-item">
+  <div class="ach-rep-metric-label">Avg PR Size (lines)</div>
+  <div class="ach-rep-metric-value">498</div>
+</div>
+<div class="ach-rep-metric-item">
+  <div class="ach-rep-metric-label">Revert Count</div>
+  <div class="ach-rep-metric-value">1</div>
+</div>
+<div class="ach-rep-metric-item">
+  <div class="ach-rep-metric-label">PR Velocity (per day)</div>
+  <div class="ach-rep-metric-value">4</div>
+</div>          — metric card fragments
+    2026-W21                  — canvas ID scope (e.g. "2026-W20")
+-->
+<style>
+  .ach-report-wrap {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: transparent;
+    color: var(--text);
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .ach-rep-h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: .25rem; color: var(--text); }
+  .ach-rep-period { color: var(--text-3); font-size: .875rem; margin-bottom: 2rem; }
+  .ach-rep-stat-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem; margin-bottom: 2rem;
+  }
+  .ach-rep-stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: .75rem; padding: 1.25rem;
+  }
+  .ach-rep-stat-label {
+    font-size: .75rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--text-3); margin-bottom: .5rem;
+  }
+  .ach-rep-stat-value { font-size: 2rem; font-weight: 700; color: var(--accent); }
+  .ach-rep-stat-value.green { color: var(--green); }
+  .ach-rep-stat-value.red { color: var(--orange); }
+  .ach-rep-stat-value.yellow { color: #f59e0b; }
+  .ach-rep-section { margin-bottom: 2rem; }
+  .ach-rep-h2 {
+    font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;
+    padding-left: .75rem; border-left: 3px solid var(--accent); color: var(--text);
+  }
+  /* charts-row — this CSS is required by the build guard */
+  .charts-row {
+    display: flex; align-items: flex-start; gap: 2rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: .75rem; padding: 1.5rem; margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .chart-wrap { width: 200px; height: 200px; flex-shrink: 0; }
+  .chart-legend { display: flex; flex-direction: column; gap: .75rem; }
+  .chart-legend-item {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .875rem; color: var(--text);
+  }
+  .chart-legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .ach-rep-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  .ach-rep-table th {
+    text-align: left; padding: .6rem .75rem; color: var(--text-3);
+    font-weight: 500; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--bg); z-index: 1;
+  }
+  .ach-rep-table td { padding: .6rem .75rem; border-bottom: 1px solid var(--border); color: var(--text); }
+  .ach-rep-table td a { color: inherit; text-decoration: none; }
+  .ach-rep-table td a:hover { text-decoration: underline; }
+  .ach-rep-table tr:last-child td { border-bottom: none; }
+  .ach-rep-table tbody tr:nth-child(even) td {
+    background: color-mix(in srgb, var(--border) 40%, transparent);
+  }
+  .ach-rep-table tbody tr:hover td { background: var(--accent-bg); }
+  .ach-rep-badge {
+    display: inline-block; padding: .15rem .5rem; border-radius: .375rem;
+    font-size: .75rem; font-weight: 500;
+  }
+  .badge-bug { background: rgba(239,68,68,.15); color: #f87171; }
+  .badge-feature { background: rgba(99,102,241,.15); color: #818cf8; }
+  .badge-enhancement { background: rgba(16,185,129,.15); color: #34d399; }
+  .badge-critical { background: rgba(245,158,11,.15); color: #f59e0b; }
+  .badge-high { background: rgba(239,68,68,.15); color: #f87171; }
+  .badge-normal { background: rgba(113,128,150,.1); color: #94a3b8; }
+  .badge-low { background: rgba(52,211,153,.15); color: #34d399; }
+  .lines-added { color: var(--green); }
+  .lines-removed { color: var(--orange); }
+  .ach-rep-metrics-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;
+  }
+  .ach-rep-metric-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: .5rem; padding: 1rem;
+  }
+  .ach-rep-metric-label { font-size: .75rem; color: var(--text-3); margin-bottom: .25rem; }
+  .ach-rep-metric-value { font-size: 1.1rem; font-weight: 600; color: var(--text); }
+  .ach-report-wrap a { color: var(--accent); text-decoration: none; }
+  .ach-report-wrap a:hover { text-decoration: underline; }
+  .priority-breakdown { display: flex; align-items: center; gap: .25rem; flex-wrap: wrap; }
+  .priority-sep { color: var(--text-3); }
+</style>
+
+<div class="ach-report-wrap">
+  <h1 class="ach-rep-h1">Achievements — 2026-W21</h1>
+  <p class="ach-rep-period">Period: 2026-05-18 → 2026-05-24</p>
+
+  <div class="ach-rep-stat-grid">
+    <div class="ach-rep-stat-card">
+  <div class="ach-rep-stat-label">PRs Merged</div>
+  <div class="ach-rep-stat-value">28</div>
+</div>
+<div class="ach-rep-stat-card">
+  <div class="ach-rep-stat-label">Lines Added</div>
+  <div class="ach-rep-stat-value green">+12645</div>
+</div>
+<div class="ach-rep-stat-card">
+  <div class="ach-rep-stat-label">Lines Removed</div>
+  <div class="ach-rep-stat-value red">-1287</div>
+</div>
+<div class="ach-rep-stat-card">
+  <div class="ach-rep-stat-label">Hotfixes</div>
+  <div class="ach-rep-stat-value yellow">19</div>
+</div>
+  </div>
+
+  <div class="ach-rep-section">
+    <h2 class="ach-rep-h2">Category &amp; Priority Breakdown</h2>
+    <div class="charts-row">
+      <div class="chart-wrap">
+  <canvas id="categoryChart-2026-W21" width="200" height="200"></canvas>
+</div>
+<div class="chart-legend">
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#f87171"></span><span>Bug Fixes — 18</span></div>
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#818cf8"></span><span>New Features — 5</span></div>
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#34d399"></span><span>Enhancements — 5</span></div>
+</div>
+<div class="chart-wrap" style="margin-left:1rem">
+  <canvas id="priorityChart-2026-W21" width="200" height="200"></canvas>
+</div>
+<div class="chart-legend">
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#f59e0b"></span><span>Critical — 19</span></div>
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#f87171"></span><span>High — 0</span></div>
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#94a3b8"></span><span>Normal — 9</span></div>
+  <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#34d399"></span><span>Low — 0</span></div>
+</div>
+    </div>
+  </div>
+
+  <div class="ach-rep-section">
+    <h2 class="ach-rep-h2">Pull Requests</h2>
+    <table class="ach-rep-table">
+      <thead>
+        <tr>
+          <th>Title</th><th>Category</th><th>Priority</th><th>Lines</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2076" target="_blank" rel="noopener noreferrer">Add sync modes across data-factory v1 + v2 UIs with adapter-managed defaults</a></td>
+  <td><span class="ach-rep-badge badge-feature">New Feature</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+2309</span> / <span class="lines-removed">-132</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2203" target="_blank" rel="noopener noreferrer">Remove Statara Partitions job</a></td>
+  <td><span class="ach-rep-badge badge-enhancement">Enhancement</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+0</span> / <span class="lines-removed">-102</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2204" target="_blank" rel="noopener noreferrer">Add new internal service env to production</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+11</span> / <span class="lines-removed">-1</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11352" target="_blank" rel="noopener noreferrer">Campaign Requestor Enhancements and Line Item Management</a></td>
+  <td><span class="ach-rep-badge badge-feature">New Feature</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+2005</span> / <span class="lines-removed">-370</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11340" target="_blank" rel="noopener noreferrer">Add type field to all campaign order report queries for Demo Campaign</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+8</span> / <span class="lines-removed">-0</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7481" target="_blank" rel="noopener noreferrer">Demo Campaign</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+4</span> / <span class="lines-removed">-4</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2211" target="_blank" rel="noopener noreferrer">Nexxen Integration Fixes and Data Factory Cleanup</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+7</span> / <span class="lines-removed">-87</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11322" target="_blank" rel="noopener noreferrer">Remove Audience Type dropdown from Demograph reach panel</a></td>
+  <td><span class="ach-rep-badge badge-enhancement">Enhancement</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+10</span> / <span class="lines-removed">-48</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7485" target="_blank" rel="noopener noreferrer">Removed Salesforce Rate-Limit</a></td>
+  <td><span class="ach-rep-badge badge-enhancement">Enhancement</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+7</span> / <span class="lines-removed">-7</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2218" target="_blank" rel="noopener noreferrer">NexxenCredentialForwardFix</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+23</span> / <span class="lines-removed">-41</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7489" target="_blank" rel="noopener noreferrer">Salesforce Additional Fields in PCL</a></td>
+  <td><span class="ach-rep-badge badge-feature">New Feature</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+8</span> / <span class="lines-removed">-0</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7493" target="_blank" rel="noopener noreferrer">Revert &quot;[HOTFIX] Salesforce Additional Fields in PCL&quot;</a></td>
+  <td><span class="ach-rep-badge badge-enhancement">Enhancement</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+0</span> / <span class="lines-removed">-8</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7494" target="_blank" rel="noopener noreferrer">Reprocess button not process on cluster</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+17</span> / <span class="lines-removed">-2</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7495" target="_blank" rel="noopener noreferrer">For reprocess button remove the prisma1 query</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+19</span> / <span class="lines-removed">-100</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11353" target="_blank" rel="noopener noreferrer">Added Salesforce Fields and CPM</a></td>
+  <td><span class="ach-rep-badge badge-feature">New Feature</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+218</span> / <span class="lines-removed">-48</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7500" target="_blank" rel="noopener noreferrer">Salesforce Additional Fields in PCL (re-apply + new fields)</a></td>
+  <td><span class="ach-rep-badge badge-feature">New Feature</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+9</span> / <span class="lines-removed">-0</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11359" target="_blank" rel="noopener noreferrer">Removed Console Log</a></td>
+  <td><span class="ach-rep-badge badge-enhancement">Enhancement</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+0</span> / <span class="lines-removed">-2</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11358" target="_blank" rel="noopener noreferrer">Multiple Transactions Fix</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+16</span> / <span class="lines-removed">-7</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11332" target="_blank" rel="noopener noreferrer">Page flickers after clicking task link</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+426</span> / <span class="lines-removed">-29</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11362" target="_blank" rel="noopener noreferrer">Guard xAxis access when Google data is empty</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+127</span> / <span class="lines-removed">-12</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7504" target="_blank" rel="noopener noreferrer">Fix Paid Search Missing Dates</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+44</span> / <span class="lines-removed">-19</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2199" target="_blank" rel="noopener noreferrer">Prevent 401 on first load of Widget Dev page</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+570</span> / <span class="lines-removed">-5</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2229" target="_blank" rel="noopener noreferrer">Unblock Ingest button for fixed-template adapters</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+635</span> / <span class="lines-removed">-22</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11378" target="_blank" rel="noopener noreferrer">Pin Google Maps API to v3.64 to restore HeatmapLayer</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+1</span> / <span class="lines-removed">-1</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2232" target="_blank" rel="noopener noreferrer">Stop ingestion scheduler infinite loop</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+666</span> / <span class="lines-removed">-51</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2189" target="_blank" rel="noopener noreferrer">Publish pipeline - address out-of-memory, resume from remaining chunk to be upload</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+5453</span> / <span class="lines-removed">-169</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11395" target="_blank" rel="noopener noreferrer">Restructure task management route to avoid flickering</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-critical">Critical</span></td>
+  <td><span class="lines-added">+17</span> / <span class="lines-removed">-9</span></td>
+</tr>
+<tr>
+  <td><a href="https://github.com/MediaJel/mediajel-gql-service/pull/7516" target="_blank" rel="noopener noreferrer">Paid-search-prisma6 crashes: empty campaigns and Decimal aggregation</a></td>
+  <td><span class="ach-rep-badge badge-bug">Bug Fix</span></td>
+  <td><span class="ach-rep-badge badge-normal">Normal</span></td>
+  <td><span class="lines-added">+35</span> / <span class="lines-removed">-11</span></td>
+</tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ach-rep-section">
+    <h2 class="ach-rep-h2">Contributors</h2>
+    <table class="ach-rep-table">
+      <thead>
+        <tr><th>Contributor</th><th>PRs</th><th>Priority Breakdown</th><th>Lines Added</th><th>Lines Removed</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+  <td><a href="https://github.com/verdelmediajel" target="_blank" rel="noopener noreferrer">verdelmediajel</a></td>
+  <td>6</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-critical">4 Critical</span><span class="priority-sep">·</span><span class="ach-rep-badge badge-normal">2 Normal</span></div></td>
+  <td class="lines-added">+9643</td>
+  <td class="lines-removed">-427</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/JC-DMZ22" target="_blank" rel="noopener noreferrer">JC-DMZ22</a></td>
+  <td>5</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-critical">5 Critical</span></div></td>
+  <td class="lines-added">+242</td>
+  <td class="lines-removed">-57</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/johnjoseph28" target="_blank" rel="noopener noreferrer">johnjoseph28</a></td>
+  <td>5</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-critical">5 Critical</span></div></td>
+  <td class="lines-added">+47</td>
+  <td class="lines-removed">-213</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/icarlofer" target="_blank" rel="noopener noreferrer">icarlofer</a></td>
+  <td>4</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-normal">4 Normal</span></div></td>
+  <td class="lines-added">+222</td>
+  <td class="lines-removed">-49</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/bertwin-mediajel" target="_blank" rel="noopener noreferrer">bertwin-mediajel</a></td>
+  <td>2</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-normal">2 Normal</span></div></td>
+  <td class="lines-added">+2012</td>
+  <td class="lines-removed">-457</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/ramzell" target="_blank" rel="noopener noreferrer">ramzell</a></td>
+  <td>2</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-critical">2 Critical</span></div></td>
+  <td class="lines-added">+443</td>
+  <td class="lines-removed">-38</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/rmm03" target="_blank" rel="noopener noreferrer">rmm03</a></td>
+  <td>2</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-critical">2 Critical</span></div></td>
+  <td class="lines-added">+12</td>
+  <td class="lines-removed">-4</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/Russell0813" target="_blank" rel="noopener noreferrer">Russell0813</a></td>
+  <td>1</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-critical">1 Critical</span></div></td>
+  <td class="lines-added">+1</td>
+  <td class="lines-removed">-1</td>
+</tr>
+<tr>
+  <td><a href="https://github.com/ZeeLiger" target="_blank" rel="noopener noreferrer">ZeeLiger</a></td>
+  <td>1</td>
+  <td><div class="priority-breakdown"><span class="ach-rep-badge badge-normal">1 Normal</span></div></td>
+  <td class="lines-added">+23</td>
+  <td class="lines-removed">-41</td>
+</tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ach-rep-section">
+    <h2 class="ach-rep-h2">Additional Metrics</h2>
+    <div class="ach-rep-metrics-grid">
+      <div class="ach-rep-metric-item">
+  <div class="ach-rep-metric-label">Most Active Repo</div>
+  <div class="ach-rep-metric-value">mediajel-dashboard</div>
+</div>
+<div class="ach-rep-metric-item">
+  <div class="ach-rep-metric-label">Avg PR Size (lines)</div>
+  <div class="ach-rep-metric-value">498</div>
+</div>
+<div class="ach-rep-metric-item">
+  <div class="ach-rep-metric-label">Revert Count</div>
+  <div class="ach-rep-metric-value">1</div>
+</div>
+<div class="ach-rep-metric-item">
+  <div class="ach-rep-metric-label">PR Velocity (per day)</div>
+  <div class="ach-rep-metric-value">4</div>
+</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var catCtx = document.getElementById('categoryChart-2026-W21');
+  if (catCtx) {
+    var bugCount = 18; var featCount = 5; var enhCount = 5;
+    var catTotal = bugCount + featCount + enhCount;
+    new Chart(catCtx.getContext('2d'), {
+      type: 'doughnut',
+      data: { labels: ['Bug Fixes', 'New Features', 'Enhancements'],
+        datasets: [{ data: catTotal > 0 ? [bugCount, featCount, enhCount] : [1,0,0],
+          backgroundColor: ['#f87171','#818cf8','#34d399'],
+          borderColor: '#1a1d27', borderWidth: 3, hoverOffset: 8 }] },
+      options: { responsive: true, maintainAspectRatio: true, cutout: '65%',
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) {
+          if (catTotal === 0) return ctx.label + ': 0';
+          return ctx.label + ': ' + ctx.raw + ' (' + Math.round(ctx.raw/catTotal*100) + '%)';
+        }}}}}
+    });
+  }
+  var priCtx = document.getElementById('priorityChart-2026-W21');
+  if (priCtx) {
+    var critCount = 19; var highCount = 0; var normCount = 9; var lowCount = 0;
+    var priTotal = critCount + highCount + normCount + lowCount;
+    new Chart(priCtx.getContext('2d'), {
+      type: 'doughnut',
+      data: { labels: ['Critical', 'High', 'Normal', 'Low'],
+        datasets: [{ data: priTotal > 0 ? [critCount, highCount, normCount, lowCount] : [1,0,0,0],
+          backgroundColor: ['#f59e0b','#f87171','#94a3b8','#34d399'],
+          borderColor: '#1a1d27', borderWidth: 3, hoverOffset: 8 }] },
+      options: { responsive: true, maintainAspectRatio: true, cutout: '65%',
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) {
+          if (priTotal === 0) return ctx.label + ': 0';
+          return ctx.label + ': ' + ctx.raw + ' (' + Math.round(ctx.raw/priTotal*100) + '%)';
+        }}}}}
+    });
+  }
+})();
+</script>
+</div></div>
+<div class="ach-report-panel" id="panel-2026-W20" data-slug="2026-W20" role="tabpanel" style="display:none"><div class="ach-report-content"><!--
   Achievements report panel template — hydrated by scripts/build.js for each JSON report.
   Never written by agents. All {{TOKEN}} placeholders are replaced at build time.
 

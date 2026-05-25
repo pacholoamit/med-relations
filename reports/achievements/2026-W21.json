@@ -1,0 +1,354 @@
+{
+  "week": "2026-W21",
+  "period": "2026-05-18 → 2026-05-24",
+  "stats": {
+    "prs": 28,
+    "linesAdded": 12645,
+    "linesRemoved": 1287,
+    "hotfixes": 19
+  },
+  "chart": {
+    "bugCount": 18,
+    "featCount": 5,
+    "enhCount": 5
+  },
+  "priorityChart": {
+    "critCount": 19,
+    "highCount": 0,
+    "normCount": 9,
+    "lowCount": 0
+  },
+  "prs": [
+    {
+      "title": "Add sync modes across data-factory v1 + v2 UIs with adapter-managed defaults",
+      "url": "https://github.com/MediaJel/amplication-nestjs-microservices/pull/2076",
+      "category": "feature",
+      "priority": "normal",
+      "linesAdded": 2309,
+      "linesRemoved": 132
+    },
+    {
+      "title": "Remove Statara Partitions job",
+      "url": "https://github.com/MediaJel/amplication-nestjs-microservices/pull/2203",
+      "category": "enhancement",
+      "priority": "critical",
+      "linesAdded": 0,
+      "linesRemoved": 102
+    },
+    {
+      "title": "Add new internal service env to production",
+      "url": "https://github.com/MediaJel/amplication-nestjs-microservices/pull/2204",
+      "category": "bug",
+      "priority": "critical",
+      "linesAdded": 11,
+      "linesRemoved": 1
+    },
+    {
+      "title": "Campaign Requestor Enhancements and Line Item Management",
+      "url": "https://github.com/MediaJel/mediajel-dashboard/pull/11352",
+      "category": "feature",
+      "priority": "normal",
+      "linesAdded": 2005,
+      "linesRemoved": 370
+    },
+    {
+      "title": "Add type field to all campaign order report queries for Demo Campaign",
+      "url": "https://github.com/MediaJel/mediajel-dashboard/pull/11340",
+      "category": "bug",
+      "priority": "critical",
+      "linesAdded": 8,
+      "linesRemoved": 0
+    },
+    {
+      "title": "Demo Campaign",
+      "url": "https://github.com/MediaJel/mediajel-gql-service/pull/7481",
+      "category": "bug",
+      "priority": "critical",
+      "linesAdded": 4,
+      "linesRemoved": 4
+    },
+    {
+      "title": "Nexxen Integration Fixes and Data Factory Cleanup",
+      "url": "https://github.com/MediaJel/amplication-nestjs-microservices/pull/2211",
+      "category": "bug",
+      "priority": "normal",
+      "linesAdded": 7,
+      "linesRemoved": 87
+    },
+    {
+      "title": "Remove Audience Type dropdown from Demograph reach panel",
+      "url": "https://github.com/MediaJel/mediajel-dashboard/pull/11322",
+      "category": "enhancement",
+      "priority": "critical",
+      "linesAdded": 10,
+      "linesRemoved": 48
+    },
+    {
+      "title": "Removed Salesforce Rate-Limit",
+      "url": "https://github.com/MediaJel/mediajel-gql-service/pull/7485",
+      "category": "enhancement",
+      "priority": "critical",
+      "linesAdded": 7,
+      "linesRemoved": 7
+    },
+    {
+      "title": "NexxenCredentialForwardFix",
+      "url": "https://github.com/MediaJel/amplication-nestjs-microservices/pull/2218",
+      "category": "bug",
+      "priority": "normal",
+      "linesAdded": 23,
+      "linesRemoved": 41
+    },
+    {
+      "title": "Salesforce Additional Fields in PCL",
+      "url": "https://github.com/MediaJel/mediajel-gql-service/pull/7489",
+      "category": "feature",
+      "priority": "critical",
+      "linesAdded": 8,
+      "linesRemoved": 0
+    },
+    {
+      "title": "Revert \"[HOTFIX] Salesforce Additional Fields in PCL\"",
+      "url": "https://github.com/MediaJel/mediajel-gql-service/pull/7493",
+      "category": "enhancement",
+      "priority": "critical",
+      "linesAdded": 0,
+      "linesRemoved": 8
+    },
+    {
+      "title": "Reprocess button not process on cluster",
+      "url": "https://github.com/MediaJel/mediajel-gql-service/pull/7494",
+      "category": "bug",
+      "priority": "critical",
+      "linesAdded": 17,
+      "linesRemoved": 2
+    },
+    {
+      "title": "For reprocess button remove the prisma1 query",
+      "url": "https://github.com/MediaJel/mediajel-gql-service/pull/7495",
+      "category": "bug",
+      "priority": "critical",
+      "linesAdded": 19,
+      "linesRemoved": 100
+    },
+    {
+      "title": "Added Salesforce Fields and CPM",
+      "url": "https://github.com/MediaJel/mediajel-dashboard/pull/11353",
+      "category": "feature",
+      "priority": "critical",
+      "linesAdded": 218,
+      "linesRemoved": 48
+    },
+    {
+      "title": "Salesforce Additional Fields in PCL (re-apply + new fields)",
+      "url": "https://github.com/MediaJel/mediajel-gql-service/pull/7500",
+      "category": "feature",
+      "priority": "critical",
+      "linesAdded": 9,
+      "linesRemoved": 0
+    },
+    {
+      "title": "Removed Console Log",
+      "url": "https://github.com/MediaJel/mediajel-dashboard/pull/11359",
+      "category": "enhancement",
+      "priority": "critical",
+      "linesAdded": 0,
+      "linesRemoved": 2
+    },
+    {
+      "title": "Multiple Transactions Fix",
+      "url": "https://github.com/MediaJel/mediajel-dashboard/pull/11358",
+      "category": "bug",
+      "priority": "normal",
+      "linesAdded": 16,
+      "linesRemoved": 7
+    },
+    {
+      "title": "Page flickers after clicking task link",
+      "url": "https://github.com/MediaJel/mediajel-dashboard/pull/11332",
+      "category": "bug",
+      "priority": "critical",
+      "linesAdded": 426,
+      "linesRemoved": 29
+    },
+    {
+      "title": "Guard xAxis access when Google data is empty",
+      "url": "https://github.com/MediaJel/mediajel-dashboard/pull/11362",
+      "category": "bug",
+      "priority": "normal",
+      "linesAdded": 127,
+      "linesRemoved": 12
+    },
+    {
+      "title": "Fix Paid Search Missing Dates",
+      "url": "https://github.com/MediaJel/mediajel-gql-service/pull/7504",
+      "category": "bug",
+      "priority": "normal",
+      "linesAdded": 44,
+      "linesRemoved": 19
+    },
+    {
+      "title": "Prevent 401 on first load of Widget Dev page",
+      "url": "https://github.com/MediaJel/amplication-nestjs-microservices/pull/2199",
+      "category": "bug",
+      "priority": "critical",
+      "linesAdded": 570,
+      "linesRemoved": 5
+    },
+    {
+      "title": "Unblock Ingest button for fixed-template adapters",
+      "url": "https://github.com/MediaJel/amplication-nestjs-microservices/pull/2229",
+      "category": "bug",
+      "priority": "critical",
+      "linesAdded": 635,
+      "linesRemoved": 22
+    },
+    {
+      "title": "Pin Google Maps API to v3.64 to restore HeatmapLayer",
+      "url": "https://github.com/MediaJel/mediajel-dashboard/pull/11378",
+      "category": "bug",
+      "priority": "critical",
+      "linesAdded": 1,
+      "linesRemoved": 1
+    },
+    {
+      "title": "Stop ingestion scheduler infinite loop",
+      "url": "https://github.com/MediaJel/amplication-nestjs-microservices/pull/2232",
+      "category": "bug",
+      "priority": "normal",
+      "linesAdded": 666,
+      "linesRemoved": 51
+    },
+    {
+      "title": "Publish pipeline - address out-of-memory, resume from remaining chunk to be upload",
+      "url": "https://github.com/MediaJel/amplication-nestjs-microservices/pull/2189",
+      "category": "bug",
+      "priority": "critical",
+      "linesAdded": 5453,
+      "linesRemoved": 169
+    },
+    {
+      "title": "Restructure task management route to avoid flickering",
+      "url": "https://github.com/MediaJel/mediajel-dashboard/pull/11395",
+      "category": "bug",
+      "priority": "critical",
+      "linesAdded": 17,
+      "linesRemoved": 9
+    },
+    {
+      "title": "Paid-search-prisma6 crashes: empty campaigns and Decimal aggregation",
+      "url": "https://github.com/MediaJel/mediajel-gql-service/pull/7516",
+      "category": "bug",
+      "priority": "normal",
+      "linesAdded": 35,
+      "linesRemoved": 11
+    }
+  ],
+  "contributors": [
+    {
+      "name": "verdelmediajel",
+      "url": "https://github.com/verdelmediajel",
+      "prs": 6,
+      "critical": 4,
+      "high": 0,
+      "normal": 2,
+      "low": 0,
+      "linesAdded": 9643,
+      "linesRemoved": 427
+    },
+    {
+      "name": "JC-DMZ22",
+      "url": "https://github.com/JC-DMZ22",
+      "prs": 5,
+      "critical": 5,
+      "high": 0,
+      "normal": 0,
+      "low": 0,
+      "linesAdded": 242,
+      "linesRemoved": 57
+    },
+    {
+      "name": "johnjoseph28",
+      "url": "https://github.com/johnjoseph28",
+      "prs": 5,
+      "critical": 5,
+      "high": 0,
+      "normal": 0,
+      "low": 0,
+      "linesAdded": 47,
+      "linesRemoved": 213
+    },
+    {
+      "name": "icarlofer",
+      "url": "https://github.com/icarlofer",
+      "prs": 4,
+      "critical": 0,
+      "high": 0,
+      "normal": 4,
+      "low": 0,
+      "linesAdded": 222,
+      "linesRemoved": 49
+    },
+    {
+      "name": "bertwin-mediajel",
+      "url": "https://github.com/bertwin-mediajel",
+      "prs": 2,
+      "critical": 0,
+      "high": 0,
+      "normal": 2,
+      "low": 0,
+      "linesAdded": 2012,
+      "linesRemoved": 457
+    },
+    {
+      "name": "ramzell",
+      "url": "https://github.com/ramzell",
+      "prs": 2,
+      "critical": 2,
+      "high": 0,
+      "normal": 0,
+      "low": 0,
+      "linesAdded": 443,
+      "linesRemoved": 38
+    },
+    {
+      "name": "rmm03",
+      "url": "https://github.com/rmm03",
+      "prs": 2,
+      "critical": 2,
+      "high": 0,
+      "normal": 0,
+      "low": 0,
+      "linesAdded": 12,
+      "linesRemoved": 4
+    },
+    {
+      "name": "Russell0813",
+      "url": "https://github.com/Russell0813",
+      "prs": 1,
+      "critical": 1,
+      "high": 0,
+      "normal": 0,
+      "low": 0,
+      "linesAdded": 1,
+      "linesRemoved": 1
+    },
+    {
+      "name": "ZeeLiger",
+      "url": "https://github.com/ZeeLiger",
+      "prs": 1,
+      "critical": 0,
+      "high": 0,
+      "normal": 1,
+      "low": 0,
+      "linesAdded": 23,
+      "linesRemoved": 41
+    }
+  ],
+  "metrics": {
+    "mostActiveRepo": "mediajel-dashboard",
+    "avgPrSize": 498,
+    "revertCount": 1,
+    "prVelocity": 4.0
+  }
+}
