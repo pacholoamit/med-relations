@@ -63,7 +63,7 @@
 <body>
 
 <h1>Achievements — 2026-W21</h1>
-<p class="period">Period: 2026-05-18 &rarr; 2026-05-24</p>
+<p class="period">Period: 2026-05-18 → 2026-05-24</p>
 
 <div class="stat-grid">
   <div class="stat-card">
@@ -72,11 +72,11 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">Lines Added</div>
-    <div class="stat-value green">+12,646</div>
+    <div class="stat-value green">+12646</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Lines Removed</div>
-    <div class="stat-value red">-1,288</div>
+    <div class="stat-value red">-1288</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Hotfixes</div>
@@ -93,15 +93,15 @@
     <div class="legend">
       <div class="legend-item">
         <div class="legend-dot" style="background:#f87171"></div>
-        <span>Bug Fixes &mdash; 26</span>
+        <span>Bug Fixes — 26</span>
       </div>
       <div class="legend-item">
         <div class="legend-dot" style="background:#818cf8"></div>
-        <span>New Features &mdash; 2</span>
+        <span>New Features — 1</span>
       </div>
       <div class="legend-item">
         <div class="legend-dot" style="background:#34d399"></div>
-        <span>Enhancements &mdash; 1</span>
+        <span>Enhancements — 2</span>
       </div>
     </div>
   </div>
@@ -131,13 +131,6 @@
         <td><span class="lines-added">+2309</span> / <span class="lines-removed">-132</span></td>
       </tr>
       <tr>
-        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11359" target="_blank">Removed Console Log</a></td>
-        <td><span class="badge badge-bug">Bug Fix</span></td>
-        <td><span class="badge badge-critical">Critical</span></td>
-        <td>mediajel-dashboard</td>
-        <td><span class="lines-added">+0</span> / <span class="lines-removed">-2</span></td>
-      </tr>
-      <tr>
         <td><a href="https://github.com/MediaJel/amplication-nestjs-microservices/pull/2203" target="_blank">Remove Statara Partitions job</a></td>
         <td><span class="badge badge-bug">Bug Fix</span></td>
         <td><span class="badge badge-critical">Critical</span></td>
@@ -153,7 +146,7 @@
       </tr>
       <tr>
         <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11352" target="_blank">Campaign Requestor Enhancements and Line Item Management</a></td>
-        <td><span class="badge badge-feature">New Feature</span></td>
+        <td><span class="badge badge-enhancement">Enhancement</span></td>
         <td><span class="badge badge-normal">Normal</span></td>
         <td>mediajel-dashboard</td>
         <td><span class="lines-added">+2005</span> / <span class="lines-removed">-370</span></td>
@@ -241,6 +234,13 @@
         <td><span class="badge badge-critical">Critical</span></td>
         <td>mediajel-gql-service</td>
         <td><span class="lines-added">+9</span> / <span class="lines-removed">-0</span></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11359" target="_blank">Removed Console Log</a></td>
+        <td><span class="badge badge-bug">Bug Fix</span></td>
+        <td><span class="badge badge-critical">Critical</span></td>
+        <td>mediajel-dashboard</td>
+        <td><span class="lines-added">+0</span> / <span class="lines-removed">-2</span></td>
       </tr>
       <tr>
         <td><a href="https://github.com/MediaJel/mediajel-dashboard/pull/11358" target="_blank">Multiple Transactions Fix</a></td>
@@ -415,8 +415,8 @@
 (function() {
   var ctx = document.getElementById('donutChart').getContext('2d');
   var bugCount = 26;
-  var featCount = 2;
-  var enhCount = 1;
+  var featCount = 1;
+  var enhCount = 2;
   var total = bugCount + featCount + enhCount;
   new Chart(ctx, {
     type: 'doughnut',
